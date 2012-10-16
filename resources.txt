@@ -1,0 +1,6 @@
+http://kohanaframework.org/3.0/guide/kohana/routing
+http://kohanaframework.org/3.0/guide/api/Request
+https://github.com/kohana/core/blob/3.2/master/classes/kohana/request.php
+https://github.com/kohana/core/blob/3.2/master/classes/kohana/route.php
+https://github.com/codeguy/Slim/blob/master/Slim/Slim.php
+https://github.com/codeguy/Slim/blob/1.6.7/Slim/Http/Request.php
