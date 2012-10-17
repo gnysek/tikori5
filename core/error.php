@@ -25,9 +25,9 @@ class Error {
 		$html[] = '<h1>Tikori5 Critical Error</h1>';
 		$html[] = '<p><strong>A problem has been detected and Tikori5 framework was unable to complete request, because:</strong></p>';
 		$html[] = '<p>' . $exception->getMessage();
-		if (Core::getMode() < Core::MODE_PROD) {
-			if (Core::cfg('env') !== null) {
-				$e = Core::cfg('env');
+		if (Core::app()->getMode() < Core::MODE_PROD) {
+			if (Core::app()->cfg('env') !== null) {
+				$e = Core::app()->cfg('env');
 				$html[] = '<br/>Requested <span>' . $e['REQUEST_METHOD'] . '</span>: ' . $e['PATH_INFO'];
 			}
 

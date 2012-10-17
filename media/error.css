@@ -1,6 +1,9 @@
 body{
-	max-width: 960px;
+	max-width: 600px;
 	margin: 25px auto;
+}
+
+body, pre {
 	font-family: 'Consolas', monospace;
 	font-size: 15px;
 	line-height: 20px;
@@ -15,10 +18,10 @@ h1 {
 
 .debug-pre {
 	overflow-x: scroll;
-	font-size: 11px;
-	line-height: 13px;
+	font-size: 12px;
+	line-height: 15px;
 	background-color: #222;
-	color: white;
+	color: khaki;
 	padding: 5px;
 	border-radius: 3px;
 }

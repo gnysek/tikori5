@@ -3,7 +3,7 @@
 class DefaultController extends Controller {
 
 	public function indexAction() {
-		echo 'xxx';
+		$this->render('body');
 	}
 
 	public function oneAction($id = 0) {

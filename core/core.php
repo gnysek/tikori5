@@ -1,63 +1,100 @@
 <?php
 
+defined('TIKORI_STARTED') or define('TIKORI_STARTED', microtime());
+defined('TIKORI_DEBUG') or define('TIKORI_DEBUG', false);
+#defined('TIKORI_PATH') or define('TIKORI_PATH', dirname(__FILE__));
+
 class Core {
 
 	const MODE_DEBUG = -1;
 	const MODE_DEV = 0;
 	const MODE_PROD = 1;
 
-	private static $_config = array();
-	public static $appDir = '';
+	private $_config = array();
+	public $appDir = '';
 
 	/**
 	 * @var Request 
 	 */
-	public static $request = null;
+	public $request = null;
 
 	/**
 	 * @var Response
 	 */
-	public static $response = null;
-	public static $mode = 0;
+	public $response = null;
+	public $mode = 0;
 
 	/**
 	 * @var Route
 	 */
-	public static $route = null;
+	public $route = null;
+
+	/**
+	 * @var Core Main app class 
+	 */
+	private static $_app = null;
+
+	/**
+	 * Returns main app
+	 * @return Core
+	 */
+	public static function app() {
+		return self::$_app;
+	}
+
+	public static function asssignApp($app) {
+		if (self::$_app === null) {
+			self::$_app = $app;
+		} else {
+			throw new Exception('Tikori5 cannot be run more than once!');
+		}
+	}
 
 	public static function run($path = '', $config = 'default') {
+		$core = new Core($path, $config);
+	}
+
+	public function __construct($path = '', $config = 'default') {
+		$this->init($path, $config);
+	}
+
+	public function init($path = '', $config = 'default') {
+		Core::asssignApp($this);
+
 		if (empty($path)) {
-			self::$appDir = dirname(__FILE__);
+			$this->appDir = dirname(__FILE__);
 		} else {
-			self::$appDir = $path;
+			$this->appDir = $path;
 		}
 		spl_autoload_register(array('Core', 'autoload'), true);
 		set_exception_handler(array('Core', 'exh'));
 
-		self::reconfigure(file_get_contents(self::$appDir . '/app/config/' . $config . '.json'));
+		$this->reconfigure(file_get_contents($this->appDir . '/app/config/' . $config . '.json'));
 
 		// request
-		self::$request = new Request();
-		self::$response = new Response();
-		self::$route = Route::process_uri(self::$request->getRouterPath());
+		$this->request = new Request();
+		$this->response = new Response();
+		$this->route = Route::process_uri($this->request->getRouterPath());
 
 		try {
-			if (self::$route == null)
+			if ($this->route == null)
 				throw new E404Exception('Not found');
-			self::$route->dispatch();
+			$this->route->dispatch();
 		} catch (E404Exception $e) {
-			$view = new View();
-			$body = $view->render('error404', array('content' => 'Requested url cannot be found'), true);
-			self::$response->status(404);
-			self::$response->write($body, true);
+			#$view = new View();
+			#$body = $view->render('error404', array('content' => 'Requested url cannot be found'), true);
+			$view = new Controller();
+			$body = $view->renderPartial('error404', array('content' => 'Requested url cannot be found'), true);
+			$this->response->status(404);
+			$this->response->write($body, true);
 		} catch (Exception $e) {
 			$view = new View();
 			$body = $view->render('error404', array('content' => $e->getMessage()), true);
-			self::$response->status(404);
-			self::$response->write($body, true);
+			$this->response->status(404);
+			$this->response->write($body, true);
 		}
 
-		list($status, $header, $body) = self::$response->finalize();
+		list($status, $header, $body) = $this->response->finalize();
 
 		//Send headers
 		if (headers_sent() === false) {
@@ -84,39 +121,39 @@ class Core {
 	 * Sets application mode
 	 * @return int (Core::MODE_DEBUG, Core::MODE_DEV, Core::MODE_PROD)
 	 */
-	public static function getMode() {
-		if (!isset(self::$_config['mode'])) {
+	public function getMode() {
+		if (!isset($this->_config['mode'])) {
 			if (isset($_ENV['TIKORI_MODE'])) {
-				self::$mode = $_ENV['TIKORI_MODE'];
+				$this->mode = $_ENV['TIKORI_MODE'];
 			} else {
 				$envMode = getenv('TIKORI_MODE');
 				if ($envMode !== false) {
-					self::$mode = $envMode;
+					$this->mode = $envMode;
 				} else {
-					self::$mode = (!empty(self::$_config['mode'])) ? self::$_config['mode'] : self::MODE_DEV;
+					$this->mode = (!empty($this->_config['mode'])) ? $this->_config['mode'] : Core::MODE_DEV;
 				}
 			}
 		}
 
-		return self::$mode;
+		return $this->mode;
 	}
 
 	/**
 	 * Reconfigures application using json string or array
 	 * @param array|string $config
 	 */
-	public static function reconfigure($config) {
+	public function reconfigure($config) {
 		if (is_string($config)) {
-			self::$_config = json_decode($config, true);
+			$this->_config = json_decode($config, true);
 		} else if (is_array($config)) {
-			self::$_config = $config;
+			$this->_config = $config;
 		} else {
 			die('Config errror.');
 		}
 
 		Route::reset();
 		// cfg route registers
-		foreach (self::$_config['routes'] as $key => $route) {
+		foreach ($this->_config['routes'] as $key => $route) {
 			Route::set($key, $route['expr'], (!empty($route['params'])) ? $route['params'] : array())->defaults($route['defaults']);
 		}
 		// default routes
@@ -131,19 +168,19 @@ class Core {
 				'action' => 'index',
 			));
 
-		self::getMode();
+		$this->getMode();
 	}
 
-	public static function cfg($key, $val = null) {
+	public function cfg($key, $val = null) {
 		if ($val === null) {
-			if (array_key_exists($key, self::$_config)) {
-				return self::$_config[$key];
+			if (array_key_exists($key, $this->_config)) {
+				return $this->_config[$key];
 			} return null;
 		} else {
-			self::$_config[$key] = $val;
+			$this->_config[$key] = $val;
 		}
 	}
-	
+
 	public static function exh(Exception $exception) {
 		echo Error::display($exception);
 		die();
@@ -155,7 +192,7 @@ class Core {
 			$file = str_replace('Controller', '', $class);
 		}
 		foreach (array('app/controllers', 'core', 'app/models') as $dir) {
-			$filename = self::$appDir . '/' . $dir . '/' . strtolower($file) . '.php';
+			$filename = Core::app()->appDir . '/' . $dir . '/' . strtolower($file) . '.php';
 			if (file_exists($filename)) {
 				require $filename;
 				return true;

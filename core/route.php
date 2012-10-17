@@ -484,7 +484,7 @@ class Route {
 			ob_start();
 			call_user_func_array(array($controller, $this->getAction() . 'Action'), $finalParams);
 			$response = ob_get_clean();
-			Core::$response->body($response);
+			Core::app()->response->body($response);
 		} catch (Exception $e) {
 			ob_get_clean();
 			throw new E404Exception('Dispatch action: <span>' . $this->getController() . '->' . $this->getAction() . '</span>: ' . $e->getMessage());

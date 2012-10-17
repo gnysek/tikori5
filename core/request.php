@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @param string $request_method (GET|POST|PUT|DELETE)
+ * @param string $script_name
+ */
 class Request {
 
 	const METHOD_HEAD = 'HEAD';
@@ -149,7 +152,7 @@ class Request {
 //		}
 
 		$this->env = $env;
-		Core::cfg('env', $env);
+		Core::app()->cfg('env', $env);
 	}
 	
 	public function getRouterPath() {
