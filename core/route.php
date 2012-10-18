@@ -446,7 +446,7 @@ class Route {
 			$class = $this->getController() . 'Controller';
 			$controller = new $class;
 		} catch (Exception $e) {
-			throw new E404Exception('Dispatch controller: <span>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</span>: ' . $e->getMessage());
+			throw new RouteNotFoundException('Dispatch controller: <span>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</span>: ' . $e->getMessage());
 		}
 
 		try {
@@ -457,7 +457,7 @@ class Route {
 			if ($method->getNumberOfRequiredParameters() > 0) {
 //				var_dump($method->getNumberOfRequiredParameters());
 				if (empty($this->params['id'])) {
-					throw new E404Exception('Not enough arguments');
+					throw new RouteNotFoundException('Not enough arguments');
 				} else {
 					$finalParams[] = $this->params['id'];
 				}
@@ -487,7 +487,7 @@ class Route {
 			Core::app()->response->body($response);
 		} catch (Exception $e) {
 			ob_get_clean();
-			throw new E404Exception('Dispatch action: <span>' . $this->getController() . '->' . $this->getAction() . '</span>: ' . $e->getMessage());
+			throw new RouteNotFoundException('Dispatch action: <span>' . $this->getController() . '->' . $this->getAction() . '</span>: ' . $e->getMessage());
 		}
 	}
 

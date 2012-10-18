@@ -23,6 +23,7 @@ class Core {
 	 */
 	public $response = null;
 	public $mode = 0;
+	public $autoloadPaths = array();
 
 	/**
 	 * @var Route
@@ -68,6 +69,7 @@ class Core {
 		}
 		spl_autoload_register(array('Core', 'autoload'), true);
 		set_exception_handler(array('Core', 'exh'));
+		$this->registerAutoloadPaths();
 
 		$this->reconfigure(file_get_contents($this->appDir . '/app/config/' . $config . '.json'));
 
@@ -78,9 +80,9 @@ class Core {
 
 		try {
 			if ($this->route == null)
-				throw new E404Exception('Not found');
+				throw new RouteNotFoundException('Not found');
 			$this->route->dispatch();
-		} catch (E404Exception $e) {
+		} catch (RouteNotFoundException $e) {
 			#$view = new View();
 			#$body = $view->render('error404', array('content' => 'Requested url cannot be found'), true);
 			$view = new Controller();
@@ -88,8 +90,8 @@ class Core {
 			$this->response->status(404);
 			$this->response->write($body, true);
 		} catch (Exception $e) {
-			$view = new View();
-			$body = $view->render('error404', array('content' => $e->getMessage()), true);
+			$view = new Controller();
+			$body = $view->renderPartial('error404', array('content' => $e->getMessage()), true);
 			$this->response->status(404);
 			$this->response->write($body, true);
 		}
@@ -115,6 +117,30 @@ class Core {
 		}
 
 		echo $body;
+	}
+
+	public function registerAutoloadPaths() {
+		$this->addAutoloadPaths(array(
+			'core',
+			'app',
+			'app/config',
+			'app/controllers',
+			'app/models',
+			'app/modules',
+		));
+	}
+
+	public function addAutoloadPaths($paths) {
+		if (is_string($paths)) {
+			return $this->addAutoloadPaths(array($paths));
+		} else {
+			foreach ($paths as $k => $dir) {
+				$dir = Core::app()->appDir . '/' . $dir;
+				if (!in_array($dir, $this->autoloadPaths)) {
+					$this->autoloadPaths[] = $dir;
+				}
+			}
+		}
 	}
 
 	/**
@@ -191,8 +217,8 @@ class Core {
 		if ($class !== 'Controller') {
 			$file = str_replace('Controller', '', $class);
 		}
-		foreach (array('app/controllers', 'core', 'app/models') as $dir) {
-			$filename = Core::app()->appDir . '/' . $dir . '/' . strtolower($file) . '.php';
+		foreach (Core::app()->autoloadPaths as $dir) {
+			$filename = $dir . '/' . strtolower($file) . '.php';
 			if (file_exists($filename)) {
 				require $filename;
 				return true;
