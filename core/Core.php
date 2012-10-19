@@ -83,10 +83,8 @@ class Core {
 				throw new RouteNotFoundException('Not found');
 			$this->route->dispatch();
 		} catch (RouteNotFoundException $e) {
-			#$view = new View();
-			#$body = $view->render('error404', array('content' => 'Requested url cannot be found'), true);
 			$view = new Controller();
-			$body = $view->renderPartial('error404', array('content' => 'Requested url cannot be found'), true);
+			$body = $view->renderPartial('error404', array('content' => 'Requested url cannot be found', 'debug' => $e->getMessage()), true);
 			$this->response->status(404);
 			$this->response->write($body, true);
 		} catch (Exception $e) {
@@ -213,12 +211,9 @@ class Core {
 	}
 
 	public static function autoload($class) {
-		$file = $class;
-		if ($class !== 'Controller') {
-			$file = str_replace('Controller', '', $class);
-		}
+		$search = str_replace('_', '/', $class);
 		foreach (Core::app()->autoloadPaths as $dir) {
-			$filename = $dir . '/' . strtolower($file) . '.php';
+			$filename = $dir . '/' . $search . '.php';
 			if (file_exists($filename)) {
 				require $filename;
 				return true;

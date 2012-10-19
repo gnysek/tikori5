@@ -10,6 +10,8 @@
 		<p><?php echo $content; ?>.</p>
 		<?php if (Core::app()->getMode() < Core::MODE_PROD) : ?>
 			Page in debug/dev mode!<br/>
+			<hr/>
+			<?php if(!empty($debug)) echo $debug; ?>
 			Request params: <pre class="debug-pre"><?php echo var_export(Core::app()->request->env, true); ?></pre>
 		<?php endif;
 		?>

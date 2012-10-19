@@ -448,11 +448,16 @@ class Route {
 		} catch (Exception $e) {
 			throw new RouteNotFoundException('Dispatch controller: <span>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</span>: ' . $e->getMessage());
 		}
-
+		
 		try {
 			$reflection = new ReflectionClass($controller);
 			$finalParams = array();
+			
+			try {
 			$method = $reflection->getMethod($this->getAction() . 'Action');
+			} catch (Exception $ref) {
+				throw new RouteNotFoundException('Unknown action');
+			}
 			/* @var $method ReflectionMethod */
 			if ($method->getNumberOfRequiredParameters() > 0) {
 //				var_dump($method->getNumberOfRequiredParameters());
@@ -487,7 +492,7 @@ class Route {
 			Core::app()->response->body($response);
 		} catch (Exception $e) {
 			ob_get_clean();
-			throw new RouteNotFoundException('Dispatch action: <span>' . $this->getController() . '->' . $this->getAction() . '</span>: ' . $e->getMessage());
+			throw new Exception('Dispatch action: <span>' . $this->getController() . '->' . $this->getAction() . '</span>: ' . $e->getMessage());
 		}
 	}
 
