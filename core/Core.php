@@ -120,6 +120,7 @@ class Core {
 	public function registerAutoloadPaths() {
 		$this->addAutoloadPaths(array(
 			'core',
+			'core/tools/',
 			'app',
 			'app/config',
 			'app/controllers',
@@ -212,8 +213,18 @@ class Core {
 
 	public static function autoload($class) {
 		$search = str_replace('_', '/', $class);
+
+		preg_match('#(.*)/(.*)#i', $search, $match);
+		if (!empty($match)) {
+			$search = strtolower($match[1]) . '/' . $match[2];
+		} else {
+			$search = ucfirst($class);
+		}
+
+		$search .= '.php';
+
 		foreach (Core::app()->autoloadPaths as $dir) {
-			$filename = $dir . '/' . $search . '.php';
+			$filename = $dir . '/' . $search;
 			if (file_exists($filename)) {
 				require $filename;
 				return true;

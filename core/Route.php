@@ -443,7 +443,7 @@ class Route {
 		// get controller first
 		$controller = null;
 		try {
-			$class = $this->getController() . 'Controller';
+			$class = ucfirst($this->getController()) . 'Controller';
 			$controller = new $class;
 		} catch (Exception $e) {
 			throw new RouteNotFoundException('Dispatch controller: <span>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</span>: ' . $e->getMessage());
