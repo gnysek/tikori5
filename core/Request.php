@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @param string $request_method (GET|POST|PUT|DELETE)
  * @param string $script_name
@@ -17,19 +18,19 @@ class Request {
 
 	public static function mock() {
 		return array(
-			'REQUEST_METHOD' => 'GET',
-			'SCRIPT_NAME' => '',
-			'PATH_INFO' => '',
-			'QUERY_STRING' => '',
-			'SERVER_NAME' => 'localhost',
-			'SERVER_PORT' => 80,
-			'ACCEPT' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-			'ACCEPT_LANGUAGE' => 'en-US,en;q=0.8',
-			'ACCEPT_CHARSET' => 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-			'USER_AGENT' => 'Tikori Framework',
-			'REMOTE_ADDR' => '127.0.0.1',
-			'tikori.url_scheme' => 'http',
-			'route' => array(),
+				'REQUEST_METHOD' => 'GET',
+				'SCRIPT_NAME' => '',
+				'PATH_INFO' => '',
+				'QUERY_STRING' => '',
+				'SERVER_NAME' => 'localhost',
+				'SERVER_PORT' => 80,
+				'ACCEPT' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+				'ACCEPT_LANGUAGE' => 'en-US,en;q=0.8',
+				'ACCEPT_CHARSET' => 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+				'USER_AGENT' => 'Tikori Framework',
+				'REMOTE_ADDR' => '127.0.0.1',
+				'tikori.url_scheme' => 'http',
+				'route' => array(),
 //			'tikori.input' => ''
 		);
 	}
@@ -69,11 +70,11 @@ class Request {
 			return $union;
 		}
 	}
-	
+
 	public function get() {
 		return array();
 	}
-	
+
 	public function post() {
 		return array();
 	}
@@ -144,21 +145,22 @@ class Request {
 //		$env['slim.input'] = $rawInput;
 		//Error stream
 //		$env['slim.errors'] = fopen('php://stderr', 'w');
-
 //		$env['tikori.route'] = Route::process_uri($env['PATH_INFO']);
-
 //		if (empty($env['tikori.route']['params'])) {
 //			throw new Exception('404');
 //		}
+		preg_match('#(.*)/(.*?)\.php#i', $env['SCRIPT_NAME'], $match);
+		$env['tikori.root_path'] = (count($match) == 3) ? $env['HOST'] . $match[1] : $env['HOST'];
+		$env['tikori.base_url'] = $env['tikori.url_scheme'] . '://' . $env['tikori.root_path'] . '/';
 
 		$this->env = $env;
 		Core::app()->cfg('env', $env);
 	}
-	
+
 	public function getRouterPath() {
 		return (empty($this->env['PATH_INFO'])) ? '' : $this->env['PATH_INFO'];
 	}
-	
+
 	public function getPost($val) {
 		return (!empty($_POST[$val])) ? $_POST[$val] : null;
 	}

@@ -1,0 +1,15 @@
+@import "fatal.css";
+
+body{margin: 10px auto; max-width: 800px; font-size: 20px; line-height: 1.8em; background-color: #131313; color: white;}
+body {font-family: 'Segoe UI Light', 'Segoe UI', sans-serif;}
+/*span, */h1, code {color: #999; background-color: #1f1f1f; padding: 1px;}
+h1 {display: inline-block; padding: 10px; font-size: 40px;}
+.stopka {color: steelblue; font-size: 12px; font-family: monospace;}
+.l {text-align: left;}
+.code, pre, code{font-family: 'Consolas', monospace; font-size: 16px; line-height: 21px;}
+.code, code {background-color: #222; overflow-x: auto; border-radius: 3px;}
+.code, .code pre {margin: 0;}
+.num {width: 50px; background-color: #0A0A0A; color: #888; display: inline-block; text-align: right; padding-right: 3px; margin-right: 3px;}
+.err {background-color: #391414; padding: 0px;}
+.err .num {background-color: darkorange; color: white}
+.pink{color:#BB6699}

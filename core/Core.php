@@ -207,6 +207,10 @@ class Core {
 			$this->_config[$key] = $val;
 		}
 	}
+	
+	public function baseUrl() {
+		return Core::app()->request->env['tikori.base_url'];
+	}
 
 	public static function exh(Exception $exception) {
 		echo Error::display($exception);
