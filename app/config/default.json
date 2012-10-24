@@ -1,10 +1,9 @@
 {
 	"appName": "Tikori 5 Test APP",
 	"host": "http://betahmt.pl/code/",
-	"dbhost": "localhost",
-	"dbuser": "user",
+	"dblink": "mysql:host=localhost;dbname=tikori5",
+	"dbuser": "root",
 	"dbpass": "",
-	"dbt": "betahmt",
 	"default": "news",
 	"routes": {
 		"forum": {

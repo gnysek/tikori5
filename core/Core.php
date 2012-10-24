@@ -69,6 +69,7 @@ class Core {
 		}
 		spl_autoload_register(array('Core', 'autoload'), true);
 		set_exception_handler(array('Core', 'exh'));
+		set_error_handler(array('Core', 'erh'), E_ALL);
 		$this->registerAutoloadPaths();
 
 		$this->reconfigure(file_get_contents($this->appDir . '/app/config/' . $config . '.json'));
@@ -121,6 +122,7 @@ class Core {
 		$this->addAutoloadPaths(array(
 			'core',
 			'core/tools/',
+			'core/db/',
 			'app',
 			'app/config',
 			'app/controllers',
@@ -208,6 +210,12 @@ class Core {
 
 	public static function exh(Exception $exception) {
 		echo Error::display($exception);
+		die();
+	}
+
+	public static function erh($errno, $errstr, $errfile, $errline, $errcontext) {
+		echo Error::display(new Exception($errstr, $errno));
+		echo $errstr;
 		die();
 	}
 

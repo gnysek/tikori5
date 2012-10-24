@@ -7,6 +7,7 @@ class Error {
 		$html[] = '<!DOCTYPE html>';
 		$html[] = '<html>';
 		$html[] = '<head>';
+		$html[] = '<meta charset="utf-8" />';
 		$html[] = '<title>Tikori5 Critical Error</title>';
 		$html[] = '<style>';
 		$html[] = 'body{margin: 10px auto; max-width: 800px; font-size: 14px; line-height: 1.8em; background-color: blue; color: white; text-align: center;}';
@@ -15,10 +16,11 @@ class Error {
 		$html[] = 'h1 {display: inline-block; padding: 10px;}';
 		$html[] = '.stopka {color: steelblue; font-size: 12px; font-family: monospace;}';
 		$html[] = '.l {text-align: left;}';
-		$html[] = '.code {text-align: left; font-size: 11px; background-color: #333; overflow-x: scroll;}';
+		$html[] = '.code {text-align: left; font-size: 11px; background-color: #333; overflow-x: scroll; border-radius: 3px;}';
 		$html[] = '.code, .code pre {line-height: 15px; margin: 0;}';
-		$html[] = '.num {width: 40px; background-color: black; color: #888; display: inline-block; text-align: right; padding-right: 3px;}';
+		$html[] = '.num {width: 40px; background-color: black; color: #888; display: inline-block; text-align: right; padding-right: 3px; margin-right: 3px;}';
 		$html[] = '.err {color: black; background-color: gold; padding: 0px;}';
+		$html[] = '.err .num {background-color: darkorange; color: white}';
 		$html[] = '</style>';
 		$html[] = '</head>';
 		$html[] = '<body>';
@@ -40,27 +42,13 @@ class Error {
 			$html[] = '<br/>' . nl2br($exception->getTraceAsString());
 			$html[] = '</div>';
 
-			if ($file = @file($exception->getFile())) {
-				$html[] = '<br/>';
-				$html [] = '<div class="code"><pre>';
-				$code = array();
-				for ($i = max(0, $exception->getLine() - 11); $i < min(count($file) - 1, $exception->getLine() + 10); $i++) {
-//					if (!preg_match('/[a-z\/]/i', $file[$i]))
-//						continue;
-
-					$code[] = '<span class="num">' . sprintf('%05d', $i+1) . ':</span>';
-					if ($i == $exception->getLine() - 1) {
-						$code[] = '<span class="err">';
-					}
-					$code[] = htmlspecialchars($file[$i]);
-					if ($i == $exception->getLine() - 1) {
-						$code[] = '</span>';
-					}
+			foreach (array_reverse($exception->getTrace()) as $trace) {
+				if (isset($trace['line'], $trace['file'])) {
+					$html[] = self::getFile($trace['file'], $trace['line']);
 				}
-				$html [] = implode('', $code);
-				$html[] = '</pre></div>';
 			}
-//			}
+
+			$html[] = self::getFile($exception->getFile(), $exception->getLine());
 		}
 		$html[] = '</p>';
 		$html[] = '<div class="stopka">';
@@ -70,6 +58,38 @@ class Error {
 		$html[] = '</html>';
 
 		echo implode('', $html);
+		die();
+	}
+
+	private static function getFile($filename, $line) {
+		$html = array();
+
+		if ($file = @file($filename)) {
+
+			$html[] = '<br/>';
+			$html[] = '<div class="code"><pre>';
+			$html[] = '<span class="num">&raquo;</span><u><span> ' . $filename . ':' . $line . ' </span></u>' . PHP_EOL;
+			$code = array();
+			for ($i = max(0, $line - 11); $i < min(count($file), $line + 10); $i++) {
+//					if (!preg_match('/[a-z\/]/i', $file[$i]))
+//						continue;
+
+				if ($i == $line - 1) {
+					$code[] = '<div class="err">';
+				}
+				$code[] = '<span class="num">' . sprintf('%05d', $i + 1) . '</span>';
+				$code[] = htmlspecialchars(str_replace(array("\n", "\r", "\r\n"), '', $file[$i]));
+				if ($i == $line - 1) {
+					$code[] = '</div>';
+				} else {
+					$code[] = PHP_EOL;
+				}
+			}
+			$html[] = implode('', $code);
+			$html[] = '</pre></div>';
+		}
+
+		return implode('', $html);
 	}
 
 }

@@ -5,7 +5,7 @@
  *
  * @author user
  */
-class Db_Db {
+class Db {
 
 	private static $_init = FALSE;
 
@@ -19,14 +19,14 @@ class Db_Db {
 			self::$_init = TRUE;
 
 			try {
-				self::$_conn = new PDO('mysql:host=localhost;dbname=titag', 'root');
+				self::$_conn = new PDO(Core::app()->cfg('dblink'), Core::app()->cfg('dbuser'), Core::app()->cfg('dbpass'));
 			} catch (PDOException $e) {
-				throw new Db_Error('Nie można połączyć z PDO ' . $e->getMessage());
+				throw new DbError('Nie można połączyć z PDO ' . $e->getMessage());
 				return FALSE;
 			}
 
 			if (!self::$_conn) {
-				throw new Db_Error('Nie można połączyć z PDO');
+				throw new DbError('Nie można połączyć z PDO');
 				return FALSE;
 			}
 		}
@@ -47,7 +47,7 @@ class Db_Db {
 		$result = self::$_conn->query($sql);
 		if (!$result) {
 			if (self::$_conn->errorCode()) {
-				throw new Db_Error($sql . '<br/>' .implode(': ', self::$_conn->errorInfo()));
+				throw new DbError($sql . '<br/>' . implode(': ', self::$_conn->errorInfo()));
 			}
 			return NULL;
 		} else {
@@ -68,7 +68,7 @@ class Db_Db {
 					return new Collection();
 				}
 			} else {
-				throw new Db_Error('SQL ERROR ' . $sql . '<br/>' . self::$_conn->errorInfo());
+				throw new DbError('SQL ERROR ' . $sql . '<br/>' . self::$_conn->errorInfo());
 				return NULL;
 			}
 		}
@@ -77,7 +77,7 @@ class Db_Db {
 	public static function update($sql) {
 		$result = self::$_conn->exec($sql);
 		if ($result === FALSE) {
-			throw new Db_Error('Błąd zapytania<br/>' . $sql . '<br/>' . var_export(self::$_conn->errorInfo(), true));
+			throw new DbError('Błąd zapytania<br/>' . $sql . '<br/>' . var_export(self::$_conn->errorInfo(), true));
 			return NULL;
 		} else {
 			return $result;
@@ -92,11 +92,8 @@ class Db_Db {
 		self::$_conn = NULL;
 	}
 
-	public static function protect($str) {
-		$str = str_replace("'", "''", $str);
-		$str = str_replace('\\', '\\\\', $str);
-
-		return $str;
+	public static function protect($string) {
+		return self::$_conn->quote($string);
 	}
 
 	/**

@@ -5,6 +5,6 @@
  *
  * @author user
  */
-class DB_Error extends Exception {
+class DbError extends Exception {
 	//put your code here
 }

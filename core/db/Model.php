@@ -1,6 +1,15 @@
 <?php
 
+/**
+ * 
+ */
 class Model {
+
+	const BELONGS_TO = 1;
+	const HAS_ONE = 2;
+	const HAS_MANY = 3;
+//	const MANY_MANY = 4;
+	const STATS = 5;
 
 	private $_table;
 	private $_fields;
@@ -11,8 +20,12 @@ class Model {
 	public $tableName = '';
 
 	public function __construct() {
-		$this->_scopes = $this->_scopes();
-		$this->$_relations = $this->_relations();
+		$this->_scopes = $this->scopes();
+		$this->_relations = $this->relations();
+	}
+
+	public function getTable() {
+		return '';
 	}
 
 	public static function model($model = __CLASS__) {
@@ -24,6 +37,9 @@ class Model {
 		return $this->find($id);
 	}
 
+	/*
+	 * return $model
+	 */
 	public function find($id) {
 		
 	}
@@ -99,11 +115,6 @@ class Model {
 		
 	}
 
-	/**	 * */
-	public function scope() {
-		
-	}
-
 	public function attributeLabels() {
 		
 	}
@@ -128,16 +139,23 @@ class Model {
 	public function generateAttributeLabel($name) {
 		return ucwords(trim(strtolower(str_replace(array('-', '_', '.'), ' ', preg_replace('/(?<![A-Z])[A-Z]/', ' \0', $name)))));
 	}
-	
+
 	public function getIsNewRecord() {
 		return $this->_isNewRecord;
 	}
 
-	private function _scopes() {
-		return array();
+	public function scopes() {
+		
 	}
 
-	private function _relations() {
+	/**
+	 * BELONGS_TO: e.g. a member belongs to a team;
+	 * HAS_ONE: e.g. a member has at most one profile;
+	 * HAS_MANY: e.g. a team has many members;
+	 * MANY_MANY: e.g. a member has many skills and a skill belongs to a member.
+	 * @return type
+	 */
+	public function relations() {
 		return array();
 	}
 

@@ -3,6 +3,9 @@
 class DefaultController extends Controller {
 
 	public function indexAction() {
+		$model = Team::model()->find(1);
+		/* @var $model Team */
+		echo $model->users->name;
 		$this->render('body');
 	}
 
