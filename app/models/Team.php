@@ -7,6 +7,7 @@
  * @property Member $users Users that Team have
  */
 class Team extends Model {
+
 	/**
 	 * @param class $model
 	 * @return Content
@@ -20,10 +21,17 @@ class Team extends Model {
 			'users' => array(self::HAS_MANY, 'Member', 'id'),
 		);
 	}
-	
+
+	public function getFields() {
+		return array(
+			'team_id', 'team_name'
+		);
+	}
+
 	public function tableName() {
 		return 'test_team';
 	}
+
 }
 
 ?>

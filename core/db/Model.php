@@ -5,14 +5,16 @@
  */
 class Model {
 
-	const BELONGS_TO = 1;
-	const HAS_ONE = 2;
-	const HAS_MANY = 3;
+	const BELONGS_TO = 'BELONGS_TO';
+	const HAS_ONE = 'HAS_ONE';
+	const HAS_MANY = 'HAS_MANY';
 //	const MANY_MANY = 4;
-	const STATS = 5;
+	const STATS = 'STATS';
 
 	private $_table;
 	private $_fields;
+	private $_values = array();
+	private $_related = null;
 	private $_primaryKey = 'id';
 	private $_scopes = array();
 	private $_relations = array();
@@ -22,6 +24,8 @@ class Model {
 	public function __construct() {
 		$this->_scopes = $this->scopes();
 		$this->_relations = $this->relations();
+		$this->_fields = $this->getFields();
+		$this->_table = $this->getTable();
 	}
 
 	public function getTable() {
@@ -40,8 +44,10 @@ class Model {
 	/*
 	 * return $model
 	 */
+
 	public function find($id) {
-		
+		DB::query('SELECT * FROM ' . $this->_table . " WHERE " . $this->_primaryKey . ' = ' . mysql_real_escape_string($this->_id));
+		return $this;
 	}
 
 	public function findByPK($key, $value) {
@@ -49,15 +55,15 @@ class Model {
 	}
 
 	public function findBy($key, $value) {
-		
+		return $this;
 	}
 
 	public function findWhere($where) {
-		
+		return $this;
 	}
 
 	public function findAll() {
-		
+		return $this;
 	}
 
 	/**	 * */
@@ -115,6 +121,10 @@ class Model {
 		
 	}
 
+	public function getFields() {
+		
+	}
+
 	public function attributeLabels() {
 		
 	}
@@ -157,6 +167,26 @@ class Model {
 	 */
 	public function relations() {
 		return array();
+	}
+
+	public function __get($value) {
+		$getter = 'get' . ucfirst($value);
+		if (isset($this->_values[$value])) {
+			return $this->_values[$value];
+		} else if (isset($this->_related[$value])) {
+			return $this->_related[$value];
+		} else if (in_array($value, $this->_relations)) {
+			return $this->getRelated($value);
+		} else if (method_exists($this, $getter)) {
+			return $this->$getter();
+		} else {
+			return null;
+		}
+	}
+
+	public function getRelated($relationName) {
+		var_dump('getting related ' . $relationName);
+		return null;
 	}
 
 }

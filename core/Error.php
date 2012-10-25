@@ -1,6 +1,21 @@
 <?php
 
 class Error {
+	
+	public static function registerErrors(){
+		set_exception_handler(array('Error', 'exh'));
+		set_error_handler(array('Error', 'erh'), E_ALL);
+	}
+
+	public static function exh(Exception $exception) {
+		echo Error::display($exception);
+		die();
+	}
+
+	public static function erh($errno, $errstr, $errfile, $errline, $errcontext) {
+		echo Error::display(new Exception($errstr, $errno), array('file' => $errfile, 'line' => $errline));
+		die();
+	}
 
 	public static function display(Exception $exception, $staticData = null) {
 		$view = new Controller();

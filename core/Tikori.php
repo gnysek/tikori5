@@ -1,6 +1,6 @@
 <?php
 
-class Tikori {
+class XTikori {
 
 	const MODE_DEBUG = -1;
 	const MODE_DEV = 0;

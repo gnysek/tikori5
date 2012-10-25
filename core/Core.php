@@ -10,26 +10,6 @@ class Core {
 	const MODE_DEV = 0;
 	const MODE_PROD = 1;
 
-	private $_config = array();
-	public $appDir = '';
-
-	/**
-	 * @var Request 
-	 */
-	public $request = null;
-
-	/**
-	 * @var Response
-	 */
-	public $response = null;
-	public $mode = 0;
-	public $autoloadPaths = array();
-
-	/**
-	 * @var Route
-	 */
-	public $route = null;
-
 	/**
 	 * @var Core Main app class 
 	 */
@@ -52,8 +32,66 @@ class Core {
 	}
 
 	public static function run($path = '', $config = 'default') {
-		$core = new Core($path, $config);
+		if (self::$_app === null) {
+			$core = new Tikori($path, $config);
+		} else {
+			self::asssignApp(null);
+		}
 	}
+
+	public static function autoload($class) {
+		$search = str_replace('_', '/', $class);
+
+		preg_match('#(.*)/(.*)#i', $search, $match);
+		if (!empty($match)) {
+			$search = strtolower($match[1]) . '/' . $match[2];
+		} else {
+			$search = ucfirst($class);
+		}
+
+		$search .= '.php';
+
+		foreach (Core::app()->autoloadPaths as $dir) {
+			$filename = $dir . '/' . $search;
+			if (file_exists($filename)) {
+				require $filename;
+				return true;
+			}
+		}
+
+		throw new Exception("Cannot autoload class " . $class . '[' . $search . ']');
+	}
+
+}
+
+/**
+ * @property string $appDir Application main directory (where index.php is)
+ * @property Request $request
+ * @property Response $request
+ * @property int $mode Core::MODE_XXX
+ * @property array $autoloadPaths Array of autoload paths
+ */
+class Tikori {
+
+	private $_config = array();
+	public $appDir = '';
+
+	/**
+	 * @var Request 
+	 */
+	public $request = null;
+
+	/**
+	 * @var Response
+	 */
+	public $response = null;
+	public $mode = 0;
+	public $autoloadPaths = array();
+
+	/**
+	 * @var Route
+	 */
+	public $route = null;
 
 	public function __construct($path = '', $config = 'default') {
 		$this->init($path, $config);
@@ -67,10 +105,13 @@ class Core {
 		} else {
 			$this->appDir = $path;
 		}
+
+		// register autoloads
 		spl_autoload_register(array('Core', 'autoload'), true);
-		set_exception_handler(array('Core', 'exh'));
-		set_error_handler(array('Core', 'erh'), E_ALL);
 		$this->registerAutoloadPaths();
+
+		// register error handlers
+		Error::registerErrors();
 
 		$this->reconfigure(file_get_contents($this->appDir . '/app/config/' . $config . '.json'));
 
@@ -210,39 +251,6 @@ class Core {
 
 	public function baseUrl() {
 		return Core::app()->request->env['tikori.base_url'];
-	}
-
-	public static function exh(Exception $exception) {
-		echo Error::display($exception);
-		die();
-	}
-
-	public static function erh($errno, $errstr, $errfile, $errline, $errcontext) {
-		echo Error::display(new Exception($errstr, $errno), array('file' => $errfile, 'line' => $errline));
-		die();
-	}
-
-	public static function autoload($class) {
-		$search = str_replace('_', '/', $class);
-
-		preg_match('#(.*)/(.*)#i', $search, $match);
-		if (!empty($match)) {
-			$search = strtolower($match[1]) . '/' . $match[2];
-		} else {
-			$search = ucfirst($class);
-		}
-
-		$search .= '.php';
-
-		foreach (Core::app()->autoloadPaths as $dir) {
-			$filename = $dir . '/' . $search;
-			if (file_exists($filename)) {
-				require $filename;
-				return true;
-			}
-		}
-
-		throw new Exception("Cannot autoload class " . $class);
 	}
 
 }
