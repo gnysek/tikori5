@@ -28,7 +28,7 @@ class Team extends Model {
 		);
 	}
 
-	public function tableName() {
+	public function getTable() {
 		return 'test_team';
 	}
 

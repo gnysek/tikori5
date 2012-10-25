@@ -89,22 +89,24 @@ class Error {
 
 //			$html[] = var_export($trace, true);
 
-			$html[] = '<div class="code hidden" id="' . $index . '"><pre class="prettyprint lang-php">';
+			$html[] = PHP_EOL . '<div class="code hidden" id="' . $index . '"><pre class="prettyprint lang-php">';
 			$code = array();
 			for ($i = max(0, $line - 11); $i < min(count($file), $line + 10); $i++) {
 //					if (!preg_match('/[a-z\/]/i', $file[$i]))
 //						continue;
 
+				$code[] = '<div class="line">';
 				if ($i == $line - 1) {
 					$code[] = '<div class="err">';
+				} else if ($i != $line) {
+//					$code[] = PHP_EOL;
 				}
 				$code[] = '<span class="num nocode">' . sprintf('%05d', $i + 1) . '</span>';
 				$code[] = htmlspecialchars(str_replace(array("\n", "\r", "\r\n"), '', $file[$i]));
 				if ($i == $line - 1) {
 					$code[] = '</div>';
-				} else {
-					$code[] = PHP_EOL;
 				}
+				$code[] = '</div>';
 			}
 			$html[] = implode('', $code);
 			$html[] = '</pre></div>';

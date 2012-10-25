@@ -46,7 +46,9 @@ class Model {
 	 */
 
 	public function find($id) {
-		DB::query('SELECT * FROM ' . $this->_table . " WHERE " . $this->_primaryKey . ' = ' . mysql_real_escape_string($this->_id));
+		if (!is_numeric($id))
+			$id = DB::protect($id);
+		DB::query('SELECT * FROM ' . $this->_table . " WHERE " . $this->_primaryKey . ' = ' . $id);
 		return $this;
 	}
 

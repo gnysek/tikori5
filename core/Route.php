@@ -446,7 +446,7 @@ class Route {
 			$class = ucfirst($this->getController()) . 'Controller';
 			$controller = new $class;
 		} catch (Exception $e) {
-			throw new RouteNotFoundException('Dispatch controller: <span>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</span>: ' . $e->getMessage());
+			throw new RouteNotFoundException('Dispatch controller: <er>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</er>: ' . $e->getMessage());
 		}
 		
 		try {
@@ -492,7 +492,7 @@ class Route {
 			Core::app()->response->body($response);
 		} catch (Exception $e) {
 			ob_get_clean();
-			throw new Exception('Dispatch action: <span>' . $this->getController() . '->' . $this->getAction() . '</span>: ' . $e->getMessage());
+			throw new Exception('Dispatch action: <er>' . $this->getController() . '->' . $this->getAction() . '</er> :<br/>' . $e->getMessage());
 		}
 	}
 

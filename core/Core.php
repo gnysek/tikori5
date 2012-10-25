@@ -129,12 +129,12 @@ class Tikori {
 			$body = $view->renderPartial('error404', array('content' => 'Requested url cannot be found', 'debug' => $e->getMessage()), true);
 			$this->response->status(404);
 			$this->response->write($body, true);
-		} catch (Exception $e) {
+		}/* catch (Exception $e) {
 			$view = new Controller();
 			$body = $view->renderPartial('error404', array('content' => $e->getMessage()), true);
 			$this->response->status(404);
 			$this->response->write($body, true);
-		}
+		}*/
 
 		list($status, $header, $body) = $this->response->finalize();
 

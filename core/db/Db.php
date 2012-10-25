@@ -25,15 +25,23 @@ class Db {
 				return FALSE;
 			}
 
-			if (!self::$_conn) {
+			if (!self::connected()) {
 				throw new DbError('Nie można połączyć z PDO');
 				return FALSE;
 			}
 		}
 	}
 
+	public static function conn() {
+		if (!self::$_init) {
+			self::connect();
+		}
+
+		return self::$_conn;
+	}
+
 	public static function connected() {
-		return (bool) self::$_conn;
+		return (bool) self::conn();
 	}
 
 	/**
@@ -44,10 +52,10 @@ class Db {
 	 * @return Collection 
 	 */
 	public static function query($sql, $skip = '', $assoc = TRUE) {
-		$result = self::$_conn->query($sql);
+		$result = self::conn()->query($sql);
 		if (!$result) {
-			if (self::$_conn->errorCode()) {
-				throw new DbError($sql . '<br/>' . implode(': ', self::$_conn->errorInfo()));
+			if (self::conn()->errorCode()) {
+				throw new DbError($sql . '<br/>' . implode(': ', self::conn()->errorInfo()));
 			}
 			return NULL;
 		} else {
@@ -68,16 +76,16 @@ class Db {
 					return new Collection();
 				}
 			} else {
-				throw new DbError('SQL ERROR ' . $sql . '<br/>' . self::$_conn->errorInfo());
+				throw new DbError('SQL ERROR ' . $sql . '<br/>' . self::conn()->errorInfo());
 				return NULL;
 			}
 		}
 	}
 
 	public static function update($sql) {
-		$result = self::$_conn->exec($sql);
+		$result = self::conn()->exec($sql);
 		if ($result === FALSE) {
-			throw new DbError('Błąd zapytania<br/>' . $sql . '<br/>' . var_export(self::$_conn->errorInfo(), true));
+			throw new DbError('Błąd zapytania<br/>' . $sql . '<br/>' . var_export(self::conn()->errorInfo(), true));
 			return NULL;
 		} else {
 			return $result;
@@ -85,7 +93,7 @@ class Db {
 	}
 
 	public static function lastId() {
-		return self::$_conn->lastInsertId();
+		return self::conn()->lastInsertId();
 	}
 
 	public static function close() {
@@ -93,7 +101,7 @@ class Db {
 	}
 
 	public static function protect($string) {
-		return self::$_conn->quote($string);
+		return self::conn()->quote($string);
 	}
 
 	/**
