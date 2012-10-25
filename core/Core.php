@@ -207,7 +207,7 @@ class Core {
 			$this->_config[$key] = $val;
 		}
 	}
-	
+
 	public function baseUrl() {
 		return Core::app()->request->env['tikori.base_url'];
 	}
@@ -218,8 +218,7 @@ class Core {
 	}
 
 	public static function erh($errno, $errstr, $errfile, $errline, $errcontext) {
-		echo Error::display(new Exception($errstr, $errno));
-		echo $errstr;
+		echo Error::display(new Exception($errstr, $errno), array('file' => $errfile, 'line' => $errline));
 		die();
 	}
 

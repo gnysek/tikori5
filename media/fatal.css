@@ -1,15 +1,22 @@
-@import "fatal.css";
+@import "reset.css";
 
 body{margin: 10px auto; max-width: 800px; font-size: 20px; line-height: 1.8em; background-color: #131313; color: white;}
 body {font-family: 'Segoe UI Light', 'Segoe UI', sans-serif;}
+em{font-style: italic; text-decoration: underline;}
+strong{font-weight: bold;}
 /*span, */h1, code {color: #999; background-color: #1f1f1f; padding: 1px;}
-h1 {display: inline-block; padding: 10px; font-size: 40px;}
-.stopka {color: steelblue; font-size: 12px; font-family: monospace;}
+h1 {display: inline-block; padding: 10px; font-size: 40px; color:#BB6699; font-weight: bold;}
+.stopka {color: steelblue; font-size: 15px; letter-spacing: 1.5px;}
 .l {text-align: left;}
+code{padding: 3px;}
 .code, pre, code{font-family: 'Consolas', monospace; font-size: 16px; line-height: 21px;}
 .code, code {background-color: #222; overflow-x: auto; border-radius: 3px;}
 .code, .code pre {margin: 0;}
 .num {width: 50px; background-color: #0A0A0A; color: #888; display: inline-block; text-align: right; padding-right: 3px; margin-right: 3px;}
-.err {background-color: #391414; padding: 0px;}
+.err, .highlight:hover {background-color: #391414;}
 .err .num {background-color: darkorange; color: white}
-.pink{color:#BB6699}
+.pink{color:#BB6699;}
+.highlight{display:block; padding: 3px 0; margin: 3px 0;cursor:pointer;}
+.highlight .num{background-color: transparent;}
+.hidden{display: none;}
+hr{height:1px;border: none;border-top: 1px solid #444;}
