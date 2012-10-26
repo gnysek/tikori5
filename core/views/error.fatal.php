@@ -26,7 +26,7 @@
 			?>
 		<?php endif; ?>
 		<hr/>
-		<div class="stopka">
+		<div class="footer">
 			&copy; 2003 - <?= date('Y') ?> gnysek.pl &bull; <?= date('d/m/Y H:i:s'); ?>
 		</div>
 	</body>

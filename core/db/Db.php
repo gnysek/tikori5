@@ -62,18 +62,21 @@ class Db {
 			if ($result instanceof PDOStatement) {
 				$return = array();
 				if ($result->rowCount()) {
-					$return = new Collection();
+//					$return = new Collection();
 
 					while (( $row = $result->fetch(( $assoc == true ) ? PDO::FETCH_ASSOC : PDO::FETCH_NUM) ) !== false) {
-						$reserved = new Data();
-						foreach ($row as $k => $v) {
-							$reserved->push(str_replace($skip, '', $k), $v);
-						}
-						$return->push($reserved);
+						$record = new Record();
+						$record->import($row, false);
+//						foreach ($row as $k => $v) {
+//							$reserved->push(str_replace($skip, '', $k), $v);
+//						}
+						$return[] = $record;
+//						$return->push($reserved);
 					}
 					return $return;
 				} else {
-					return new Collection();
+//					return new Collection();
+					return array(new Record());
 				}
 			} else {
 				throw new DbError('SQL ERROR ' . $sql . '<br/>' . self::conn()->errorInfo());

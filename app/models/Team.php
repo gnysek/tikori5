@@ -18,7 +18,7 @@ class Team extends Model {
 
 	public function relations() {
 		return array(
-			'users' => array(self::HAS_MANY, 'Member', 'id'),
+			'users' => array(self::HAS_MANY, 'Member', 'team'),
 		);
 	}
 
@@ -30,6 +30,10 @@ class Team extends Model {
 
 	public function getTable() {
 		return 'test_team';
+	}
+	
+	public function getPK() {
+		return $this->_fields[0];
 	}
 
 }

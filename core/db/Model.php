@@ -11,14 +11,14 @@ class Model {
 //	const MANY_MANY = 4;
 	const STATS = 'STATS';
 
-	private $_table;
-	private $_fields;
-	private $_values = array();
-	private $_related = null;
-	private $_primaryKey = 'id';
-	private $_scopes = array();
-	private $_relations = array();
-	private $_isNewRecord = true;
+	protected $_table;
+	protected $_fields;
+	protected $_values = array();
+	protected $_related = null;
+	protected $_primaryKey = 'id';
+	protected $_scopes = array();
+	protected $_relations = array();
+	protected $_isNewRecord = true;
 	public $tableName = '';
 
 	public function __construct() {
@@ -26,14 +26,25 @@ class Model {
 		$this->_relations = $this->relations();
 		$this->_fields = $this->getFields();
 		$this->_table = $this->getTable();
+		$this->_primaryKey = $this->getPK();
 	}
 
 	public function getTable() {
 		return '';
 	}
 
+	public function getPK() {
+		return $this->_primaryKey;
+	}
+
 	public static function model($model = __CLASS__) {
 		return new $model();
+	}
+	
+	public function setValues($values) {
+		if (is_array($values)) {
+			$this->_values = $values;
+		}
 	}
 
 	/** find * */
@@ -48,16 +59,34 @@ class Model {
 	public function find($id) {
 		if (!is_numeric($id))
 			$id = DB::protect($id);
-		DB::query('SELECT * FROM ' . $this->_table . " WHERE " . $this->_primaryKey . ' = ' . $id);
+		$result = DB::query('SELECT * FROM ' . $this->_table . " WHERE " . $this->_primaryKey . ' = ' . $id);
+		if (count($result) > 1)
+			throw new DbError('Returned more than 1 record - PK wrongly defined?');
+		foreach ($this->_fields as $field) {
+			if ($result[0]->offsetExists($field)) {
+				$this->_values[$field] = $result[0]->$field;
+			}
+		}
 		return $this;
 	}
 
-	public function findByPK($key, $value) {
+	public function findByPK($value) {
 		return $this->findBy($this->_primaryKey, $value);
 	}
 
 	public function findBy($key, $value) {
-		return $this;
+		if (!is_numeric($value))
+			$value = DB::protect($value);
+		$result = DB::query('SELECT * FROM ' . $this->_table . " WHERE " . $key . ' = ' . $value);
+		$return = array();
+		foreach ($result as $row) {
+			/* @var $row Result */
+			$c = self::model(__CLASS__);
+			$c->setValues($row->getIterator()->getArrayCopy());
+			$return[] = $c;
+		}
+		return $return;
+//		return $this;
 	}
 
 	public function findWhere($where) {
@@ -177,7 +206,7 @@ class Model {
 			return $this->_values[$value];
 		} else if (isset($this->_related[$value])) {
 			return $this->_related[$value];
-		} else if (in_array($value, $this->_relations)) {
+		} else if (array_key_exists($value, $this->_relations)) {
 			return $this->getRelated($value);
 		} else if (method_exists($this, $getter)) {
 			return $this->$getter();
@@ -187,8 +216,21 @@ class Model {
 	}
 
 	public function getRelated($relationName) {
-		var_dump('getting related ' . $relationName);
+		switch ($this->_relations[$relationName][0]) {
+			case self::HAS_MANY:
+				$rel = self::model($this->_relations[$relationName][1]);
+				$result = $rel->findBy($this->_relations[$relationName][2], $this->_values[$this->getPK()]);
+				$this->_related[$relationName] = $result;
+				return $this->_related[$relationName];
+				break;
+			default:
+				throw new DbError('Unknown relation type ' . $this->_relations[$relationName][0]);
+		}
 		return null;
+	}
+	
+	public function __toString() {
+		return 'Returned data from ' . $this->getTable() . ' results: ' . count($this->_values);
 	}
 
 }

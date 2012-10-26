@@ -126,12 +126,12 @@ class Tikori {
 			$this->route->dispatch();
 		} catch (RouteNotFoundException $e) {
 			$view = new Controller();
-			$body = $view->renderPartial('error404', array('content' => 'Requested url cannot be found', 'debug' => $e->getMessage()), true);
+			$body = $view->renderPartial('error.404', array('content' => 'Requested url cannot be found', 'debug' => $e->getMessage()), true);
 			$this->response->status(404);
 			$this->response->write($body, true);
 		}/* catch (Exception $e) {
 			$view = new Controller();
-			$body = $view->renderPartial('error404', array('content' => $e->getMessage()), true);
+			$body = $view->renderPartial('error.404', array('content' => $e->getMessage()), true);
 			$this->response->status(404);
 			$this->response->write($body, true);
 		}*/

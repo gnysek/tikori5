@@ -8,8 +8,12 @@
  * @property $team team
  * @author user
  */
-class Member {
+class Member extends Model {
 	//put your code here
+	
+	public function getTable(){
+		return 'test_user';
+	}
 }
 
 ?>
