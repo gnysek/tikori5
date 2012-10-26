@@ -27,3 +27,11 @@ h1 {
 	margin-top: 5px;
 	border-top: 1px solid #555;
 }
+
+strong {
+	font-weight: bold;
+}
+
+p {
+	margin-bottom: 4px;
+}

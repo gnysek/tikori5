@@ -40,7 +40,7 @@ class Model {
 	public static function model($model = __CLASS__) {
 		return new $model();
 	}
-	
+
 	public function setValues($values) {
 		if (is_array($values)) {
 			$this->_values = $values;
@@ -81,7 +81,7 @@ class Model {
 		$return = array();
 		foreach ($result as $row) {
 			/* @var $row Result */
-			$c = self::model(__CLASS__);
+			$c = self::model(get_called_class());
 			$c->setValues($row->getIterator()->getArrayCopy());
 			$return[] = $c;
 		}
@@ -201,12 +201,17 @@ class Model {
 	}
 
 	public function __get($value) {
+		/* if (__CLASS__ == 'Member') {
+		  var_dump($value);
+		  var_dump($this->_relations);
+		  } */
 		$getter = 'get' . ucfirst($value);
 		if (isset($this->_values[$value])) {
 			return $this->_values[$value];
 		} else if (isset($this->_related[$value])) {
 			return $this->_related[$value];
 		} else if (array_key_exists($value, $this->_relations)) {
+//			var_dump('relation ' . __CLASS__);
 			return $this->getRelated($value);
 		} else if (method_exists($this, $getter)) {
 			return $this->$getter();
@@ -223,14 +228,22 @@ class Model {
 				$this->_related[$relationName] = $result;
 				return $this->_related[$relationName];
 				break;
+			case self::BELONGS_TO:
+				$rel = self::model($this->_relations[$relationName][1]);
+				$result = $rel->find($this->_values[$this->_relations[$relationName][2]]);
+				$this->_related[$relationName] = $result;
+//				var_dump($result);
+				return $this->_related[$relationName];
+				break;
 			default:
 				throw new DbError('Unknown relation type ' . $this->_relations[$relationName][0]);
 		}
 		return null;
 	}
-	
+
 	public function __toString() {
-		return 'Returned data from ' . $this->getTable() . ' results: ' . count($this->_values);
+		//return 'Returned data from ' . $this->getTable() . ' results: ' . count($this->_values);
+		return 'Data in ' . get_called_class() . ' model instance: ' . var_export($this->_values, true);
 	}
 
 }
