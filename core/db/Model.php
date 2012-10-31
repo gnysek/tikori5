@@ -249,6 +249,31 @@ class Model {
 			$row .= '<td>' . $v . '</td>';
 		}
 
+		$headerCount = count($this->_values);
+
+		foreach ($this->_relations as $relationName => $relation) {
+			///echo $relation[1];
+			switch ($relation[0]) {
+				case self::HAS_ONE:
+					echo $relation[1];
+					break;
+				case self::BELONGS_TO:
+					if (!empty($this->_related[$relationName])) {
+						$head .= '<th rowspan="2" style="vertical-align: middle;">belongs to ' . $relation[1] . '</th>';
+						$headerCount++;
+
+						foreach ($this->_related[$relationName]->getFields() as $v) {
+							$headerCount++;
+							$head .= '<th>' . $v . '</th>';
+							$row .= '<td>' . $this->_related[$relationName]->$v . '</td>';
+						}
+					}
+					break;
+			}
+		}
+
+		$head = '<tr><th colspan="' . $headerCount . '">' . get_called_class() . '</th></tr>' . $head;
+
 		return /* 'Data in ' . get_called_class() . ' model instance:<br/>' . */ '<table><tr>' . $head . '</tr><tr>' . $row . '</tr></table>';
 	}
 
