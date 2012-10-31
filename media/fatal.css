@@ -18,6 +18,7 @@ code{padding: 3px;}
 .code, code {background-color: #222; overflow-x: auto; border-radius: 3px;}
 
 .num {margin-left: -50px; width: 50px; background-color: #0A0A0A; color: #888; display: inline-block; text-align: right; padding-right: 3px; margin-right: 3px;}
+code .num{margin-left:0px;}
 
 .line{margin-left: 50px;}
 .line:hover{background-color: #333;}
@@ -30,4 +31,3 @@ code{padding: 3px;}
 
 .highlight{display:block; padding: 3px 0; margin: 3px 0;cursor:pointer;}
 .highlight .num{background-color: transparent;}
-

@@ -242,8 +242,14 @@ class Model {
 	}
 
 	public function __toString() {
-		//return 'Returned data from ' . $this->getTable() . ' results: ' . count($this->_values);
-		return 'Data in ' . get_called_class() . ' model instance: ' . var_export($this->_values, true);
+		$head = '';
+		$row = '';
+		foreach ($this->_values as $k => $v) {
+			$head .= ($k == $this->getPK()) ? '<th><u>' . $k . '</u></th>' : '<th>' . $k . '</th>';
+			$row .= '<td>' . $v . '</td>';
+		}
+
+		return /* 'Data in ' . get_called_class() . ' model instance:<br/>' . */ '<table><tr>' . $head . '</tr><tr>' . $row . '</tr></table>';
 	}
 
 }

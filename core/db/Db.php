@@ -8,6 +8,7 @@
 class Db {
 
 	private static $_init = FALSE;
+	private static $_queries = 0;
 
 	/**
 	 * @var PDO
@@ -44,6 +45,10 @@ class Db {
 		return (bool) self::conn();
 	}
 
+	public static function queries() {
+		return self::$_queries;
+	}
+
 	/**
 	 *
 	 * @param type $sql
@@ -52,6 +57,8 @@ class Db {
 	 * @return Collection 
 	 */
 	public static function query($sql, $skip = '', $assoc = TRUE) {
+		self::$_queries++;
+
 		$result = self::conn()->query($sql);
 		if (!$result) {
 			if (self::conn()->errorCode()) {

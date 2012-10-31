@@ -62,6 +62,19 @@ class Core {
 		throw new Exception("Cannot autoload class " . $class . '[' . $search . ']');
 	}
 
+	public static function genTimeNow() {
+		$arr = explode(" ", TIKORI_STARTED);
+		$_time1 = $arr[1] + $arr[0];
+		$arr = explode(" ", microtime());
+		$_time2 = $arr[1] + $arr[0];
+
+		$_time = round($_time2 - $_time1, 2);
+
+		$_time = ($_time == 0) ? '<0.01' : $_time;
+
+		return $_time;
+	}
+
 }
 
 /**
@@ -130,11 +143,11 @@ class Tikori {
 			$this->response->status(404);
 			$this->response->write($body, true);
 		}/* catch (Exception $e) {
-			$view = new Controller();
-			$body = $view->renderPartial('error.404', array('content' => $e->getMessage()), true);
-			$this->response->status(404);
-			$this->response->write($body, true);
-		}*/
+		  $view = new Controller();
+		  $body = $view->renderPartial('error.404', array('content' => $e->getMessage()), true);
+		  $this->response->status(404);
+		  $this->response->write($body, true);
+		  } */
 
 		list($status, $header, $body) = $this->response->finalize();
 

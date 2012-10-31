@@ -1,4 +1,4 @@
-<h1>Default action for <?php echo Core::app()->cfg('appName') ?></h1>
+<h2>Default action</h2>
 
 <p>Hello, world!</p>
 <p>This is default action for Tikori5 framework.</p>
@@ -9,7 +9,7 @@
 	<?php echo $value; ?><br/>
 <?php endforeach; ?>
 <hr/>
-<strong>Test 2:</strong>
+<h4>Test 2:</h4>
 <br/>
 <?php echo $test2; ?>
 
