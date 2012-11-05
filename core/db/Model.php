@@ -272,7 +272,7 @@ class Model {
 			}
 		}
 
-		$head = '<tr><th colspan="' . $headerCount . '">' . get_called_class() . '</th></tr>' . $head;
+		$head = '<th colspan="' . $headerCount . '">' . get_called_class() . '</th></tr><tr>' . $head;
 
 		return /* 'Data in ' . get_called_class() . ' model instance:<br/>' . */ '<table><tr>' . $head . '</tr><tr>' . $row . '</tr></table>';
 	}
