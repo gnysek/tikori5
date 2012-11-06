@@ -1,0 +1,9 @@
+{
+	"appName": "Unknown application",
+	"host": "http://localhost/",
+	"dblink": "",
+	"dbuser": "",
+	"dbpass": "",
+	"default": "index",
+	"routes": {}
+}

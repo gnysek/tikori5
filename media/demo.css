@@ -76,3 +76,13 @@ tr:hover th{background-color: #ccc; transition: all 0.2s ease-in-out; -webkit-tr
 .clearfix {
 	clear: both;
 }
+
+ul, ol {
+	margin-left: 30px;
+}
+ul {
+	list-style: square;
+}
+ol {
+	list-style: decimal;
+}

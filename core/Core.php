@@ -2,7 +2,7 @@
 
 defined('TIKORI_STARTED') or define('TIKORI_STARTED', microtime());
 defined('TIKORI_DEBUG') or define('TIKORI_DEBUG', false);
-#defined('TIKORI_PATH') or define('TIKORI_PATH', dirname(__FILE__));
+defined('TIKORI_CPATH') or define('TIKORI_CPATH', dirname(__FILE__));
 
 class Core {
 
@@ -17,7 +17,7 @@ class Core {
 
 	/**
 	 * Returns main app
-	 * @return Core
+	 * @return Tikori
 	 */
 	public static function app() {
 		return self::$_app;
@@ -41,7 +41,7 @@ class Core {
 
 	public static function autoload($class) {
 		$search = str_replace('_', '/', $class);
-
+		
 		preg_match('#(.*)/(.*)#i', $search, $match);
 		if (!empty($match)) {
 			$search = strtolower($match[1]) . '/' . $match[2];
@@ -54,23 +54,29 @@ class Core {
 		foreach (Core::app()->autoloadPaths as $dir) {
 			$filename = $dir . '/' . $search;
 			if (file_exists($filename)) {
+//				var_dump($filename);
 				require $filename;
 				return true;
 			}
 		}
 
 		throw new Exception("Cannot autoload class " . $class . '[' . $search . ']');
+		return false;
 	}
 
+	/**
+	 * Gets time from app start to now
+	 * @return string
+	 */
 	public static function genTimeNow() {
-		$arr = explode(" ", TIKORI_STARTED);
+		$arr = explode(' ', TIKORI_STARTED);
 		$_time1 = $arr[1] + $arr[0];
-		$arr = explode(" ", microtime());
+		$arr = explode(' ', microtime());
 		$_time2 = $arr[1] + $arr[0];
 
-		$_time = round($_time2 - $_time1, 2);
+		$_time = round($_time2 - $_time1, 3);
 
-		$_time = ($_time == 0) ? '<0.01' : $_time;
+		$_time = ($_time == 0) ? '&lt; 0.001' : $_time;
 
 		return $_time;
 	}
@@ -88,6 +94,7 @@ class Tikori {
 
 	private $_config = array();
 	public $appDir = '';
+	public $coreDir = '';
 
 	/**
 	 * @var Request 
@@ -110,23 +117,36 @@ class Tikori {
 		$this->init($path, $config);
 	}
 
+	/**
+	 * It runs application. Whole magic is here, abracadabra!
+	 * Echoes results, throw exceptions and 404s, redirects etc.
+	 * 
+	 * @param type $path Path to APP parent dir
+	 * @param string $config config file name without .json, usually 'default'
+	 * @throws RouteNotFoundException
+	 */
 	public function init($path = '', $config = 'default') {
+		// assign reference
 		Core::asssignApp($this);
 
-		if (empty($path)) {
-			$this->appDir = dirname(__FILE__);
-		} else {
-			$this->appDir = $path;
-		}
-
+		// set directories
+		$this->appDir = (empty($path)) ? dirname(__FILE__) : $path;
+		$this->coreDir = TIKORI_CPATH;
+		
 		// register autoloads
-		spl_autoload_register(array('Core', 'autoload'), true);
+		spl_autoload_register(array('Core', 'autoload'));
 		$this->registerAutoloadPaths();
 
 		// register error handlers
 		Error::registerErrors();
 
-		$this->reconfigure(file_get_contents($this->appDir . '/app/config/' . $config . '.json'));
+		$cfgFile = $this->appDir . '/app/config/' . $config . '.json';
+		if (file_exists($cfgFile)) {
+			$this->reconfigure(file_get_contents($cfgFile));
+		} else {
+			$this->reconfigure(file_get_contents($this->coreDir . '/config/config.json'));
+			//throw new Exception('Default config not found');
+		}
 
 		// request
 		$this->request = new Request();
@@ -170,13 +190,21 @@ class Tikori {
 		}
 
 		echo $body;
+		return true;
 	}
 
+	/**
+	 * Registers autoload paths for class searching
+	 */
 	public function registerAutoloadPaths() {
+		// core directory - can be shared on server :)
 		$this->addAutoloadPaths(array(
-			'core',
-			'core/tools/',
-			'core/db/',
+			'/',
+			'tools',
+			'db',
+		), true);
+			// app directory
+		$this->addAutoloadPaths(array(
 			'app',
 			'app/config',
 			'app/controllers',
@@ -185,12 +213,19 @@ class Tikori {
 		));
 	}
 
-	public function addAutoloadPaths($paths) {
+	/**
+	 * Adds paths for autload if you need some another paths than default.
+	 * Usually it should be set in config and not called from app.
+	 * 
+	 * @param string|array $paths Paths to add as array values
+	 * @return type
+	 */
+	public function addAutoloadPaths($paths, $core = false) {
 		if (is_string($paths)) {
 			return $this->addAutoloadPaths(array($paths));
 		} else {
 			foreach ($paths as $k => $dir) {
-				$dir = Core::app()->appDir . '/' . $dir;
+				$dir = rtrim((($core) ? $this->coreDir : $this->appDir) . '/' . $dir, '/');
 				if (!in_array($dir, $this->autoloadPaths)) {
 					$this->autoloadPaths[] = $dir;
 				}
@@ -229,7 +264,8 @@ class Tikori {
 		} else if (is_array($config)) {
 			$this->_config = $config;
 		} else {
-			die('Config errror.');
+			//die('Config errror.');
+			throw new Exception('Config errror');
 		}
 
 		Route::reset();
@@ -252,18 +288,31 @@ class Tikori {
 		$this->getMode();
 	}
 
+	/**
+	 * Get / Set cfg value
+	 * 
+	 * @param string $key
+	 * @param mixed $val
+	 * @return mixed Returns value for key or null if not found.
+	 */
 	public function cfg($key, $val = null) {
 		if ($val === null) {
 			if (array_key_exists($key, $this->_config)) {
 				return $this->_config[$key];
-			} return null;
-		} else {
-			$this->_config[$key] = $val;
+			}
+			return null;
 		}
+		$this->_config[$key] = $val;
+		return $val;
 	}
 
+	/**
+	 * Returns base url for app
+	 * 
+	 * @return string URL, like http://foo.bar/
+	 */
 	public function baseUrl() {
-		return Core::app()->request->env['tikori.base_url'];
+		return (isset(Core::app()->request->env)) ? Core::app()->request->env['tikori.base_url'] : '/';
 	}
 
 }

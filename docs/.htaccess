@@ -12,9 +12,6 @@ RewriteBase /
 	Deny From All
 </Files>
 
-# ingore
-RewriteRule ^docs - [L,NC]
-
 # Protect application and system files from being viewed
 RewriteRule ^(?:class|special|app)\b.* index.php/$0 [L]
 
@@ -24,4 +21,4 @@ RewriteCond %{REQUEST_FILENAME} !-f
 #RewriteCond %{REQUEST_FILENAME} !-d
 
 # Rewrite all other URLs to index.php/URL
-RewriteRule .* index.php/$0 [PT]
+RewriteRule .* docs/index.php/$0 [PT]

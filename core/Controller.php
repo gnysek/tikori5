@@ -41,10 +41,10 @@ class Controller {
 	}
 
 	private function _findViewFile($file) {
-		$paths = array('app/views/', 'core/views/');
+		$paths = array(Core::app()->appDir . '/app/views/', Core::app()->coreDir . '/views/');
 
 		foreach ($paths as $path) {
-			$filename = Core::app()->appDir . '/' . $path . $file . '.php';
+			$filename = $path . $file . '.php';
 			if (file_exists($filename)) {
 				return $filename;
 			}

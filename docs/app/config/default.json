@@ -1,0 +1,9 @@
+{
+	"appName": "Documentation, Tikori 5.0.0-TD",
+	"host": "http://localhost/docs/",
+	"dblink": "",
+	"dbuser": "",
+	"dbpass": "",
+	"default": "index",
+	"routes": {}
+}
