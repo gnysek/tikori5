@@ -18,11 +18,15 @@ class Db {
 	public static function connect() {
 		if (!self::$_init) {
 			self::$_init = TRUE;
+			
+			if (Core::app()->cfg('dblink') == '') {
+				throw new DbError('Database not yet configured!');
+			}
 
 			try {
 				self::$_conn = new PDO(Core::app()->cfg('dblink'), Core::app()->cfg('dbuser'), Core::app()->cfg('dbpass'));
 			} catch (PDOException $e) {
-				throw new DbError('Nie można połączyć z PDO ' . $e->getMessage());
+				throw new DbError('Nie można połączyć z PDO: ' . $e->getMessage());
 				return FALSE;
 			}
 

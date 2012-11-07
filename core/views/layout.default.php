@@ -9,7 +9,7 @@
 		<h1><?php echo Core::app()->cfg('appName'); ?></h1>
 		<?php echo $content ?>
 		<div class="footer">
-			&copy; 2012 - <?php date('Y'); ?> <a href="gnysek.pl" target="_blank">gnysek.pl</a>
+			&copy; 2012 - <?php date('Y'); ?> <a href="http://gnysek.pl" target="_blank">gnysek.pl</a>
 			<div class="pull-right">
 				<?php if (DB::queries() > 0): ?>
 				Database queries: <strong><?php echo DB::queries(); ?></strong> &bull;

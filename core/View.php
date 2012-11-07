@@ -1,6 +1,6 @@
 <?php
 
-class View {
+class XView {
 
 	public function render($filename, $data = array(), $return = false) {
 		$fileFind = false;

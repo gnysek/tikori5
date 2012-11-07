@@ -57,9 +57,12 @@ class Model {
 	 */
 
 	public function find($id) {
-		if (!is_numeric($id))
+		if (!is_numeric($id)) {
 			$id = DB::protect($id);
-		$result = DB::query('SELECT * FROM ' . $this->_table . " WHERE " . $this->_primaryKey . ' = ' . $id);
+		}
+
+		$sql = DbQuery::sql()->select()->from($this->_table)->where(array($this->_primaryKey, '=', $id));
+		$result = $sql->execute();
 		if (count($result) > 1)
 			throw new DbError('Returned more than 1 record - PK wrongly defined?');
 		foreach ($this->_fields as $field) {
@@ -75,9 +78,11 @@ class Model {
 	}
 
 	public function findBy($key, $value) {
-		if (!is_numeric($value))
+		if (!is_numeric($value)) {
 			$value = DB::protect($value);
-		$result = DB::query('SELECT * FROM ' . $this->_table . " WHERE " . $key . ' = ' . $value);
+		}
+		$sql = DbQuery::sql()->select()->from($this->_table)->where(array($key, '=', $value));
+		$result = $sql->execute();
 		$return = array();
 		foreach ($result as $row) {
 			/* @var $row Result */

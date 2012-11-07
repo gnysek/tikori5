@@ -41,7 +41,7 @@ class Core {
 
 	public static function autoload($class) {
 		$search = str_replace('_', '/', $class);
-		
+
 		preg_match('#(.*)/(.*)#i', $search, $match);
 		if (!empty($match)) {
 			$search = strtolower($match[1]) . '/' . $match[2];
@@ -49,12 +49,11 @@ class Core {
 			$search = ucfirst($class);
 		}
 
-		$search .= '.php';
+		$search = '/' . $search . '.php';
 
 		foreach (Core::app()->autoloadPaths as $dir) {
-			$filename = $dir . '/' . $search;
+			$filename = $dir . $search;
 			if (file_exists($filename)) {
-//				var_dump($filename);
 				require $filename;
 				return true;
 			}
@@ -130,9 +129,9 @@ class Tikori {
 		Core::asssignApp($this);
 
 		// set directories
-		$this->appDir = (empty($path)) ? dirname(__FILE__) : $path;
+		$this->appDir = (empty($path)) ? dirname(__FILE__) . '../app' : $path . '/app';
 		$this->coreDir = TIKORI_CPATH;
-		
+
 		// register autoloads
 		spl_autoload_register(array('Core', 'autoload'));
 		$this->registerAutoloadPaths();
@@ -140,7 +139,7 @@ class Tikori {
 		// register error handlers
 		Error::registerErrors();
 
-		$cfgFile = $this->appDir . '/app/config/' . $config . '.json';
+		$cfgFile = $this->appDir . '/config/' . $config . '.json';
 		if (file_exists($cfgFile)) {
 			$this->reconfigure(file_get_contents($cfgFile));
 		} else {
@@ -197,20 +196,20 @@ class Tikori {
 	 * Registers autoload paths for class searching
 	 */
 	public function registerAutoloadPaths() {
-		// core directory - can be shared on server :)
-		$this->addAutoloadPaths(array(
-			'/',
-			'tools',
-			'db',
-		), true);
-			// app directory
-		$this->addAutoloadPaths(array(
-			'app',
-			'app/config',
-			'app/controllers',
-			'app/models',
-			'app/modules',
-		));
+		// core directory - can be shared on server :) false then true
+		for ($i = 0; $i <= 1; $i++) {
+			$this->addAutoloadPaths(array(
+				'controllers',
+				'models',
+				'modules',
+				'db',
+				'helpers',
+				'tikori',
+				), $i);
+		}
+
+//		var_dump($this->autoloadPaths);
+//		die();
 	}
 
 	/**

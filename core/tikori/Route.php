@@ -441,11 +441,11 @@ class Route {
 
 	public function dispatch() {
 		// check for app
-		
-		if (!file_exists(Core::app()->appDir . '/app')) {
+
+		if (!file_exists(Core::app()->appDir)) {
 			throw new Exception('app/ path not found');
 		}
-		
+
 		// get controller first
 		$controller = null;
 		try {
@@ -454,13 +454,13 @@ class Route {
 		} catch (Exception $e) {
 			throw new RouteNotFoundException('Dispatch controller: <er>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</er>: ' . $e->getMessage());
 		}
-		
+
 		try {
 			$reflection = new ReflectionClass($controller);
 			$finalParams = array();
-			
+
 			try {
-			$method = $reflection->getMethod($this->getAction() . 'Action');
+				$method = $reflection->getMethod($this->getAction() . 'Action');
 			} catch (Exception $ref) {
 				throw new RouteNotFoundException('Unknown action');
 			}
@@ -496,6 +496,9 @@ class Route {
 			call_user_func_array(array($controller, $this->getAction() . 'Action'), $finalParams);
 			$response = ob_get_clean();
 			Core::app()->response->body($response);
+		} catch (DbError $e) {
+			ob_get_clean();
+			throw new Exception('DB Error: ' . $e->getMessage());
 		} catch (Exception $e) {
 			ob_get_clean();
 			throw new Exception('Dispatch action: <er>' . $this->getController() . '->' . $this->getAction() . '</er> :<br/>' . $e->getMessage());
