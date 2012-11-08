@@ -1,6 +1,10 @@
 {
 	"appName": "Unknown application",
-	"host": "http://localhost/",
+	//	"host": "http://localhost/",
+	"url": {
+		"addScriptName": false,
+		"pathInsteadGet": false,
+	},
 	"dblink": "",
 	"dbuser": "",
 	"dbpass": "",

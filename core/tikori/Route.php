@@ -125,16 +125,16 @@ class Route {
 		if (!is_string($uri))
 			return;
 
-// The URI should be considered literal except for keys and optional parts
-// Escape everything preg_quote would escape except for : ( ) < >
+		// The URI should be considered literal except for keys and optional parts
+		// Escape everything preg_quote would escape except for : ( ) < >
 		$expression = preg_replace('#' . Route::REGEX_ESCAPE . '#', '\\\\$0', $uri);
 
 		if (strpos($expression, '(') !== FALSE) {
-// Make optional parts of the URI non-capturing and optional
+			// Make optional parts of the URI non-capturing and optional
 			$expression = str_replace(array('(', ')'), array('(?:', ')?'), $expression);
 		}
 
-// Insert default regex for keys
+		// Insert default regex for keys
 		$expression = str_replace(array('<', '>'), array('(?P<', '>' . Route::REGEX_SEGMENT . ')'), $expression);
 
 		if ($regex) {
@@ -144,7 +144,7 @@ class Route {
 				$replace[] = "<$key>$value";
 			}
 
-// Replace the default regex with the user-specified regex
+			// Replace the default regex with the user-specified regex
 			$expression = str_replace($search, $replace, $expression);
 		}
 
@@ -160,13 +160,13 @@ class Route {
 	 */
 	public static function process_uri($uri, $routes = NULL) {
 		$uri = trim($uri, '/');
-// Load routes
+		// Load routes
 		$routes = (empty($routes)) ? Route::all() : $routes;
 		$params = NULL;
 
 		/* @var $route Route */
 		foreach ($routes as $name => $route) {
-// We found something suitable
+		// We found something suitable
 			if ($params = $route->matches($uri)) {
 				$route->params = $params;
 				return /* clone */ $route;
@@ -441,7 +441,6 @@ class Route {
 
 	public function dispatch() {
 		// check for app
-
 		if (!file_exists(Core::app()->appDir)) {
 			throw new Exception('app/ path not found');
 		}

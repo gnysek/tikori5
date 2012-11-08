@@ -18,19 +18,19 @@ class Request {
 
 	public static function mock() {
 		return array(
-				'REQUEST_METHOD' => 'GET',
-				'SCRIPT_NAME' => '',
-				'PATH_INFO' => '',
-				'QUERY_STRING' => '',
-				'SERVER_NAME' => 'localhost',
-				'SERVER_PORT' => 80,
-				'ACCEPT' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-				'ACCEPT_LANGUAGE' => 'en-US,en;q=0.8',
-				'ACCEPT_CHARSET' => 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-				'USER_AGENT' => 'Tikori Framework',
-				'REMOTE_ADDR' => '127.0.0.1',
-				'tikori.url_scheme' => 'http',
-				'route' => array(),
+			'REQUEST_METHOD' => 'GET',
+			'SCRIPT_NAME' => '',
+			'PATH_INFO' => '',
+			'QUERY_STRING' => '',
+			'SERVER_NAME' => 'localhost',
+			'SERVER_PORT' => 80,
+			'ACCEPT' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+			'ACCEPT_LANGUAGE' => 'en-US,en;q=0.8',
+			'ACCEPT_CHARSET' => 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+			'USER_AGENT' => 'Tikori Framework',
+			'REMOTE_ADDR' => '127.0.0.1',
+			'tikori.url_scheme' => 'http',
+			'route' => array(),
 //			'tikori.input' => ''
 		);
 	}
@@ -113,6 +113,16 @@ class Request {
 		}
 		$env['SCRIPT_NAME'] = rtrim($env['SCRIPT_NAME'], '/');
 		$env['PATH_INFO'] = '/' . ltrim($env['PATH_INFO'], '/');
+
+		$env['tikori.path_info'] = $env['PATH_INFO'];
+
+		$cfg = Core::app()->cfg('url');
+		if ($cfg['pathInsteadGet'] and !empty($_GET['d'])) {
+			$env['PATH_INFO'] = '/' . $_GET['d'];
+			foreach (array_slice($_GET, 1) as $key => $val) {
+				$env['PATH_INFO'] .= '/' . $key . '/' . $val;
+			}
+		}
 
 		//The portion of the request URI following the '?'
 		$env['QUERY_STRING'] = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '';

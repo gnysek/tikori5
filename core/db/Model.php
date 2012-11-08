@@ -102,6 +102,11 @@ class Model {
 		return $this;
 	}
 
+	// eager
+	public function with($with) {
+		
+	}
+
 	/**	 * */
 	public function delete() {
 		

@@ -259,7 +259,12 @@ class Tikori {
 	 */
 	public function reconfigure($config) {
 		if (is_string($config)) {
-			$this->_config = json_decode($config, true);
+			$decoded = json_decode($config, true);
+			if ($decoded == null) {
+				throw new Exception('Config isn\'t valid JSON file.');
+			} else {
+				$this->_config = $decoded;
+			}
 		} else if (is_array($config)) {
 			$this->_config = $config;
 		} else {
