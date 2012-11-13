@@ -45,8 +45,8 @@ class Error {
 		}
 
 		$view = new Controller();
-		$e = Core::app()->cfg('env');
-
+		$e = Core::app()->cfg()->env;
+		
 		$files = array();
 
 		foreach (array_reverse($exception->getTrace()) as $trace) {
@@ -64,13 +64,13 @@ class Error {
 			'message' => $exception->getMessage(),
 			'file' => $exception->getFile(),
 			'line' => $exception->getLine(),
-			'reqMethod' => $e['REQUEST_METHOD'],
-			'reqPath' => $e['PATH_INFO'],
+			'reqMethod' => (empty($e)) ? '' : $e['REQUEST_METHOD'],
+			'reqPath' => (empty($e)) ? '' : $e['PATH_INFO'],
 			'files' => $files,
 			), true);
 
 		echo $body;
-		exit();
+		exit;
 	}
 
 	/**

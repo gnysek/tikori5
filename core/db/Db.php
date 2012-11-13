@@ -18,13 +18,13 @@ class Db {
 	public static function connect() {
 		if (!self::$_init) {
 			self::$_init = TRUE;
-			
-			if (Core::app()->cfg('dblink') == '') {
+
+			if (Core::app()->cfg()->db->dblink == '') {
 				throw new DbError('Database not yet configured!');
 			}
 
 			try {
-				self::$_conn = new PDO(Core::app()->cfg('dblink'), Core::app()->cfg('dbuser'), Core::app()->cfg('dbpass'));
+				self::$_conn = new PDO(Core::app()->cfg()->db->dblink, Core::app()->cfg()->db->dbuser, Core::app()->cfg()->db->dbpass);
 			} catch (PDOException $e) {
 				throw new DbError('Nie można połączyć z PDO: ' . $e->getMessage());
 				return FALSE;
@@ -61,6 +61,8 @@ class Db {
 	 * @return Collection 
 	 */
 	public static function query($sql, $skip = '', $assoc = TRUE) {
+		Log::addLog('SQL QUERY: <tt>' . substr($sql, 0, 30) . '&hellip;</tt>');
+
 		self::$_queries++;
 
 		$result = self::conn()->query($sql);

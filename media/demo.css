@@ -6,13 +6,13 @@ body{
 	color: #333;
 }
 
-body, pre {
+body, pre, code, tt {
 	font-family: 'Arial', sans-serif;
 	font-size: 15px;
 	line-height: 22px;
 }
 
-pre, code {
+pre, code, tt {
 	font-family: 'Consolas', monospace;
 }
 

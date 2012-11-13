@@ -116,8 +116,7 @@ class Request {
 
 		$env['tikori.path_info'] = $env['PATH_INFO'];
 
-		$cfg = Core::app()->cfg('url');
-		if ($cfg['pathInsteadGet'] and !empty($_GET['d'])) {
+		if (Core::app()->cfg()->url->pathInsteadGet and !empty($_GET['d'])) {
 			$env['PATH_INFO'] = '/' . $_GET['d'];
 			foreach (array_slice($_GET, 1) as $key => $val) {
 				$env['PATH_INFO'] .= '/' . $key . '/' . $val;
@@ -164,7 +163,8 @@ class Request {
 		$env['tikori.base_url'] = $env['tikori.url_scheme'] . '://' . $env['tikori.root_path'] . '/';
 
 		$this->env = $env;
-		Core::app()->cfg('env', $env);
+//		Core::app()->cfg('env', $env);
+		Core::app()->cfg()->env = $env;
 	}
 
 	public function getRouterPath() {

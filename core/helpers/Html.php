@@ -11,15 +11,13 @@ class Html {
 			return self::url(array($url));
 		}
 
-		$cfg = Core::app()->cfg('url');
-
 		$script = '';
-		if (!empty($cfg['addScriptName']) and $cfg['addScriptName'] == true) {
+		if (!empty(Core::app()->cfg()->url->addScriptName) and Core::app()->cfg()->url->addScriptName == true) {
 			$script = 'index.php';
 		}
 		$addon = '';
 		$path = '';
-		if (!empty($cfg['pathInsteadGet']) and $cfg['pathInsteadGet'] == true) {
+		if (!empty(Core::app()->cfg()->url->pathInsteadGet) and Core::app()->cfg()->url->pathInsteadGet == true) {
 			$addon = '?p=';
 			foreach (array_slice($url, 1) as $key => $entry) {
 				$path .= '&' . $key . '=' . $entry;

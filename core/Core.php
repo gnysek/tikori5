@@ -59,7 +59,7 @@ class Core {
 			}
 		}
 
-		throw new Exception("Cannot autoload class " . $class . '[' . $search . ']');
+		throw new Exception("Cannot autoload class " . $class . ' [' . $search . ']');
 		return false;
 	}
 
@@ -73,9 +73,9 @@ class Core {
 		$arr = explode(' ', microtime());
 		$_time2 = $arr[1] + $arr[0];
 
-		$_time = round($_time2 - $_time1, 3);
+		$_time = round($_time2 - $_time1, 4);
 
-		$_time = ($_time == 0) ? '&lt; 0.001' : $_time;
+		$_time = ($_time == 0) ? '&lt; 0.0001' : $_time;
 
 		return $_time;
 	}
@@ -91,6 +91,9 @@ class Core {
  */
 class Tikori {
 
+	/**
+	 * @var Config
+	 */
 	private $_config = array();
 	public $appDir = '';
 	public $coreDir = '';
@@ -135,22 +138,31 @@ class Tikori {
 		// register autoloads
 		spl_autoload_register(array('Core', 'autoload'));
 		$this->registerAutoloadPaths();
+		
+		Log::addLog('Registered autoload');
 
 		// register error handlers
 		Error::registerErrors();
+		Log::addLog('Registered errors');
+
+		$this->defaultCfg();
 
 		$cfgFile = $this->appDir . '/config/' . $config . '.json';
 		if (file_exists($cfgFile)) {
 			$this->reconfigure(file_get_contents($cfgFile));
-		} else {
-			$this->reconfigure(file_get_contents($this->coreDir . '/config/config.json'));
-			//throw new Exception('Default config not found');
+//		} else {
+//			$this->reconfigure(file_get_contents($this->coreDir . '/config/config.json'));
+//			throw new Exception('Default config not found');
 		}
+		Log::addLog('Reconfigured');
 
 		// request
 		$this->request = new Request();
+		Log::addLog('Request created');
 		$this->response = new Response();
+		Log::addLog('Response created');
 		$this->route = Route::process_uri($this->request->getRouterPath());
+		Log::addLog('Uri processed');
 
 		try {
 			if ($this->route == null)
@@ -167,8 +179,11 @@ class Tikori {
 		  $this->response->status(404);
 		  $this->response->write($body, true);
 		  } */
+		
+		Log::addLog('Route handled');
 
 		list($status, $header, $body) = $this->response->finalize();
+		Log::addLog('Response finalized');
 
 		//Send headers
 		if (headers_sent() === false) {
@@ -189,6 +204,11 @@ class Tikori {
 		}
 
 		echo $body;
+		
+		Log::addLog('Finishing application');
+		if ($this->mode != Core::MODE_PROD) {
+			echo Log::getLogs();
+		}
 		return true;
 	}
 
@@ -205,6 +225,7 @@ class Tikori {
 				'db',
 				'helpers',
 				'tikori',
+				'',
 				), $i);
 		}
 
@@ -237,7 +258,7 @@ class Tikori {
 	 * @return int (Core::MODE_DEBUG, Core::MODE_DEV, Core::MODE_PROD)
 	 */
 	public function getMode() {
-		if (!isset($this->_config['mode'])) {
+		if (!isset($this->cfg()->mode)) {
 			if (isset($_ENV['TIKORI_MODE'])) {
 				$this->mode = $_ENV['TIKORI_MODE'];
 			} else {
@@ -245,12 +266,20 @@ class Tikori {
 				if ($envMode !== false) {
 					$this->mode = $envMode;
 				} else {
-					$this->mode = (!empty($this->_config['mode'])) ? $this->_config['mode'] : Core::MODE_DEV;
+					$this->mode = (!empty($this->cfg()->mode)) ? $this->cfg()->mode : Core::MODE_DEV;
 				}
 			}
 		}
 
 		return $this->mode;
+	}
+
+	public function defaultCfg() {
+		$this->_config = new Config(array(
+				'appname' => 'Unknown application',
+				'url' => DefC_Url::getDefValues(),
+				'db' => DefC_Db::getDefValues(),
+			));
 	}
 
 	/**
@@ -263,10 +292,14 @@ class Tikori {
 			if ($decoded == null) {
 				throw new Exception('Config isn\'t valid JSON file.');
 			} else {
-				$this->_config = $decoded;
+				foreach ($decoded as $key => $value) {
+					$this->_config->reconfigure($key, $value);
+				}
 			}
 		} else if (is_array($config)) {
-			$this->_config = $config;
+			foreach ($config as $key => $value) {
+				$this->_config->reconfigure($key, $value);
+			}
 		} else {
 			//die('Config errror.');
 			throw new Exception('Config errror');
@@ -274,7 +307,7 @@ class Tikori {
 
 		Route::reset();
 		// cfg route registers
-		foreach ($this->_config['routes'] as $key => $route) {
+		foreach ($this->cfg()->routes as $key => $route) {
 			Route::set($key, $route['expr'], (!empty($route['params'])) ? $route['params'] : array())->defaults($route['defaults']);
 		}
 		// default routes
@@ -293,22 +326,29 @@ class Tikori {
 	}
 
 	/**
-	 * Get / Set cfg value
-	 * 
-	 * @param string $key
-	 * @param mixed $val
-	 * @return mixed Returns value for key or null if not found.
+	 * @return Config
 	 */
-	public function cfg($key, $val = null) {
-		if ($val === null) {
-			if (array_key_exists($key, $this->_config)) {
-				return $this->_config[$key];
-			}
-			return null;
-		}
-		$this->_config[$key] = $val;
-		return $val;
+	public function cfg() {
+		return $this->_config;
 	}
+
+//	/**
+//	 * Get / Set cfg value
+//	 * 
+//	 * @param string $key
+//	 * @param mixed $val
+//	 * @return mixed Returns value for key or null if not found.
+//	 */
+//	public function cfg($key, $val = null) {
+//		if ($val === null) {
+//			if (array_key_exists($key, $this->_config)) {
+//				return $this->_config[$key];
+//			}
+//			return null;
+//		}
+//		$this->_config[$key] = $val;
+//		return $val;
+//	}
 
 	/**
 	 * Returns base url for app
