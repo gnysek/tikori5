@@ -1,9 +1,17 @@
 @import url('reset.css');
 
 body{
-	max-width: 960px;
-	margin: 25px auto;
 	color: #333;
+	background-color: #ddd;
+}
+
+#layout{
+	max-width: 960px;
+	margin: 0px auto;
+}
+#inner-layout{
+	padding: 25px 5px 5px 5px;
+	background-color: white;
 }
 
 body, pre, code, tt {
@@ -57,7 +65,6 @@ tr:hover th{background-color: #ccc; transition: all 0.2s ease-in-out; -webkit-tr
 	color: white;
 	background-color: #666;
 	padding: 5px;
-	margin-top: 5px;
 	border-top: 1px solid #444;
 	border-radius: 0 0 3px 3px;
 }

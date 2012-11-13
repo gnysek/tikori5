@@ -1,5 +1,30 @@
 <?php
 
+class TconfigAlt {
+
+	public function get($item, $default = null) {
+		
+	}
+
+	public function set($item, $value, $protect = false) {
+		
+	}
+
+	public function delete($item) {
+		
+	}
+
+	//load('x') loads x.json, load('forum:x') loads modules/forum/config/x.json :)
+	public function load($file, $reload = false) {
+		
+	}
+
+	public function save($file, $item) {
+		
+	}
+
+}
+
 /**
  * Returns cfg data
  * @package tikori

@@ -6,20 +6,24 @@
 		<link rel="stylesheet" type="text/css" href="/media/demo.css"/>
 	</head>
 	<body>
-		<h1><?php echo Core::app()->cfg()->appName; ?></h1>
-		<?php echo $content ?>
-		<div class="footer">
-			&copy; 2012 - <?php date('Y'); ?> <a href="http://gnysek.pl" target="_blank">gnysek.pl</a>
-			<div class="pull-right">
-				<?php if (DB::queries() > 0): ?>
-					Database queries: <strong><?php echo DB::queries(); ?></strong> &bull;
-				<?php endif; ?>
-				Generated in: <strong><?php echo Core::genTimeNow(); ?></strong>s.
+		<div id="layout">
+			<div id="inner-layout">
+				<h1><?php echo Core::app()->cfg()->appName; ?></h1>
+				<?php echo $content ?>
 			</div>
-		</div>
+			<div class="footer">
+				&copy; 2012 - <?php date('Y'); ?> <a href="http://gnysek.pl" target="_blank">gnysek.pl</a>
+				<div class="pull-right">
+					<?php if (DB::queries() > 0): ?>
+						Database queries: <strong><?php echo DB::queries(); ?></strong> &bull;
+					<?php endif; ?>
+					Generated in: <strong><?php echo Core::genTimeNow(); ?></strong>s.
+				</div>
+			</div>
 
-		<?php if (Core::app()->mode != Core::MODE_PROD): ?>
-			<?php $this->renderPartial('debug.default'); ?>
-		<?php endif; ?>
+			<?php if (Core::app()->mode != Core::MODE_PROD): ?>
+				<?php $this->renderPartial('debug.default'); ?>
+			<?php endif; ?>
+		</div>
 	</body>
 </html>
