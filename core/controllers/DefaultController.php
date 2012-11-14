@@ -12,7 +12,17 @@ class DefaultController extends Controller {
 	}
 
 	public function oneAction($id = 0) {
-		echo 'one';
+		var_dump(Core::app()->cfg('test'));
+		var_dump(Core::app()->cfg('test2/x/y'));
+		echo '<h1>test</h1>';
+		var_dump(Core::app()->cfg()->set('test', 12));
+		var_dump(Core::app()->cfg()->set('test2/x/y', 15));
+		var_dump(Core::app()->cfg()->set('test2/x/y', 17));
+		echo '<h1>after</h1>';
+		var_dump(Core::app()->cfg('test'));
+		var_dump(Core::app()->cfg('test2/x/y'));
+		echo '<h1>all</h1>';
+		var_dump(Core::app()->cfg(''));
 	}
 
 	public function twoAction($id) {

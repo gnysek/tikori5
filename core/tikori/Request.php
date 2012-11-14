@@ -165,7 +165,7 @@ class Request {
 		$this->env = $env;
 //		Core::app()->cfg('env', $env);
 //		Core::app()->cfg()->env = $env;
-		return Core::app()->cfg()->set('env', $env);
+		return Core::app()->cfg()->set('env', $env, true);
 	}
 
 	public function getRouterPath() {
