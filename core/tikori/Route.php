@@ -21,6 +21,25 @@ class Route {
 	 */
 	protected static $_routes = array();
 
+	public static function reconfigure() {
+		Route::reset();
+		// cfg route registers
+		foreach (Core::app()->cfg('routes') as $key => $route) {
+			Route::set($key, $route['expr'], (!empty($route['params'])) ? $route['params'] : array())->defaults($route['defaults']);
+		}
+		// default routes
+		Route::set('tikori-admin', '<directory>(/<controller>(/<action>(/<id>)))(.html)', array('directory' => 'admin', 'id' => '.+'))
+			->defaults(array(
+				'controller' => 'admin',
+				'action' => 'index',
+			));
+		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))(.html)')
+			->defaults(array(
+				'controller' => 'default',
+				'action' => 'index',
+			));
+	}
+
 	/**
 	 * Stores a named route and returns it. The "action" will always be set to
 	 * "index" if it is not defined.
@@ -166,7 +185,7 @@ class Route {
 
 		/* @var $route Route */
 		foreach ($routes as $name => $route) {
-		// We found something suitable
+			// We found something suitable
 			if ($params = $route->matches($uri)) {
 				$route->params = $params;
 				return /* clone */ $route;

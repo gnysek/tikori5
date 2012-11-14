@@ -12,12 +12,12 @@ class Html {
 		}
 
 		$script = '';
-		if (!empty(Core::app()->cfg()->url->addScriptName) and Core::app()->cfg()->url->addScriptName == true) {
+		if (Core::app()->cfg('url/addScriptName') == true) {
 			$script = 'index.php';
 		}
 		$addon = '';
 		$path = '';
-		if (!empty(Core::app()->cfg()->url->pathInsteadGet) and Core::app()->cfg()->url->pathInsteadGet == true) {
+		if (Core::app()->cfg('url/pathInsteadGet') == true) {
 			$addon = '?p=';
 			foreach (array_slice($url, 1) as $key => $entry) {
 				$path .= '&' . $key . '=' . $entry;

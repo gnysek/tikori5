@@ -19,12 +19,12 @@ class Db {
 		if (!self::$_init) {
 			self::$_init = TRUE;
 
-			if (Core::app()->cfg()->db->dblink == '') {
+			if (Core::app()->cfg('db/dblink') === null) {
 				throw new DbError('Database not yet configured!');
 			}
 
 			try {
-				self::$_conn = new PDO(Core::app()->cfg()->db->dblink, Core::app()->cfg()->db->dbuser, Core::app()->cfg()->db->dbpass);
+				self::$_conn = new PDO(Core::app()->cfg('db/dblink'), Core::app()->cfg('db/dbuser'), Core::app()->cfg('db/dbpass'));
 			} catch (PDOException $e) {
 				throw new DbError('Nie można połączyć z PDO: ' . $e->getMessage());
 				return FALSE;

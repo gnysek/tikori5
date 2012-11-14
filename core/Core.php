@@ -94,7 +94,7 @@ class Tikori {
 	/**
 	 * @var Config
 	 */
-	private $_config = array();
+	private $_config = null;
 	public $appDir = '';
 	public $coreDir = '';
 
@@ -107,7 +107,7 @@ class Tikori {
 	 * @var Response
 	 */
 	public $response = null;
-	public $mode = 0;
+	public $mode = null;
 	public $autoloadPaths = array();
 
 	/**
@@ -138,22 +138,16 @@ class Tikori {
 		// register autoloads
 		spl_autoload_register(array('Core', 'autoload'));
 		$this->registerAutoloadPaths();
-		
+
 		Log::addLog('Registered autoload');
 
 		// register error handlers
 		Error::registerErrors();
 		Log::addLog('Registered errors');
 
-		$this->defaultCfg();
-
-		$cfgFile = $this->appDir . '/config/' . $config . '.json';
-		if (file_exists($cfgFile)) {
-			$this->reconfigure(file_get_contents($cfgFile));
-//		} else {
-//			$this->reconfigure(file_get_contents($this->coreDir . '/config/config.json'));
-//			throw new Exception('Default config not found');
-		}
+//		$this->defaultCfg();
+		
+		$this->reconfigure($config);
 		Log::addLog('Reconfigured');
 
 		// request
@@ -161,6 +155,7 @@ class Tikori {
 		Log::addLog('Request created');
 		$this->response = new Response();
 		Log::addLog('Response created');
+		Route::reconfigure();
 		$this->route = Route::process_uri($this->request->getRouterPath());
 		Log::addLog('Uri processed');
 
@@ -179,9 +174,10 @@ class Tikori {
 		  $this->response->status(404);
 		  $this->response->write($body, true);
 		  } */
-		
+
 		Log::addLog('Route handled');
 
+		Log::addLog('Finalizing response');
 		list($status, $header, $body) = $this->response->finalize();
 		Log::addLog('Response finalized');
 
@@ -204,7 +200,7 @@ class Tikori {
 		}
 
 		echo $body;
-		
+
 		Log::addLog('Finishing application');
 		if ($this->mode != Core::MODE_PROD) {
 			echo Log::getLogs();
@@ -219,13 +215,13 @@ class Tikori {
 		// core directory - can be shared on server :) false then true
 		for ($i = 0; $i <= 1; $i++) {
 			$this->addAutoloadPaths(array(
+				'',
 				'controllers',
 				'models',
 				'modules',
 				'db',
 				'helpers',
 				'tikori',
-				'',
 				), $i);
 		}
 
@@ -258,7 +254,7 @@ class Tikori {
 	 * @return int (Core::MODE_DEBUG, Core::MODE_DEV, Core::MODE_PROD)
 	 */
 	public function getMode() {
-		if (!isset($this->cfg()->mode)) {
+		if (/* $this->cfg('mode') */ $this->mode === null) {
 			if (isset($_ENV['TIKORI_MODE'])) {
 				$this->mode = $_ENV['TIKORI_MODE'];
 			} else {
@@ -266,7 +262,7 @@ class Tikori {
 				if ($envMode !== false) {
 					$this->mode = $envMode;
 				} else {
-					$this->mode = (!empty($this->cfg()->mode)) ? $this->cfg()->mode : Core::MODE_DEV;
+					$this->mode = ($this->cfg('mode') === null) ? Core::MODE_DEV : $this->cfg('mode');
 				}
 			}
 		}
@@ -286,50 +282,24 @@ class Tikori {
 	 * Reconfigures application using json string or array
 	 * @param array|string $config
 	 */
-	public function reconfigure($config) {
-		if (is_string($config)) {
-			$decoded = json_decode($config, true);
-			if ($decoded == null) {
-				throw new Exception('Config isn\'t valid JSON file.');
-			} else {
-				foreach ($decoded as $key => $value) {
-					$this->_config->reconfigure($key, $value);
-				}
-			}
-		} else if (is_array($config)) {
-			foreach ($config as $key => $value) {
-				$this->_config->reconfigure($key, $value);
-			}
-		} else {
-			//die('Config errror.');
-			throw new Exception('Config errror');
-		}
-
-		Route::reset();
-		// cfg route registers
-		foreach ($this->cfg()->routes as $key => $route) {
-			Route::set($key, $route['expr'], (!empty($route['params'])) ? $route['params'] : array())->defaults($route['defaults']);
-		}
-		// default routes
-		Route::set('tikori-admin', '<directory>(/<controller>(/<action>(/<id>)))(.html)', array('directory' => 'admin', 'id' => '.+'))
-			->defaults(array(
-				'controller' => 'admin',
-				'action' => 'index',
-			));
-		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))(.html)')
-			->defaults(array(
-				'controller' => 'default',
-				'action' => 'index',
-			));
-
+	public function reconfigure($config) {		
+		$this->cfg()->load($config);
 		$this->getMode();
 	}
 
 	/**
 	 * @return Config
 	 */
-	public function cfg() {
-		return $this->_config;
+	public function cfg($item = null, $default = null) {
+		if ($this->_config === null) {
+			$this->_config = new Config();
+		}
+		
+		if ($item === null) {
+			return $this->_config;
+		} else {
+			return $this->_config->get($item, $default);
+		}
 	}
 
 //	/**

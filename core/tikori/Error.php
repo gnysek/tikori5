@@ -45,7 +45,7 @@ class Error {
 		}
 
 		$view = new Controller();
-		$e = Core::app()->cfg()->env;
+		$e = Core::app()->cfg('env');
 		
 		$files = array();
 
