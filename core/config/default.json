@@ -1,16 +1,15 @@
 {
 	"appName": "Unknown application",
-	//	"host": "http://localhost/",
 	"default": "index",
 	"url": {
-		"addScriptName": false,
-		"pathInsteadGet": false,
+		"addScriptName": true,
+		"pathInsteadGet": true
 	},
 	"db": {
 		"dblink": "",
 		"dbuser": "",
 		"dbpass": "",
-		"dbprefix": "",
+		"dbprefix": ""
 	},
 	"routes": {}
 }

@@ -115,13 +115,17 @@ class Request {
 		$env['PATH_INFO'] = '/' . ltrim($env['PATH_INFO'], '/');
 
 		$env['tikori.path_info'] = $env['PATH_INFO'];
-
+		
+//		var_dump(Core::app()->cfg('url/pathInsteadGet'));
+		
 		if (Core::app()->cfg('url/pathInsteadGet') === true and !empty($_GET['d'])) {
 			$env['PATH_INFO'] = '/' . $_GET['d'];
 			foreach (array_slice($_GET, 1) as $key => $val) {
 				$env['PATH_INFO'] .= '/' . $key . '/' . $val;
 			}
 		}
+		
+//		var_dump($env['PATH_INFO']);
 
 		//The portion of the request URI following the '?'
 		$env['QUERY_STRING'] = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '';
@@ -160,6 +164,11 @@ class Request {
 //		}
 		preg_match('#(.*)/(.*?)\.php#i', $env['SCRIPT_NAME'], $match);
 		$env['tikori.root_path'] = (count($match) == 3) ? $env['HOST'] . $match[1] : $env['HOST'];
+		if (Core::app()->cfg('url/addScriptName') === true) {
+			$path = ((count($match) != 3)) ? $env['SCRIPT_NAME'] : dirname($env['SCRIPT_NAME']);
+			$env['tikori.root_path'] = $env['HOST'] . $path;
+		}
+
 		$env['tikori.base_url'] = $env['tikori.url_scheme'] . '://' . $env['tikori.root_path'] . '/';
 
 		$this->env = $env;

@@ -460,9 +460,10 @@ class Route {
 
 	public function dispatch() {
 		// check for app
-		if (!file_exists(Core::app()->appDir)) {
-			throw new Exception('app/ path not found');
-		}
+		# don't need to check that anymore, default controller can be in core
+//		if (!file_exists(Core::app()->appDir)) {
+//			throw new Exception('app/ path not found');
+//		}
 
 		// get controller first
 		$controller = null;

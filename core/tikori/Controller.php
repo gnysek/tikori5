@@ -41,7 +41,7 @@ class Controller {
 	}
 
 	private function _findViewFile($file) {
-		$paths = array(Core::app()->appDir . '/app/views/', Core::app()->coreDir . '/views/');
+		$paths = array(Core::app()->appDir . '/views/', Core::app()->coreDir . '/views/');
 
 		foreach ($paths as $path) {
 			$filename = $path . $file . '.php';
