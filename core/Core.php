@@ -326,7 +326,9 @@ class Tikori {
 	 * @return string URL, like http://foo.bar/
 	 */
 	public function baseUrl() {
-		return (isset(Core::app()->request->env)) ? Core::app()->request->env['tikori.base_url'] : '/';
+		//return (isset(Core::app()->request->env)) ? Core::app()->request->env['tikori.base_url'] : '/';
+		
+		return (!empty($this->request)) ? $this->request->getBaseUrl(true) : '/';
 	}
 
 }

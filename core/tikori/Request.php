@@ -15,6 +15,9 @@ class Request {
 	const METHOD_OVERRIDE = '_METHOD';
 
 	public $env = array();
+	private $_scriptUrl = null;
+	private $_baseUrl = null;
+	private $_hostInfo = null;
 
 	public static function mock() {
 		return array(
@@ -115,18 +118,17 @@ class Request {
 		$env['PATH_INFO'] = '/' . ltrim($env['PATH_INFO'], '/');
 
 		$env['tikori.path_info'] = $env['PATH_INFO'];
-		
+
 //		var_dump(Core::app()->cfg('url/pathInsteadGet'));
-		
+
 		if (Core::app()->cfg('url/pathInsteadGet') === true and !empty($_GET['d'])) {
 			$env['PATH_INFO'] = '/' . $_GET['d'];
 			foreach (array_slice($_GET, 1) as $key => $val) {
 				$env['PATH_INFO'] .= '/' . $key . '/' . $val;
 			}
 		}
-		
-//		var_dump($env['PATH_INFO']);
 
+//		var_dump($env['PATH_INFO']);
 		//The portion of the request URI following the '?'
 		$env['QUERY_STRING'] = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '';
 
@@ -184,6 +186,49 @@ class Request {
 
 	public function getPost($val) {
 		return (!empty($_POST[$val])) ? $_POST[$val] : null;
+	}
+
+	public function getBaseUrl($absolute = false) {
+		if ($this->_baseUrl === null)
+			$this->_baseUrl = rtrim(dirname($this->getScriptUrl()), '\\/');
+
+		return $absolute ? $this->getHostInfo() . $this->_baseUrl : $this->_baseUrl;
+	}
+
+	public function getHostInfo() {
+		if ($this->_hostInfo === null) {
+			if (isset($_SERVER['HTTP_HOST']))
+				$this->_hostInfo = $this->env['tikori.url_scheme'] . '://' . $_SERVER['HTTP_HOST'];
+			else {
+				$this->_hostInfo = $this->env['tikori.url_scheme'] . '://' . $_SERVER['SERVER_NAME'];
+			}
+		}
+
+		return $this->_hostInfo;
+	}
+
+	/**
+	 * Returns the relative URL of the entry script.
+	 * The implementation of this method referenced Zend_Controller_Request_Http in Zend Framework.
+	 * @return string the relative URL of the entry script.
+	 */
+	public function getScriptUrl() {
+		if ($this->_scriptUrl === null) {
+			$scriptName = basename($_SERVER['SCRIPT_FILENAME']);
+			if (basename($_SERVER['SCRIPT_NAME']) === $scriptName)
+				$this->_scriptUrl = $_SERVER['SCRIPT_NAME'];
+			else if (basename($_SERVER['PHP_SELF']) === $scriptName)
+				$this->_scriptUrl = $_SERVER['PHP_SELF'];
+			else if (isset($_SERVER['ORIG_SCRIPT_NAME']) && basename($_SERVER['ORIG_SCRIPT_NAME']) === $scriptName)
+				$this->_scriptUrl = $_SERVER['ORIG_SCRIPT_NAME'];
+			else if (($pos = strpos($_SERVER['PHP_SELF'], '/' . $scriptName)) !== false)
+				$this->_scriptUrl = substr($_SERVER['SCRIPT_NAME'], 0, $pos) . '/' . $scriptName;
+			else if (isset($_SERVER['DOCUMENT_ROOT']) && strpos($_SERVER['SCRIPT_FILENAME'], $_SERVER['DOCUMENT_ROOT']) === 0)
+				$this->_scriptUrl = str_replace('\\', '/', str_replace($_SERVER['DOCUMENT_ROOT'], '', $_SERVER['SCRIPT_FILENAME']));
+			else
+				throw new Exception('TRequest is unable to determine the entry script URL.');
+		}
+		return $this->_scriptUrl;
 	}
 
 }
