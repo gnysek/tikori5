@@ -464,7 +464,6 @@ class Route {
 //		if (!file_exists(Core::app()->appDir)) {
 //			throw new Exception('app/ path not found');
 //		}
-
 		// get controller first
 		$controller = null;
 		try {
@@ -486,11 +485,23 @@ class Route {
 			/* @var $method ReflectionMethod */
 			if ($method->getNumberOfRequiredParameters() > 0) {
 //				var_dump($method->getNumberOfRequiredParameters());
-				if (empty($this->params['id'])) {
-					throw new RouteNotFoundException('Not enough arguments');
-				} else {
-					$finalParams[] = $this->params['id'];
+				
+				foreach($method->getParameters() as $paramObject) {
+					/* @var $paramObject ReflectionParameter */
+					
+					if ($paramObject->isOptional() === false and empty($this->params[ $paramObject->name ])) {
+						throw new RouteNotFoundException('Not enough arguments or wrong argument name ['  .$paramObject->name .']');
+					}
+					
+					$finalParams[] = (empty($this->params[ $paramObject->name ])) ? null : $this->params[ $paramObject->name ];
 				}
+//				var_dump($this->params);
+//				var_dump($method->getParameters());
+//				if (empty($this->params['id'])) {
+//					throw new RouteNotFoundException('Not enough arguments');
+//				} else {
+//					$finalParams[] = $this->params['id'];
+//				}
 			}
 
 //			$params = explode('/', $);
@@ -511,9 +522,14 @@ class Route {
 //				}
 //			}
 
+			TLog::addLog('Calling controller: <tt>' . $this->getController() . '::' . $this->getAction() . '</tt>');
+
 			ob_start();
 			call_user_func_array(array($controller, $this->getAction() . 'Action'), $finalParams);
 			$response = ob_get_clean();
+
+			TLog::addLog('Owerwriting body using last controller action');
+
 			Core::app()->response->body($response);
 		} catch (DbError $e) {
 			ob_get_clean();

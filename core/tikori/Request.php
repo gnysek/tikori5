@@ -13,6 +13,7 @@ class Request {
 	const METHOD_DELETE = 'DELETE';
 	const METHOD_OPTIONS = 'OPTIONS';
 	const METHOD_OVERRIDE = '_METHOD';
+	const GET_PATH_PARAM = 'p';
 
 	public $env = array();
 	private $_scriptUrl = null;
@@ -121,8 +122,8 @@ class Request {
 
 //		var_dump(Core::app()->cfg('url/pathInsteadGet'));
 
-		if (Core::app()->cfg('url/pathInsteadGet') === true and !empty($_GET['d'])) {
-			$env['PATH_INFO'] = '/' . $_GET['d'];
+		if (Core::app()->cfg('url/pathInsteadGet') === true and !empty($_GET[self::GET_PATH_PARAM])) {
+			$env['PATH_INFO'] = '/' . $_GET[self::GET_PATH_PARAM];
 			foreach (array_slice($_GET, 1) as $key => $val) {
 				$env['PATH_INFO'] .= '/' . $key . '/' . $val;
 			}
@@ -192,7 +193,7 @@ class Request {
 		if ($this->_baseUrl === null)
 			$this->_baseUrl = rtrim(dirname($this->getScriptUrl()), '\\/');
 
-		return $absolute ? $this->getHostInfo() . $this->_baseUrl : $this->_baseUrl;
+		return $absolute ? $this->getHostInfo() .  $this->_baseUrl . '/' : $this->_baseUrl . '/';
 	}
 
 	public function getHostInfo() {

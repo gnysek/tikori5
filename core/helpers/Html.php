@@ -18,7 +18,7 @@ class Html {
 		$addon = '';
 		$path = '';
 		if (Core::app()->cfg('url/pathInsteadGet') == true) {
-			$addon = '?p=';
+			$addon = '?' . Request::GET_PATH_PARAM;
 			foreach (array_slice($url, 1) as $key => $entry) {
 				$path .= '&' . $key . '=' . $entry;
 			}
