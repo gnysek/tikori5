@@ -469,6 +469,8 @@ class Route {
 		try {
 			$class = ucfirst($this->getController()) . 'Controller';
 			$controller = new $class;
+			/* @var $controller Controller */
+			$controller->setController($this->getController());
 		} catch (Exception $e) {
 			throw new RouteNotFoundException('Dispatch controller: <er>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</er>: ' . $e->getMessage());
 		}
@@ -485,15 +487,15 @@ class Route {
 			/* @var $method ReflectionMethod */
 			if ($method->getNumberOfRequiredParameters() > 0) {
 //				var_dump($method->getNumberOfRequiredParameters());
-				
-				foreach($method->getParameters() as $paramObject) {
+
+				foreach ($method->getParameters() as $paramObject) {
 					/* @var $paramObject ReflectionParameter */
-					
-					if ($paramObject->isOptional() === false and empty($this->params[ $paramObject->name ])) {
-						throw new RouteNotFoundException('Not enough arguments or wrong argument name ['  .$paramObject->name .']');
+
+					if ($paramObject->isOptional() === false and empty($this->params[$paramObject->name])) {
+						throw new RouteNotFoundException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
 					}
-					
-					$finalParams[] = (empty($this->params[ $paramObject->name ])) ? null : $this->params[ $paramObject->name ];
+
+					$finalParams[] = (empty($this->params[$paramObject->name])) ? null : $this->params[$paramObject->name];
 				}
 //				var_dump($this->params);
 //				var_dump($method->getParameters());
@@ -522,13 +524,13 @@ class Route {
 //				}
 //			}
 
-			TLog::addLog('Calling controller: <tt>' . $this->getController() . '::' . $this->getAction() . '</tt>');
+			Log::addLog('Calling controller: <tt>' . $this->getController() . '::' . $this->getAction() . '</tt>');
 
 			ob_start();
 			call_user_func_array(array($controller, $this->getAction() . 'Action'), $finalParams);
 			$response = ob_get_clean();
 
-			TLog::addLog('Owerwriting body using last controller action');
+			Log::addLog('Owerwriting body using last controller action');
 
 			Core::app()->response->body($response);
 		} catch (DbError $e) {

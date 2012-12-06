@@ -17,10 +17,13 @@ class Html {
 		}
 		$addon = '';
 		$path = '';
-		if (Core::app()->cfg('url/pathInsteadGet') == true) {
-			$addon = '?' . Request::GET_PATH_PARAM;
-			foreach (array_slice($url, 1) as $key => $entry) {
-				$path .= '&' . $key . '=' . $entry;
+		
+		if (!empty($url[0])) {
+			if (Core::app()->cfg('url/pathInsteadGet') == true) {
+				$addon = '?' . Request::GET_PATH_PARAM . '=';
+				foreach (array_slice($url, 1) as $key => $entry) {
+					$path .= '&' . $key . '=' . $entry;
+				}
 			}
 		}
 
