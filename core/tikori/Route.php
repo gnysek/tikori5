@@ -471,8 +471,14 @@ class Route {
 			$controller = new $class;
 			/* @var $controller Controller */
 			$controller->setController($this->getController());
+			$controller->setAction($this->getAction());
+			$controller->setParams($this->params);
 		} catch (Exception $e) {
 			throw new RouteNotFoundException('Dispatch controller: <er>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</er>: ' . $e->getMessage());
+		}
+		
+		if (!method_exists($controller, $this->getAction() . 'Action')) {
+			$this->setAction('default');
 		}
 
 		try {
@@ -548,6 +554,10 @@ class Route {
 
 	public function getAction() {
 		return $this->_getParam('action', 'index');
+	}
+	
+	public function setAction($action) {
+		return $this->params['action'] = $action;
 	}
 
 	public function getDirectory() {

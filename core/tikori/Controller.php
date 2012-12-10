@@ -3,14 +3,36 @@
 class Controller {
 
 	public $layout = 'layout.default';
-	public $controller = '';
-	
-	public function setController($controller){
+	public $controller = 'default';
+	public $action = 'default';
+	public $params = array();
+
+	public function setController($controller = '') {
 		$this->controller = $controller;
 	}
 
-	public function render($file, $data = null, $return = false) {
-		$out = $this->renderPartial($file, $data);
+	public function setAction($action = '') {
+		$this->action = $action;
+	}
+
+	public function getControllerFullName() {
+		return ucfirst($this->controller) . 'Controller';
+	}
+
+	public function setParams($params) {
+		$this->params = array_merge($this->params, $params);
+	}
+
+//	public function defaultAction() {
+//		throw new RouteNotFoundException('Unknown action');
+//	}
+
+	public function render($file = null, $data = null, $return = false) {
+		if (!empty($file) && $this->viewExists($file)) {
+			$out = $this->renderPartial($file, $data);
+		} else {
+			$out = $data;
+		}
 
 		$out = $this->renderPartial($this->layout, array('content' => $out));
 
@@ -49,7 +71,7 @@ class Controller {
 		return $this->_findViewFile($view);
 	}
 
-	private function _findViewFile($file) {
+	protected function _findViewFile($file) {
 		$paths = array(
 			Core::app()->appDir . '/views/' . $this->controller . '/',
 			Core::app()->coreDir . '/views/' . $this->controller . '/',

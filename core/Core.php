@@ -67,15 +67,17 @@ class Core {
 	 * Gets time from app start to now
 	 * @return string
 	 */
-	public static function genTimeNow() {
+	public static function genTimeNow($decimalPart = 4) {
+		$decimalPart = max(1, $decimalPart);
+		
 		$arr = explode(' ', TIKORI_STARTED);
 		$_time1 = $arr[1] + $arr[0];
 		$arr = explode(' ', microtime());
 		$_time2 = $arr[1] + $arr[0];
 
-		$_time = round($_time2 - $_time1, 4);
+		$_time = round($_time2 - $_time1, $decimalPart);
 
-		$_time = ($_time == 0) ? '&lt; 0.0001' : $_time;
+		$_time = ($_time == 0) ? '&lt; 0.' . str_repeat('0', $decimalPart - 1) . '1' : sprintf('%.' . $decimalPart . 'f', $_time);
 
 		return $_time;
 	}
@@ -146,7 +148,7 @@ class Tikori {
 		Log::addLog('Registered errors');
 
 //		$this->defaultCfg();
-		
+
 		$this->reconfigure($config);
 		Log::addLog('Reconfigured');
 
@@ -273,8 +275,8 @@ class Tikori {
 	public function defaultCfg() {
 		$this->_config = new Config(array(
 				'appname' => 'Unknown application',
-				'url' => DefC_Url::getDefValues(),
-				'db' => DefC_Db::getDefValues(),
+//				'url' => DefC_Url::getDefValues(),
+//				'db' => DefC_Db::getDefValues(),
 			));
 	}
 
@@ -282,7 +284,7 @@ class Tikori {
 	 * Reconfigures application using json string or array
 	 * @param array|string $config
 	 */
-	public function reconfigure($config) {		
+	public function reconfigure($config) {
 		$this->cfg()->load($config);
 		$this->getMode();
 	}
@@ -294,12 +296,40 @@ class Tikori {
 		if ($this->_config === null) {
 			$this->_config = new Config();
 		}
-		
+
 		if ($item === null) {
 			return $this->_config;
 		} else {
+
+			if (substr($item, strlen($item) - 2, 2) === '/*') {
+				return $this->cfg(substr($item, 0, strlen($item) - 2));
+			}
+			// maybe later add code to search bt path/to/node/somet* ?
+
 			return $this->_config->get($item, $default);
 		}
+	}
+
+	public function flatcfg($item = null, $default = null) {
+		if ($item === null) {
+			return $this->_flatify($item, $this->_config);
+		} else {
+			return $this->_flatify($item, $this->_config->get($item, $default));
+		}
+	}
+
+	private function _flatify($item, $array) {
+		$flat = array();
+
+		foreach ($array as $key => $value) {
+			if (is_array($value)) {
+				$flat = array_merge($flat, $this->_flatify($item . '/' . $key, $value));
+			} else {
+				$flat[ltrim($item . '/' . $key, '/')] = $value;
+			}
+		}
+
+		return $flat;
 	}
 
 //	/**
@@ -327,7 +357,7 @@ class Tikori {
 	 */
 	public function baseUrl() {
 		//return (isset(Core::app()->request->env)) ? Core::app()->request->env['tikori.base_url'] : '/';
-		
+
 		return (!empty($this->request)) ? $this->request->getBaseUrl(true) : '/';
 	}
 

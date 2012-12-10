@@ -1,17 +1,18 @@
 <?php
+
 /**
  * @author Piotr Gnys <gnysek@gnysek.pl>
  * @package user
  */
 class User_TUser {
+
 	const U_ANONIM = -1;
 	const U_BOT = -2;
 	const D_NAME = 'Anonim';
-	
 	const SKEY_GET = 1;
 	const SKEY_COOKIE = 2;
 	const SKEY_OTHER = 3;
-	
+
 	private $_id = self::U_ANONIM;
 	private $_name = self::D_NAME;
 	private $_ip = '0.0.0.0';
@@ -26,8 +27,9 @@ class User_TUser {
 	private $_time = 0;
 	private $_loginStartTime = 0;
 	private $_posts = 0;
-	
+
 	public function __construct() {
 		$this->_ip = Core::app()->request->env;
 	}
+
 }

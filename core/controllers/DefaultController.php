@@ -1,6 +1,10 @@
 <?php
 
 class DefaultController extends Controller {
+	
+//	public function defaultAction() {
+//		
+//	}
 
 	public function indexAction() {
 		$model = Team::model()->find(1);
@@ -11,18 +15,24 @@ class DefaultController extends Controller {
 		));
 	}
 
-	public function oneAction($id = 0) {
+	public function configtestAction($id = 0) {
 		var_dump(Core::app()->cfg('test'));
 		var_dump(Core::app()->cfg('test2/x/y'));
 		echo '<h1>test</h1>';
 		var_dump(Core::app()->cfg()->set('test', 12));
 		var_dump(Core::app()->cfg()->set('test2/x/y', 15));
 		var_dump(Core::app()->cfg()->set('test2/x/y', 17));
+		var_dump(Core::app()->cfg()->set('test2/x/z', 19));
+		var_dump(Core::app()->cfg()->set('test2/e', 'b'));
 		echo '<h1>after</h1>';
 		var_dump(Core::app()->cfg('test'));
 		var_dump(Core::app()->cfg('test2/x/y'));
-		echo '<h1>all</h1>';
+		echo '<h1>result</h1>';
+		var_dump(Core::app()->cfg('test2*'));
+		var_dump(Core::app()->flatcfg('test2'));
+		echo '<h1>whole cfg</h1>';
 		var_dump(Core::app()->cfg(''));
+		var_dump(Core::app()->flatcfg(''));
 	}
 
 	public function twoAction($id) {

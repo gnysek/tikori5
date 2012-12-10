@@ -5,5 +5,17 @@
 	"dbuser": "",
 	"dbpass": "",
 	"default": "index",
-	"routes": {}
+	"routes": {
+		"static": {
+			"expr": "static(/<path>)",
+			"params": {
+				"path": "[a-zA-Z0-9_/]+"
+			},
+			"defaults": {
+				"controller": "static",
+				"action": "default",
+				"path": "none"
+			}
+		}
+	}
 }

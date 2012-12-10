@@ -11,5 +11,16 @@
 		"dbpass": "",
 		"dbprefix": ""
 	},
-	"routes": {}
+	"routes": {
+		"static": {
+			"expr": "static(/<path>)",
+			"params": {
+				"path": "[a-zA-Z0-9_/]+"
+			},
+			"defaults": {
+				"controller": "static",
+				"action": "default"
+			}
+		}
+	}
 }
