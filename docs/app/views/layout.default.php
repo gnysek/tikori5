@@ -24,10 +24,6 @@
 					Generated in: <strong><?php echo Core::genTimeNow(2); ?></strong>s.
 				</div>
 			</div>
-
-			<?php if (Core::app()->mode != Core::MODE_PROD): ?>
-				<?php $this->renderPartial('debug.default'); ?>
-			<?php endif; ?>
 		</div>
 	</body>
 </html>

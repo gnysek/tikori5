@@ -1,18 +1,18 @@
-<?php echo HTML::link('Documentation main page', ''); ?>
+&bull; <?php echo HTML::link('Documentation main page', ''); ?>
 <ol>
 	<li><?php echo HTML::link('Instalation', 'static/installation'); ?></li>
 	<li><?php echo HTML::link('Basic configuration', 'static/basic'); ?></li>
 	<li><?php echo HTML::link('Static apps', 'static/static'); ?></li>
 	<li><?php echo HTML::link('Dynamic apps', 'static/dynamic'); ?></a>
 		<ol>
-			<li><a href="#">Database connection</a></li>
-			<li><a href="#">Predefined modules</a>
+			<li><?php echo HTML::link('Database connection', 'static/dynamic/database'); ?></li>
+			<li><?php echo HTML::link('Predefined modules', 'static/dynamic/predefined'); ?>
 				<ol>
-					<li><a href="#">Content & Categories</a>
+					<li><?php echo HTML::link('Content & Categories', 'static/dynamic/content'); ?>
 						<ul>
-							<li><a href="#">Types of content, Categories</a></li>
-							<li><a href="#">Front page</a></li>
-							<li><a href="#">Comments</a></li>
+							<li><?php echo HTML::link('Types of content, Categories', 'static/dynamic/content/types'); ?></li>
+							<li><?php echo HTML::link('Front page', 'static/dynamic/content/frontpage'); ?></li>
+							<li><?php echo HTML::link('Comments', 'static/dynamic/content/comments'); ?></li>
 						</ul>
 					</li>
 					<li><a href="#">Downloads</a></li>

@@ -3,7 +3,14 @@
 class Html {
 
 	public static function link($text, $url, $options = array()) {
-		return '<a href="' . self::url($url) . '">' . $text . '</a>';
+		if (trim(Core::app()->request->getRouterPath(), '/') == $url) {
+			if (!empty($options['class'])) {
+				$options['class'] = 'active ' . $options['class'];
+			} else {
+				$options['class'] = 'active';
+			}
+		}
+		return '<a href="' . self::url($url) . '"' . ((empty($options['class'])) ? '' : (' class="' . $options['class'] . '"')) . '>' . $text . '</a>';
 	}
 
 	public static function url($url) {
@@ -17,7 +24,7 @@ class Html {
 		}
 		$addon = '';
 		$path = '';
-		
+
 		if (!empty($url[0])) {
 			if (Core::app()->cfg('url/pathInsteadGet') == true) {
 				$addon = '?' . Request::GET_PATH_PARAM . '=';

@@ -2,12 +2,13 @@
 
 body{
 	color: #333;
-	background-color: #F1F8DB;
+	background-color: crimson;
 }
 
 #layout{
 	max-width: 800px;
 	margin: 0px auto;
+	margin-bottom: 10px;
 }
 #inner-layout{
 	padding: 10px 15px 5px 15px;
@@ -42,6 +43,7 @@ h2, h4, h6 {font-size: 20px;}
 
 a, a:visited{color: cornflowerblue; text-decoration: none;}
 a:hover, a:focus{color: steelblue;}
+a.active{font-weight: bold;}
 
 strong {
 	font-weight: bold;
@@ -49,6 +51,10 @@ strong {
 
 p {
 	margin-bottom: 4px;
+}
+
+small, small code {
+	font-size: 10px;
 }
 
 table{border: 1px solid #aaa; border-radius: 3px; border-collapse: separate; border-spacing: 0;}
