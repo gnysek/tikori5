@@ -2,7 +2,7 @@
 
 class Controller {
 
-	public $layout = 'layout.default';
+	public $layout = '//layout.default';
 	public $controller = 'default';
 	public $action = 'default';
 	public $params = array();
@@ -31,7 +31,7 @@ class Controller {
 		if (!empty($file) && $this->viewExists($file)) {
 			$out = $this->renderPartial($file, $data);
 		} else {
-			$out = $data;
+			$out = (string) $data;
 		}
 
 		$out = $this->renderPartial($this->layout, array('content' => $out));
@@ -56,10 +56,11 @@ class Controller {
 		} else {
 			$data = $_dataNC;
 		}
-
+		
 		if ($_returnNC) {
 			ob_start();
 			ob_implicit_flush(false);
+			Log::addLog('Rendering <tt>' . str_replace(Core::app()->appDir, '', $_fileNC) . '</tt>');
 			require($_fileNC);
 			return ob_get_clean();
 		} else {
@@ -68,16 +69,21 @@ class Controller {
 	}
 
 	public function viewExists($view) {
-		return $this->_findViewFile($view);
+		return ($this->_findViewFile($view) !== false);
 	}
 
 	protected function _findViewFile($file) {
-		$paths = array(
-			Core::app()->appDir . '/views/' . $this->controller . '/',
-			Core::app()->coreDir . '/views/' . $this->controller . '/',
-			Core::app()->appDir . '/views/',
-			Core::app()->coreDir . '/views/',
-		);
+		$paths = array();
+
+		if (substr($file, 0, 2) != '//') {
+			$paths[] = Core::app()->appDir . '/views/' . $this->controller . '/';
+			$paths[] = Core::app()->coreDir . '/views/' . $this->controller . '/';
+		}
+
+		$paths[] = Core::app()->appDir . '/views/';
+		$paths[] = Core::app()->coreDir . '/views/';
+
+		$file = ltrim($file, '/');
 
 		foreach ($paths as $path) {
 			$filename = $path . $file . '.php';

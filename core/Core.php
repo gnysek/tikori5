@@ -69,7 +69,7 @@ class Core {
 	 */
 	public static function genTimeNow($decimalPart = 4) {
 		$decimalPart = max(1, $decimalPart);
-		
+
 		$arr = explode(' ', TIKORI_STARTED);
 		$_time1 = $arr[1] + $arr[0];
 		$arr = explode(' ', microtime());
@@ -159,7 +159,6 @@ class Tikori {
 		Log::addLog('Response created');
 		Route::reconfigure();
 		$this->route = Route::process_uri($this->request->getRouterPath());
-		Log::addLog('Uri processed');
 
 		try {
 			if ($this->route == null)
@@ -189,7 +188,7 @@ class Tikori {
 			if (strpos(PHP_SAPI, 'cgi') === 0) {
 				header(sprintf('Status: %s', Response::getMessageForCode($status)));
 			} else {
-				header(sprintf('HTTP/%s %s', /* $this->config('http.version') */ '1.1', Response::getMessageForCode($status)));
+				header(sprintf('HTTP/%s %s', '1.1', Response::getMessageForCode($status)), false);
 			}
 
 			//Send headers
@@ -200,6 +199,8 @@ class Tikori {
 				}
 			}
 		}
+
+		Log::addLog('Headers:<br/>' . implode('<br/>', headers_list()));
 
 		echo $body;
 

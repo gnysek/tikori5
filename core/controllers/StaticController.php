@@ -9,7 +9,7 @@ class StaticController extends Controller {
 			$content = '<strong>Error 404</strong> &ndash; Requested "' . $this->params['path'] . '" content not found.';
 		}
 
-		$this->render('static', array(
+		$this->render('//static', array(
 			'content' => $content
 		));
 	}

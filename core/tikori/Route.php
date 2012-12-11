@@ -1,14 +1,14 @@
 <?php
 
 class Route {
-// Defines the pattern of a <segment>
+	// Defines the pattern of a <segment>
 
 	const REGEX_KEY = '<([a-zA-Z0-9_]++)>';
 
-// What can be part of a <segment> value
+	// What can be part of a <segment> value
 	const REGEX_SEGMENT = '[^/.,;?\n]++';
 
-// What must be escaped in the route regex
+	// What must be escaped in the route regex
 	const REGEX_ESCAPE = '[.\\+*?[^\\]${}=!|]';
 
 	/**
@@ -117,7 +117,7 @@ class Route {
 	public static function url($name, array $params = NULL, $protocol = NULL) {
 		$route = Route::get($name);
 
-// Create a URI with the route and convert it to a URL
+		// Create a URI with the route and convert it to a URL
 		if ($route->is_external())
 			return Route::get($name)->uri($params);
 		else
@@ -182,6 +182,8 @@ class Route {
 		// Load routes
 		$routes = (empty($routes)) ? Route::all() : $routes;
 		$params = NULL;
+
+		Log::addLog('Processing URI <tt>/' . $uri . '</tt> against ' . count($routes) . ' routes');
 
 		/* @var $route Route */
 		foreach ($routes as $name => $route) {
@@ -262,7 +264,7 @@ class Route {
 	 */
 	public function __construct($uri = NULL, $regex = NULL) {
 		if ($uri === NULL) {
-// Assume the route is from cache
+			// Assume the route is from cache
 			return;
 		}
 
@@ -278,7 +280,7 @@ class Route {
 			$this->_regex = $regex;
 		}
 
-// Store the compiled regex locally
+		// Store the compiled regex locally
 		$this->_route_regex = Route::compile($uri, $regex);
 	}
 
@@ -340,18 +342,18 @@ class Route {
 			$params = array();
 			foreach ($matches as $key => $value) {
 				if (is_int($key)) {
-// Skip all unnamed keys
+					// Skip all unnamed keys
 					continue;
 				}
 
-// Set the value for all matched keys
+				// Set the value for all matched keys
 				$params[$key] = $value;
 			}
 		}
 
 		foreach ($this->_defaults as $key => $value) {
 			if (!isset($params[$key]) OR $params[$key] === '') {
-// Set default values for any key that was not matched
+				// Set default values for any key that was not matched
 				$params[$key] = $value;
 			}
 		}
@@ -375,49 +377,49 @@ class Route {
 	 * @uses    Route::REGEX_Key
 	 */
 	public function uri(array $params = NULL) {
-// Start with the routed URI
+		// Start with the routed URI
 		$uri = $this->_uri;
 
 		if (strpos($uri, '<') === FALSE AND strpos($uri, '(') === FALSE) {
-// This is a static route, no need to replace anything
+			// This is a static route, no need to replace anything
 
 			if (!$this->is_external())
 				return $uri;
 
-// If the localhost setting does not have a protocol
+			// If the localhost setting does not have a protocol
 			if (strpos($this->_defaults['host'], '://') === FALSE) {
-// Use the default defined protocol
+				// Use the default defined protocol
 				$params['host'] = Route::$default_protocol . $this->_defaults['host'];
 			} else {
-// Use the supplied host with protocol
+				// Use the supplied host with protocol
 				$params['host'] = $this->_defaults['host'];
 			}
 
-// Compile the final uri and return it
+			// Compile the final uri and return it
 			return rtrim($params['host'], '/') . '/' . $uri;
 		}
 
 		while (preg_match('#\([^()]++\)#', $uri, $match)) {
-// Search for the matched value
+			// Search for the matched value
 			$search = $match[0];
 
-// Remove the parenthesis from the match as the replace
+			// Remove the parenthesis from the match as the replace
 			$replace = substr($match[0], 1, -1);
 
 			while (preg_match('#' . Route::REGEX_KEY . '#', $replace, $match)) {
 				list($key, $param) = $match;
 
 				if (isset($params[$param])) {
-// Replace the key with the parameter value
+					// Replace the key with the parameter value
 					$replace = str_replace($key, $params[$param], $replace);
 				} else {
-// This group has missing parameters
+					// This group has missing parameters
 					$replace = '';
 					break;
 				}
 			}
 
-// Replace the group in the URI
+			// Replace the group in the URI
 			$uri = str_replace($search, $replace, $uri);
 		}
 
@@ -425,11 +427,11 @@ class Route {
 			list($key, $param) = $match;
 
 			if (!isset($params[$param])) {
-// Look for a default
+				// Look for a default
 				if (isset($this->_defaults[$param])) {
 					$params[$param] = $this->_defaults[$param];
 				} else {
-// Ungrouped parameters are required
+					// Ungrouped parameters are required
 					throw new Kohana_Exception('Required route parameter not passed: :param', array(
 						':param' => $param,
 					));
@@ -439,19 +441,19 @@ class Route {
 			$uri = str_replace($key, $params[$param], $uri);
 		}
 
-// Trim all extra slashes from the URI
+		// Trim all extra slashes from the URI
 		$uri = preg_replace('#//+#', '/', rtrim($uri, '/'));
 
 		if ($this->is_external()) {
-// Need to add the host to the URI
+			// Need to add the host to the URI
 			$host = $this->_defaults['host'];
 
 			if (strpos($host, '://') === FALSE) {
-// Use the default defined protocol
+				// Use the default defined protocol
 				$host = Route::$default_protocol . $host;
 			}
 
-// Clean up the host and prepend it to the URI
+			// Clean up the host and prepend it to the URI
 			$uri = rtrim($host, '/') . '/' . $uri;
 		}
 
@@ -467,7 +469,7 @@ class Route {
 		// get controller first
 		$controller = null;
 		try {
-			$class = ucfirst($this->getController()) . 'Controller';
+			$class = $this->getControllerClassName();
 			$controller = new $class;
 			/* @var $controller Controller */
 			$controller->setController($this->getController());
@@ -476,8 +478,8 @@ class Route {
 		} catch (Exception $e) {
 			throw new RouteNotFoundException('Dispatch controller: <er>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</er>: ' . $e->getMessage());
 		}
-		
-		if (!method_exists($controller, $this->getAction() . 'Action')) {
+
+		if (!method_exists($controller, $this->getActionMethodName())) {
 			$this->setAction('default');
 		}
 
@@ -486,7 +488,7 @@ class Route {
 			$finalParams = array();
 
 			try {
-				$method = $reflection->getMethod($this->getAction() . 'Action');
+				$method = $reflection->getMethod($this->getActionMethodName());
 			} catch (Exception $ref) {
 				throw new RouteNotFoundException('Unknown action');
 			}
@@ -530,7 +532,7 @@ class Route {
 //				}
 //			}
 
-			Log::addLog('Calling controller: <tt>' . $this->getController() . '::' . $this->getAction() . '</tt>');
+			Log::addLog('Calling controller: <tt>' . $this->getControllerClassName() . '::' . $this->getActionMethodName() . '</tt>');
 
 			ob_start();
 			call_user_func_array(array($controller, $this->getAction() . 'Action'), $finalParams);
@@ -552,10 +554,18 @@ class Route {
 		return $this->_getParam('controller');
 	}
 
+	public function getControllerClassName() {
+		return ucfirst($this->getController()) . 'Controller';
+	}
+
 	public function getAction() {
 		return $this->_getParam('action', 'index');
 	}
-	
+
+	public function getActionMethodName() {
+		return $this->getAction() . 'Action';
+	}
+
 	public function setAction($action) {
 		return $this->params['action'] = $action;
 	}

@@ -2,7 +2,7 @@
 
 body{
 	color: #333;
-	background-color: crimson;
+	background-color: #202E3B;
 }
 
 #layout{
@@ -12,7 +12,7 @@ body{
 }
 #inner-layout{
 	padding: 10px 15px 5px 15px;
-	background-color: white;
+	/*background-color: white;*/
 }
 
 body, pre, code, tt {
@@ -23,6 +23,7 @@ body, pre, code, tt {
 
 pre, code, tt {
 	font-family: 'Consolas', monospace;
+	color: brown;
 }
 
 pre, code {
@@ -30,6 +31,12 @@ pre, code {
 	padding: 1px 4px;
 	border-radius: 3px;
 	background-color: #eee;
+}
+
+hr {
+	height: 0px;
+	border: none;
+	border-top: 1px solid #333;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -41,8 +48,8 @@ h3, h4 {color: black; text-decoration: underline;}
 h1, h3, h5 {font-size: 25px;}
 h2, h4, h6 {font-size: 20px;}
 
-a, a:visited{color: cornflowerblue; text-decoration: none;}
-a:hover, a:focus{color: steelblue;}
+a, a:visited{color: steelblue; text-decoration: none;}
+a:hover, a:focus{color: #2F3F4F;}
 a.active{font-weight: bold;}
 
 strong {
@@ -57,7 +64,7 @@ small, small code {
 	font-size: 10px;
 }
 
-table{border: 1px solid #aaa; border-radius: 3px; border-collapse: separate; border-spacing: 0;}
+table{border: 1px solid #aaa; border-radius: 3px; border-collapse: separate; border-spacing: 0; background-color: white;}
 td, th{border-left: 1px solid #aaa; border-top: 1px solid #aaa; padding: 2px 5px;}
 th{background-color: #ddd; color: #555;}
 td{min-width: 50px;}
@@ -75,7 +82,6 @@ tr:hover th{background-color: #ccc; transition: all 0.2s ease-in-out; -webkit-tr
 .footer{
 	font-size: 10px;
 	color: white;
-	background-color: #333;
 	padding: 5px;
 	border-radius: 0 0 3px 3px;
 }
@@ -104,3 +110,21 @@ ul {
 ol {
 	list-style: decimal;
 }
+
+.blue-more{color: #202E3B}
+.blue-less{color: #2F3F4F;}
+.red-more{color: #762A2E;}
+.red-less{color: #8C3136;}
+.brown{color: #5A1F23;}
+.cream{color: #F4F3EE;}
+.cream-light{color: #EBE8DF;}
+.cream-dark{color: #DEDDD8;}
+
+.blue-more-bg{background-color: #202E3B}
+.blue-less-bg{background-color: #2F3F4F;}
+.red-more-bg{background-color: #762A2E;}
+.red-less-bg{background-color: #8C3136;}
+.brown-bg{background-color: #5A1F23;}
+.cream-bg{background-color: #F4F3EE;}
+.cream-light-bg{background-color: #EBE8DF;}
+.cream-dark-bg{background-color: #DEDDD8;}
