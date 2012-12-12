@@ -1,6 +1,9 @@
 <?php
 
 /**
+ * Provides all data about request made by user
+ * Cookie, Urls, server info, IP, Request method, headers, etc.
+ * 
  * @param string $request_method (GET|POST|PUT|DELETE)
  * @param string $script_name
  */
@@ -39,6 +42,31 @@ class Request {
 		);
 	}
 
+	public function isGet() {
+		return ($_SERVER['REQUEST_METHOD'] === 'GET');
+	}
+
+	public function isPost() {
+		return ($_SERVER['REQUEST_METHOD'] === 'POST');
+	}
+
+	public function isDelete() {
+		return ($_SERVER['REQUEST_METHOD'] === 'DELETE');
+	}
+
+	public function isPut() {
+		return ($_SERVER['REQUEST_METHOD'] === 'PUT');
+	}
+
+	/**
+	 * Is this a Flash request?
+	 *
+	 * @return bool
+	 */
+	public static function isFlashRequest() {
+		return ('Shockwave Flash' === $_SERVER['HTTP_USER_AGENT']);
+	}
+
 	/**
 	 * Is this an AJAX request?
 	 * @return bool
@@ -51,6 +79,10 @@ class Request {
 		} else {
 			return false;
 		}
+	}
+
+	public function isSecure() {
+		return ($this->scheme() === 'https');
 	}
 
 	/**
@@ -193,7 +225,11 @@ class Request {
 		if ($this->_baseUrl === null)
 			$this->_baseUrl = rtrim(dirname($this->getScriptUrl()), '\\/');
 
-		return $absolute ? $this->getHostInfo() .  $this->_baseUrl . '/' : $this->_baseUrl . '/';
+		return $absolute ? ($this->getHostInfo() . $this->_baseUrl . '/') : $this->_baseUrl . '/';
+	}
+
+	public function getCurrentUrl() {
+		throw new Exception('TRequest::getCurrentUrl is not yet implemented');
 	}
 
 	public function getHostInfo() {
@@ -206,6 +242,31 @@ class Request {
 		}
 
 		return $this->_hostInfo;
+	}
+
+	/**
+	 * Get Client Ip
+	 *
+	 * @param string $default
+	 * @return string
+	 */
+	public function clientIp($default = '0.0.0.0') {
+		$keys = array('HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'REMOTE_ADDR');
+
+		foreach ($keys as $key) {
+			if (empty($_SERVER[$key]))
+				continue;
+			$ips = explode(',', $_SERVER[$key], 1);
+			$ip = $ips[0];
+			if (false != ip2long($ip) && long2ip(ip2long($ip) === $ip))
+				return $ips[0];
+		}
+
+		return $default;
+	}
+
+	public function scheme() {
+		return $this->env['tikori.url_scheme'];
 	}
 
 	/**

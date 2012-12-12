@@ -1,6 +1,13 @@
+/// Code based on:
+
 http://kohanaframework.org/3.0/guide/kohana/routing
 http://kohanaframework.org/3.0/guide/api/Request
 https://github.com/kohana/core/blob/3.2/master/classes/kohana/request.php
 https://github.com/kohana/core/blob/3.2/master/classes/kohana/route.php
 https://github.com/codeguy/Slim/blob/master/Slim/Slim.php
 https://github.com/codeguy/Slim/blob/1.6.7/Slim/Http/Request.php
+http://code.google.com/p/colaphp/source/browse/
+
+/// Info about some added features:
+Etag: 
+http://blog.programa.pl/2009/07/etag-co-to-jest-iz-czym-to-sie-je/

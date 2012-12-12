@@ -8,8 +8,8 @@ class Model {
 	const BELONGS_TO = 'BELONGS_TO';
 	const HAS_ONE = 'HAS_ONE';
 	const HAS_MANY = 'HAS_MANY';
-//	const MANY_MANY = 4;
 	const STATS = 'STATS';
+//	const MANY_MANY = 4;
 
 	protected $_table;
 	protected $_fields;
@@ -19,6 +19,7 @@ class Model {
 	protected $_scopes = array();
 	protected $_relations = array();
 	protected $_isNewRecord = true;
+	protected $_errors = array();
 	public $tableName = '';
 
 	public function __construct() {

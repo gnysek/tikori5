@@ -15,6 +15,7 @@ class Route {
 	 * @var  string  default action for all routes
 	 */
 	public static $default_action = 'index';
+	public $area = '';
 
 	/**
 	 * @var  array
