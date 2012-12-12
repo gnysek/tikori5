@@ -41,7 +41,7 @@
 	<li><a href="#">Cache</a></li>
 	<li><a href="#">Extending</a>
 		<ol>
-			<li><a href="#">Controllers & Routes</a></li>
+			<li><?php echo HTML::link('Controllers & Routes', 'static/extend/controllers-and-routes'); ?></li>
 			<li><a href="#">Models</a></li>
 			<li><a href="#">Custom SQL queries</a></li>
 			<li><a href="#">Modules</a></li>

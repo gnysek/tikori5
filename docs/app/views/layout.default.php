@@ -4,8 +4,10 @@
 		<meta charset="utf-8" />
 		<title><?php echo Core::app()->cfg('appName'); ?></title>
 		<link rel="stylesheet" type="text/css" href="<?php echo Core::app()->baseUrl() ?>media/style.css"/>
+		<link rel="stylesheet" type="text/css" href="<?php echo Core::app()->baseUrl() ?>media/prettify.css"/>
+		<script type="text/javascript" src="<?php echo Core::app()->baseUrl() ?>../media/prettify.js"></script>
 	</head>
-	<body>
+	<body onload="prettyPrint();">
 		<div id="layout">
 			<div id="inner-layout" class="cream-light-bg">
 				
