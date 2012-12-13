@@ -16,6 +16,7 @@ class Core {
 	const MODE_DEBUG = -1;
 	const MODE_DEV = 0;
 	const MODE_PROD = 1;
+	const VERSION = '1.0.0&alpha;';
 
 	/**
 	 * @var Core Main app class 
@@ -141,6 +142,10 @@ class Core {
 		$_time = ($_time == 0 and $returnLessWhenZero) ? '&lt; 0.' . str_repeat('0', $decimalPart - 1) . '1' : sprintf('%.' . $decimalPart . 'f', $_time);
 
 		return $_time;
+	}
+	
+	public static function poweredBy() {
+		return 'Powered by <a href="http://tikori5.gnysek.pl/" target="_blank">Tikori5</a> v' . self::VERSION;
 	}
 
 }

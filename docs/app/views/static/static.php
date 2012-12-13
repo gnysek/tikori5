@@ -5,6 +5,8 @@
 This documentation uses <tt>static</tt> mode to display it's content.
 </p>
 
+<blockquote>When using static app, you cannot use anything from modules folder, and modules configuration will be skipped.</blockquote>
+
 <p><strong>Example:</strong></p>
 
 <p>

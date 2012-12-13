@@ -1,3 +1,10 @@
+<?php
+$this->breadcrumbs = array(
+	'Extend' => array('static/extend'),
+	'Controllers &amp; Routes',
+);
+?>
+
 <h4>Controllers &amp; Routes</h4>
 
 <p>To set new route, you can use following code:</p>

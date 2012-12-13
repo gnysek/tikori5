@@ -140,6 +140,7 @@ class Tikori {
 				'modules',
 				'db',
 				'helpers',
+				'widgets',
 				'tikori',
 				), $i);
 		}

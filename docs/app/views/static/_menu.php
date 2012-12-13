@@ -2,6 +2,7 @@
 <ol>
 	<li><?php echo HTML::link('Instalation', 'static/installation'); ?></li>
 	<li><?php echo HTML::link('Basic configuration', 'static/basic'); ?></li>
+	<li><?php echo HTML::link('Request flow', 'static/request-flow'); ?></li>
 	<li><?php echo HTML::link('Static apps', 'static/static'); ?></li>
 	<li><?php echo HTML::link('Dynamic apps', 'static/dynamic'); ?></a>
 		<ol>

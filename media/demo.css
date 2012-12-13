@@ -32,6 +32,7 @@ pre, code, blockquote {
 	border-radius: 3px;
 	background-color: #eee;
 }
+code.tt {padding: 0; border: none; background: none;}
 
 hr {
 	height: 0px;
@@ -137,3 +138,8 @@ ol {
 .cream-bg{background-color: #F4F3EE;}
 .cream-light-bg{background-color: #EBE8DF;}
 .cream-dark-bg{background-color: #DEDDD8;}
+
+.breadcrumbs{
+	font-size: 11px;
+	font-weight: bold;
+}

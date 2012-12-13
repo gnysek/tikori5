@@ -56,7 +56,7 @@ class Controller {
 		} else {
 			$data = $_dataNC;
 		}
-		
+
 		if ($_returnNC) {
 			ob_start();
 			ob_implicit_flush(false);
@@ -93,6 +93,30 @@ class Controller {
 		}
 
 		return false;
+	}
+
+	public function widget($class, $properties, $captureOutput = false) {
+		if ($captureOutput) {
+			ob_start();
+			ob_implicit_flush(false);
+		}
+
+		$widget = $this->_createWidget($class, $properties);
+		$widget->run();
+		
+		if ($captureOutput) {
+			return ob_get_clean();
+		}
+
+		return $widget;
+	}
+
+	private function _createWidget($class, $properties) {
+		$className = ucfirst($class) . 'Widget';
+		$widget = new $className;
+		$widget->setupProperties($properties);
+		$widget->init();
+		return $widget;
 	}
 
 }

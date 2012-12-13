@@ -1,3 +1,9 @@
+<?php
+	$this->breadcrumbs = array(
+		'Installation',
+	);
+?>
+
 <h4>1. Installation</h4>
 
 <p>To install Tikori 5:</p>
