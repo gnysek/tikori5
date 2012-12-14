@@ -14,6 +14,7 @@ class Model {
 	protected $_table;
 	protected $_fields;
 	protected $_values = array();
+	protected $_rules = array();
 	protected $_related = null;
 	protected $_primaryKey = 'id';
 	protected $_scopes = array();
@@ -26,6 +27,7 @@ class Model {
 		$this->_scopes = $this->scopes();
 		$this->_relations = $this->relations();
 		$this->_fields = $this->getFields();
+		$this->_rules = $this->rules();
 		$this->_table = $this->getTable();
 		$this->_primaryKey = $this->getPK();
 	}
@@ -46,6 +48,10 @@ class Model {
 		if (is_array($values)) {
 			$this->_values = $values;
 		}
+	}
+	
+	public function rules() {
+		return array();
 	}
 
 	/** find * */

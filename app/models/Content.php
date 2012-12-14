@@ -12,7 +12,7 @@ class Content extends Model {
 	public static function model($model = __CLASS__) {
 		return parent::model($model);
 	}
-
+	
 	public function relations() {
 		return array(
 			'comments' => array(self::HAS_MANY, 'Comments', 'content_id'),
