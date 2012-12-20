@@ -9,9 +9,10 @@ class Model {
 	const HAS_ONE = 'HAS_ONE';
 	const HAS_MANY = 'HAS_MANY';
 	const STATS = 'STATS';
+
 //	const MANY_MANY = 4;
 
-	protected $_table;
+	protected $_table = '';
 	protected $_fields;
 	protected $_values = array();
 	protected $_rules = array();
@@ -33,7 +34,7 @@ class Model {
 	}
 
 	public function getTable() {
-		return '';
+		return $this->_table;
 	}
 
 	public function getPK() {
@@ -49,11 +50,11 @@ class Model {
 			$this->_values = $values;
 		}
 	}
-	
+
 	public function getValues() {
 		return $this->_values;
 	}
-	
+
 	public function rules() {
 		return array();
 	}
@@ -84,11 +85,12 @@ class Model {
 		return $this;
 	}
 
-	public function findByPK($value) {
-		return $this->findBy($this->_primaryKey, $value);
-	}
+	// duplicate of load in fact...
+//	public function findByPK($value) {
+//		return $this->findBy($this->_primaryKey, $value);
+//	}
 
-	public function findBy($key, $value) {
+	public function findBy($key, $value, $onlyFirst = false) {
 		if (!is_numeric($value)) {
 			$value = DB::protect($value);
 		}
@@ -99,6 +101,11 @@ class Model {
 			/* @var $row Result */
 			$c = self::model(get_called_class());
 			$c->setValues($row->getIterator()->getArrayCopy());
+
+			if ($onlyFirst) {
+				return $c;
+			}
+
 			$return[] = $c;
 		}
 		return $return;

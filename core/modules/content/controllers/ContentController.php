@@ -7,7 +7,9 @@
 class ContentController extends Controller {
 
 	public function nodeAction($id) {
-		$this->render('', $id);
+		$result = ContentTranslation::model()->findBy('page_id', $id, true);
+
+		$this->render('node', array('node' => $result));
 	}
 
 	/**
@@ -16,18 +18,16 @@ class ContentController extends Controller {
 	 */
 	public function staticAction($path) {
 
-		$model = new ContentTranslation();
-		$result = $model->findBy('url', $path);
-//		var_dump($result);
-		foreach($result as $k => $v) {
-			echo $k;
-			var_dump($v->getValues());
-		}
-
-		// get id
-		$id = 0;
+		$result = ContentTranslation::model()->findBy('url', $path, true);
+//		foreach($result as $k => $v) {
+//			echo $k;
+//			var_dump($v->getValues());
+//		}
+//		var_dump($result->getValues());
+//		var_dump($result->content->getValues());
 		// forward action
-		return $this->nodeAction($path);
+		$this->render('node', array('node' => $result));
+//		return $this->nodeAction($path);
 	}
 
 }

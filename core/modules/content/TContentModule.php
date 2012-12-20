@@ -9,7 +9,6 @@ class TContentModule extends TModule {
 	public function init() {
 		// default routes
 		Route::set('content-nodes', 'content/view(/<id>)', array(
-			'directory' => 'admin',
 			'id' => '[0-9]+'
 		))->defaults(array(
 			'controller' => 'Content',
@@ -23,7 +22,7 @@ class TContentModule extends TModule {
 			'controller' => 'Content',
 			'action' => 'static',
 		));
-		
+
 		return true;
 	}
 

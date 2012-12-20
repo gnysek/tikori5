@@ -78,6 +78,15 @@ class Controller {
 		if (substr($file, 0, 2) != '//') {
 			$paths[] = Core::app()->appDir . '/views/' . $this->controller . '/';
 			$paths[] = Core::app()->coreDir . '/views/' . $this->controller . '/';
+
+			$modules = Core::app()->cfg('modules');
+			if (!empty($modules)) {
+				foreach ($modules as $module => $config) {
+					$module = strtolower($module);
+					$paths[] = Core::app()->appDir . '/modules/' . $module . '/views/' . /* strtolower($this->controller) . */ '/';
+					$paths[] = Core::app()->coreDir . '/modules/' . $module . '/views/' . /* strtolower($this->controller) . */ '/';
+				}
+			}
 		}
 
 		$paths[] = Core::app()->appDir . '/views/';
@@ -103,7 +112,7 @@ class Controller {
 
 		$widget = $this->_createWidget($class, $properties);
 		$widget->run();
-		
+
 		if ($captureOutput) {
 			return ob_get_clean();
 		}

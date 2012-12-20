@@ -182,7 +182,7 @@ class DbQuery {
 				$sql[] = 'WHERE';
 				$where = array();
 				foreach ($this->_where as $w) {
-					$where[] = '`' . $this->_fromAliases[(empty($w[3])) ? array_shift(array_values($this->_from)) : $w[3]] . '`.' . $w[0] . ' ' . $w[1] . ' ' . $w[2];
+					$where[] = '`' . $this->_fromAliases[(empty($w[3])) ? array_shift(array_values($this->_from)) : $w[3]] . '`.`' . $w[0] . '` ' . $w[1] . ' ' . $w[2];
 				}
 				$sql[] = implode(' AND ', $where);
 			}

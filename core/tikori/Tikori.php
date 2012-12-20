@@ -92,6 +92,19 @@ class Tikori {
 			}
 		}
 
+		// default routes
+//		Route::set('tikori-admin', '<directory>(/<controller>(/<action>(/<id>)))(.html)', array('directory' => 'admin', 'id' => '.+'))
+//			->defaults(array(
+//				'controller' => 'admin',
+//				'action' => 'index',
+//			));
+////		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))(.html)')
+		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))')
+			->defaults(array(
+				'controller' => 'default',
+				'action' => 'index',
+			));
+
 		// request
 		$this->request = new Request();
 		Log::addLog('Request created');

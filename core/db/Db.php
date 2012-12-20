@@ -61,7 +61,7 @@ class Db {
 	 * @return Collection 
 	 */
 	public static function query($sql, $skip = '', $assoc = TRUE) {
-		Log::addLog('SQL QUERY: <tt>' . substr($sql, 0, 30) . '&hellip;</tt>');
+		Log::addLog('SQL QUERY: <tt title="'. $sql .'">' . substr($sql, 0, 30) . '&hellip;</tt>');
 
 		self::$_queries++;
 

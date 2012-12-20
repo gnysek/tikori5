@@ -28,18 +28,6 @@ class Route {
 		foreach (Core::app()->cfg('routes') as $key => $route) {
 			Route::set($key, $route['expr'], (!empty($route['params'])) ? $route['params'] : array())->defaults($route['defaults']);
 		}
-		// default routes
-		Route::set('tikori-admin', '<directory>(/<controller>(/<action>(/<id>)))(.html)', array('directory' => 'admin', 'id' => '.+'))
-			->defaults(array(
-				'controller' => 'admin',
-				'action' => 'index',
-			));
-//		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))(.html)')
-		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))')
-			->defaults(array(
-				'controller' => 'default',
-				'action' => 'index',
-			));
 	}
 
 	/**
