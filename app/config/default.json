@@ -21,5 +21,10 @@
 				"action": "index"
 			}
 		}
+	},
+	"modules": {
+		"content": {
+			
+		}
 	}
 }

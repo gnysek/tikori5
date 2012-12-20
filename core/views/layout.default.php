@@ -7,11 +7,11 @@
 	</head>
 	<body>
 		<div id="layout">
-			<div id="inner-layout">
+			<div id="inner-layout" class="cream-bg">
 				<h1><?php echo Core::app()->cfg('appName'); ?></h1>
 				<?php echo $content; ?>
 			</div>
-			<div class="footer">
+			<div class="footer red-less-bg">
 				&copy; 2012 - <?php date('Y'); ?> <a href="http://gnysek.pl" target="_blank">gnysek.pl</a>
 				<div class="pull-right">
 					<?php if (DB::queries() > 0): ?>

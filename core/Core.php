@@ -99,7 +99,7 @@ class Core {
 	 * @return boolean
 	 * @throws Exception
 	 */
-	public static function autoload($class) {
+	public static function autoload($class, $throw = true) {
 		$search = str_replace('_', '/', $class);
 
 		preg_match('#(.*)/(.*)#i', $search, $match);
@@ -114,12 +114,17 @@ class Core {
 		foreach (Core::app()->autoloadPaths as $dir) {
 			$filename = $dir . $search;
 			if (file_exists($filename)) {
+				if (class_exists('Log')) {
+					Log::addLog('Loading <tt>' . $class . '</tt> from <tt>' . $filename . '<tt>');
+				}
 				require $filename;
 				return true;
 			}
 		}
 
-		throw new Exception("Cannot autoload class " . $class . ' [' . $search . ']');
+		if ($throw) {
+			throw new Exception("Cannot autoload class " . $class . ' [' . $search . ']');
+		}
 		return false;
 	}
 
@@ -143,7 +148,7 @@ class Core {
 
 		return $_time;
 	}
-	
+
 	public static function poweredBy() {
 		return 'Powered by <a href="http://tikori5.gnysek.pl/" target="_blank">Tikori5</a> v' . self::VERSION;
 	}

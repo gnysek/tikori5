@@ -34,7 +34,8 @@ class Route {
 				'controller' => 'admin',
 				'action' => 'index',
 			));
-		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))(.html)')
+//		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))(.html)')
+		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))')
 			->defaults(array(
 				'controller' => 'default',
 				'action' => 'index',

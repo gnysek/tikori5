@@ -50,6 +50,10 @@ class Model {
 		}
 	}
 	
+	public function getValues() {
+		return $this->_values;
+	}
+	
 	public function rules() {
 		return array();
 	}

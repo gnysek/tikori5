@@ -12,6 +12,10 @@
  */
 class ContentTranslation extends Model {
 	//put your code here
+	
+	public function getTable() {
+		return 'content_translation';
+	}
 }
 
 ?>

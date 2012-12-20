@@ -66,14 +66,39 @@ class Tikori {
 //		$this->defaultCfg();
 
 		$this->reconfigure($config);
+		Route::reconfigure();
 		Log::addLog('Reconfigured');
+
+		// configure modules
+		$modules = $this->cfg('modules');
+		if (!empty($modules)) {
+			foreach ($this->cfg('modules') as $module => $config) {
+				foreach (array(true, false) as $includeCoreDir) {
+					$this->addAutoloadPaths(array(
+						'modules/' . $module,
+						'modules/' . $module . '/config',
+						'modules/' . $module . '/controllers',
+						'modules/' . $module . '/models',
+						'modules/' . $module . '/views',
+						), $includeCoreDir);
+				}
+				$moduleClass = ucfirst($module) . 'Module';
+				if (Core::autoload($moduleClass, false)) {
+					$class = new $moduleClass;
+					if (method_exists($class, 'init')) {
+						$class->init();
+					}
+				}
+			}
+		}
 
 		// request
 		$this->request = new Request();
 		Log::addLog('Request created');
 		$this->response = new Response();
 		Log::addLog('Response created');
-		Route::reconfigure();
+
+		// process route
 		$this->route = Route::process_uri($this->request->getRouterPath());
 
 		try {
@@ -132,12 +157,12 @@ class Tikori {
 	 */
 	public function registerAutoloadPaths() {
 		// core directory - can be shared on server :) false then true
-		for ($i = 0; $i <= 1; $i++) {
+		foreach (array(true, false) as $i) {
 			$this->addAutoloadPaths(array(
 				'',
 				'controllers',
 				'models',
-				'modules',
+//				'modules',
 				'db',
 				'helpers',
 				'widgets',
@@ -158,12 +183,17 @@ class Tikori {
 	 */
 	public function addAutoloadPaths($paths, $core = false) {
 		if (is_string($paths)) {
-			return $this->addAutoloadPaths(array($paths));
+			return $this->addAutoloadPaths(array($paths), $core);
 		} else {
 			foreach ($paths as $k => $dir) {
 				$dir = rtrim((($core) ? $this->coreDir : $this->appDir) . '/' . $dir, '/');
-				if (!in_array($dir, $this->autoloadPaths)) {
-					$this->autoloadPaths[] = $dir;
+				if (!in_array($dir, $this->autoloadPaths) and file_exists($dir)) {
+//					$this->autoloadPaths[] = $dir;
+					if (!empty($this->autoloadPaths)) {
+						array_unshift($this->autoloadPaths, $dir);
+					} else {
+						$this->autoloadPaths[] = $dir;
+					}
 				}
 			}
 		}
