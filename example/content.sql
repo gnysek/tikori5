@@ -42,3 +42,13 @@ ALTER TABLE `content_translation`
   ADD CONSTRAINT `content_translation_ibfk_1` FOREIGN KEY (`language_id`) REFERENCES `language` (`language_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `content_translation_ibfk_2` FOREIGN KEY (`page_id`) REFERENCES `content` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 SET FOREIGN_KEY_CHECKS=1;
+
+INSERT INTO `content` (`id`, `name`, `enabled`, `path`, `parent`, `type`, `created`, `updated`, `comments`, `author`) VALUES
+(1, 'Pierwszy wpis', 1, '/', NULL, 0, 2012, 2012, 0, 0);
+
+INSERT INTO `content_translation` (`id`, `page_id`, `language_id`, `name`, `short`, `long`, `img`, `url`, `comm`) VALUES
+(1, 1, 1, 'Pierwszy wpis test', 'Short', NULL, NULL, 'test', 0);
+
+INSERT INTO `language` (`language_id`, `language_code`) VALUES
+(1, 'pl'),
+(2, 'en');
