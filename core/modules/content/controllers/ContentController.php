@@ -14,7 +14,7 @@ class ContentController extends Controller {
 
 	/**
 	 * Displays content using static routing - example.com/&lt;path&gt;.html
-	 * @param type $path Content static (seo) link to display
+	 * @param string $path Content static (seo) link to display
 	 */
 	public function staticAction($path) {
 

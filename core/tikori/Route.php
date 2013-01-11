@@ -55,7 +55,7 @@ class Route {
 	 *
 	 * @param   string  $name   route name
 	 * @return  Route
-	 * @throws  Kohana_Exception
+	 * @throws  Exception
 	 */
 	public static function get($name) {
 		if (!isset(Route::$_routes[$name])) {
@@ -165,7 +165,7 @@ class Route {
 	 *
 	 * @param   string  $uri     URI
 	 * @param   array   $routes  Route
-	 * @return  array
+	 * @return  Route
 	 */
 	public static function process_uri($uri, $routes = NULL) {
 		$uri = trim($uri, '/');
@@ -363,7 +363,7 @@ class Route {
 	 *
 	 * @param   array   $params URI parameters
 	 * @return  string
-	 * @throws  Kohana_Exception
+	 * @throws  Exception
 	 * @uses    Route::REGEX_Key
 	 */
 	public function uri(array $params = NULL) {
@@ -422,7 +422,7 @@ class Route {
 					$params[$param] = $this->_defaults[$param];
 				} else {
 					// Ungrouped parameters are required
-					throw new Kohana_Exception('Required route parameter not passed: :param', array(
+					throw new Exception('Required route parameter not passed: :param', array(
 						':param' => $param,
 					));
 				}
@@ -463,11 +463,14 @@ class Route {
 			$controller = new $class;
 			/* @var $controller Controller */
 			$controller->setController($this->getController());
-			$controller->setAction($this->getAction());
-			$controller->setParams($this->params);
+//			$controller->setAction($this->getAction());
+//			$controller->setParams($this->params);
 		} catch (Exception $e) {
-			throw new RouteNotFoundException('Dispatch controller: <er>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</er>: ' . $e->getMessage());
+			$controller = new Controller();
+			//throw new RouteNotFoundException('Dispatch controller: <er>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</er>: ' . $e->getMessage());
 		}
+		$controller->setAction($this->getAction());
+		$controller->setParams($this->params);
 
 		if (!method_exists($controller, $this->getActionMethodName())) {
 			$this->setAction('default');
@@ -480,21 +483,27 @@ class Route {
 			try {
 				$method = $reflection->getMethod($this->getActionMethodName());
 			} catch (Exception $ref) {
-				throw new RouteNotFoundException('Unknown action');
+				Core::app()->response->status(404);
+				$this->setAction('httpStatus');
+				//throw new RouteNotFoundException('Unknown action');
 			}
-			/* @var $method ReflectionMethod */
-			if ($method->getNumberOfRequiredParameters() > 0) {
+
+			// check agains param numbers - if it was an error (method not found), skip
+			if (!empty($method)) {
+				/* @var $method ReflectionMethod */
+				if ($method->getNumberOfRequiredParameters() > 0) {
 //				var_dump($method->getNumberOfRequiredParameters());
 
-				foreach ($method->getParameters() as $paramObject) {
-					/* @var $paramObject ReflectionParameter */
+					foreach ($method->getParameters() as $paramObject) {
+						/* @var $paramObject ReflectionParameter */
 
-					if ($paramObject->isOptional() === false and empty($this->params[$paramObject->name])) {
-						throw new RouteNotFoundException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
+						if ($paramObject->isOptional() === false and empty($this->params[$paramObject->name])) {
+							//throw new RouteNotFoundException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
+							throw new ErrorException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
+						}
+
+						$finalParams[] = (empty($this->params[$paramObject->name])) ? null : $this->params[$paramObject->name];
 					}
-
-					$finalParams[] = (empty($this->params[$paramObject->name])) ? null : $this->params[$paramObject->name];
-				}
 //				var_dump($this->params);
 //				var_dump($method->getParameters());
 //				if (empty($this->params['id'])) {
@@ -502,6 +511,7 @@ class Route {
 //				} else {
 //					$finalParams[] = $this->params['id'];
 //				}
+				}
 			}
 
 //			$params = explode('/', $);

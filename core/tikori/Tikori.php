@@ -3,7 +3,8 @@
 /**
  * @property string $appDir Application main directory (where index.php is)
  * @property Request $request
- * @property Response $request
+ * @property Response $response
+ * @property Route $route
  * @property int $mode Core::MODE_XXX
  * @property array $autoloadPaths Array of autoload paths
  */
@@ -17,7 +18,7 @@ class Tikori {
 	public $coreDir = '';
 
 	/**
-	 * @var Request 
+	 * @var Request
 	 */
 	public $request = null;
 
@@ -40,7 +41,7 @@ class Tikori {
 	/**
 	 * It runs application. Whole magic is here, abracadabra!
 	 * Echoes results, throw exceptions and 404s, redirects etc.
-	 * 
+	 *
 	 * @param type $path Path to APP parent dir
 	 * @param string $config config file name without .json, usually 'default'
 	 * @throws RouteNotFoundException
@@ -114,16 +115,17 @@ class Tikori {
 		// process route
 		$this->route = Route::process_uri($this->request->getRouterPath());
 
-		try {
-			if ($this->route == null)
-				throw new RouteNotFoundException('Not found');
-			$this->route->dispatch();
-		} catch (RouteNotFoundException $e) {
-			$view = new Controller();
-			$body = $view->renderPartial('error.404', array('content' => 'Requested url cannot be found', 'debug' => $e->getMessage()), true);
-			$this->response->status(404);
-			$this->response->write($body, true);
-		}/* catch (Exception $e) {
+//		try {
+		if ($this->route == null)
+			throw new RouteNotFoundException('Route not found');
+
+		$this->route->dispatch();
+		/* } catch (RouteNotFoundException $e) {
+		  $view = new Controller();
+		  $body = $view->renderPartial('error.404', array('content' => 'Requested url cannot be found', 'debug' => $e->getMessage()), true);
+		  $this->response->status(404);
+		  $this->response->write($body, true);
+		  }/* catch (Exception $e) {
 		  $view = new Controller();
 		  $body = $view->renderPartial('error.404', array('content' => $e->getMessage()), true);
 		  $this->response->status(404);
@@ -190,7 +192,7 @@ class Tikori {
 	/**
 	 * Adds paths for autload if you need some another paths than default.
 	 * Usually it should be set in config and not called from app.
-	 * 
+	 *
 	 * @param string|array $paths Paths to add as array values
 	 * @return type
 	 */
@@ -313,7 +315,7 @@ class Tikori {
 
 	/**
 	 * Returns base url for app
-	 * 
+	 *
 	 * @return string URL, like http://foo.bar/
 	 */
 	public function baseUrl() {

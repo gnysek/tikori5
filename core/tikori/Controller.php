@@ -23,6 +23,11 @@ class Controller {
 		$this->params = array_merge($this->params, $params);
 	}
 
+	public function httpStatusAction() {
+		$status = Core::app()->response->status();
+		$this->render('http404', array('status' => $status, 'message' => Response::getMessageForCode($status)));
+	}
+
 //	public function defaultAction() {
 //		throw new RouteNotFoundException('Unknown action');
 //	}

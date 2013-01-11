@@ -69,7 +69,7 @@ class TConfig {
 	}
 
 	public function delete($item) {
-		
+		throw new Exception('Unimplemented');
 	}
 
 	//load('x') loads x.json, load('forum:x') loads modules/forum/config/x.json :)
@@ -95,7 +95,7 @@ class TConfig {
 	}
 
 	public function save($file, $item) {
-		
+		throw new Exception('Unimplemented');
 	}
 
 //	private function _configMerge($key, $value) {
@@ -110,5 +110,4 @@ class TConfig {
 //
 //		return true;
 //	}
-
 }
