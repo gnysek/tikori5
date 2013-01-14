@@ -92,6 +92,18 @@ class DbQuery {
 		return $this;
 	}
 
+	public function order($orderby) {
+		return $this;
+	}
+
+	public function limit($limit = -1, $offset = 0) {
+		if ($limit > 0) {
+			$this->_limit = $limit;
+			$this->_offset = $offset;
+		}
+		return $this;
+	}
+
 	public function joinOn($table, $on) {
 //		$cnt = count($this->_joinTables);
 
@@ -186,8 +198,12 @@ class DbQuery {
 				}
 				$sql[] = implode(' AND ', $where);
 			}
-			// insert
+
+			if ($this->_limit>0) {
+				$sql[] = 'LIMIT ' . $this->_offset . ', ' . $this->_limit;
+			}
 		} else {
+			// insert
 			$fld = array();
 			$val = array();
 

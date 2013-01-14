@@ -9,6 +9,20 @@
 		<div id="layout">
 			<div id="inner-layout" class="cream-bg">
 				<h1><?php echo Core::app()->cfg('appName'); ?></h1>
+				<hr/>
+				<?php
+				if (!empty($this->breadcrumbs)) {
+					$breadcrumbs = $this->widget('Breadcrumbs', array(
+						'links' => $this->breadcrumbs,
+					), true);
+				} else {
+					$breadcrumbs = $this->widget('Breadcrumbs', array(
+						'links' => array(Core::app()->cfg('appName')),
+					), true);
+				}
+				echo $breadcrumbs;
+				?>
+
 				<?php echo $content; ?>
 			</div>
 			<div class="footer red-less-bg">

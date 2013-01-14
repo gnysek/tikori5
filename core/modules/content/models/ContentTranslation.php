@@ -9,6 +9,16 @@
  * Description of ContentTranslation
  *
  * @author user
+ * @property Content $content
+ * @property int $id
+ * @property int $page_id
+ * @property int $language_id
+ * @property string $name
+ * @property string $short
+ * @property string $long
+ * @property string $img
+ * @property string $url
+ * @property int $comm
  */
 class ContentTranslation extends Model {
 

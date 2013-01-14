@@ -12,6 +12,17 @@
 	"seolinks": {
 		"enabled": false,
 		"routes": {
+			"content-all": {
+				"expr": "content(/<action>(/<settings>))",
+				"params": {
+					"action": "[a-z]+",
+					"settings": ".*"
+				},
+				"defaults": {
+					"controller": "content",
+					"action": "default"
+				}
+			},
 			"content-static": {
 				"expr": "<path>.html",
 				"params": {

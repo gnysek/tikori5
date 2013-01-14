@@ -538,7 +538,7 @@ class Route {
 			call_user_func_array(array($controller, $this->getAction() . 'Action'), $finalParams);
 			$response = ob_get_clean();
 
-			Log::addLog('Owerwriting body using last controller action');
+			Log::addLog('Overwriting body using last controller action');
 
 			Core::app()->response->body($response);
 		} catch (DbError $e) {

@@ -102,7 +102,7 @@ class Tikori {
 ////		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))(.html)')
 		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))')
 			->defaults(array(
-				'controller' => 'default',
+				'controller' => ($this->cfg('default') !== null) ? $this->cfg('default') : 'default',
 				'action' => 'index',
 			));
 
@@ -116,8 +116,9 @@ class Tikori {
 		$this->route = Route::process_uri($this->request->getRouterPath());
 
 //		try {
-		if ($this->route == null)
+		if ($this->route == null) {
 			throw new RouteNotFoundException('Route not found');
+		}
 
 		$this->route->dispatch();
 		/* } catch (RouteNotFoundException $e) {

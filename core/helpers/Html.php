@@ -31,6 +31,10 @@ class Html {
 				foreach (array_slice($url, 1) as $key => $entry) {
 					$path .= '&' . $key . '=' . $entry;
 				}
+			} else {
+				foreach (array_slice($url, 1) as $key => $entry) {
+					$path .= '/' . $key . '/' . $entry;
+				}
 			}
 		}
 

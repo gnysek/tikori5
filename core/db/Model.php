@@ -116,8 +116,18 @@ class Model {
 		return $this;
 	}
 
-	public function findAll() {
-		return $this;
+	public function findAll($limit = -1, $offset =0) {
+		$sql = DbQuery::sql()->select()->from($this->_table)->limit($limit, $offset);
+		$result = $sql->execute();
+		$return = array();
+		foreach ($result as $row) {
+			/* @var $row Result */
+			$c = self::model(get_called_class());
+			$c->setValues($row->getIterator()->getArrayCopy());
+
+			$return[] = $c;
+		}
+		return $return;
 	}
 
 	// eager

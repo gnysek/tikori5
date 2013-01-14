@@ -30,4 +30,10 @@ class ContentController extends Controller {
 //		return $this->nodeAction($path);
 	}
 
+	public function defaultAction() {
+		$result = ContentTranslation::model()->findAll(10);
+
+		$this->render('list', array('collection' => $result));
+	}
+
 }

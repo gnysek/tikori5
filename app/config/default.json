@@ -1,7 +1,6 @@
 {
 	"appName": "Tikori 5 Test APP",
-	"host": "http://betahmt.pl/code/",
-	"default": "news",
+	"default": "content",
 	"url": {
 		"addScriptName": false,
 		"pathInsteadGet": false
