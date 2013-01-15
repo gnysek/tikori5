@@ -1,6 +1,7 @@
 <?php
 
 class Route {
+
 	// Defines the pattern of a <segment>
 
 	const REGEX_KEY = '<([a-zA-Z0-9_]++)>';
@@ -15,7 +16,6 @@ class Route {
 	 * @var  string  default action for all routes
 	 */
 	public static $default_action = 'index';
-	public $area = '';
 
 	/**
 	 * @var  array
@@ -42,6 +42,7 @@ class Route {
 	 * @param   string  $name           route name
 	 * @param   string  $uri_callback   URI pattern
 	 * @param   array   $regex          regex patterns for route keys
+	 *
 	 * @return  Route
 	 */
 	public static function set($name, $uri_callback = NULL, $regex = NULL) {
@@ -54,6 +55,7 @@ class Route {
 	 *     $route = Route::get('default');
 	 *
 	 * @param   string  $name   route name
+	 *
 	 * @return  Route
 	 * @throws  Exception
 	 */
@@ -86,6 +88,7 @@ class Route {
 	 *     $name = Route::name($route)
 	 *
 	 * @param   Route   $route  instance
+	 *
 	 * @return  string
 	 */
 	public static function name(Route $route) {
@@ -100,6 +103,7 @@ class Route {
 	 * @param   string  $name       route name
 	 * @param   array   $params     URI parameters
 	 * @param   mixed   $protocol   protocol string or boolean, adds protocol and domain
+	 *
 	 * @return  string
 	 * @since   3.0.7
 	 * @uses    URL::site
@@ -165,6 +169,7 @@ class Route {
 	 *
 	 * @param   string  $uri     URI
 	 * @param   array   $routes  Route
+	 *
 	 * @return  Route
 	 */
 	public static function process_uri($uri, $routes = NULL) {
@@ -173,17 +178,31 @@ class Route {
 		$routes = (empty($routes)) ? Route::all() : $routes;
 		$params = NULL;
 
-		Log::addLog('Processing URI <tt>/' . $uri . '</tt> against ' . count($routes) . ' routes');
+		// get area
+		$area = null;
+		if (Core::app()->cfg('areas') !== null) {
+			$test = end(Core::app()->cfg('areas'));
+
+			if (preg_match('#^(' . $test . ')(?:/*).*#', $uri)) {
+				$area = $test;
+				$uri = preg_replace('#^(' . $test . ')(?:/*)(.*)#', '$2', $uri);
+			}
+		}
+
+		Log::addLog('Processing URI <tt>/' . $uri . '</tt> against ' . count($routes) . ' routes' . (empty($area) ? '' : ' using route <tt>' . $area . '</tt>'));
 
 		/* @var $route Route */
 		foreach ($routes as $name => $route) {
 			// We found something suitable
 			if ($params = $route->matches($uri)) {
 				$route->params = $params;
-				return /* clone */ $route;
+				if (!empty($area)) {
+					$route->area = $area;
+				}
+				return $route;
 //				return array(
 //					'params' => $params,
-//					'route' => $route,
+//					'route'  => $route,
 //				);
 			}
 		}
@@ -192,12 +211,12 @@ class Route {
 	}
 
 	/**
-	 * @var callback	The callback method for routes
+	 * @var callback    The callback method for routes
 	 */
 	protected $_callback;
 
 	/**
-	 * @var string		route URI
+	 * @var string        route URI
 	 */
 	protected $_uri = '';
 
@@ -217,9 +236,10 @@ class Route {
 	protected $_route_regex;
 
 	/**
-	 * @var	array 
+	 * @var array
 	 */
 	public $params = array();
+	public $area = '';
 
 	/**
 	 * Creates a new route. Sets the URI and regular expressions for keys.
@@ -236,19 +256,20 @@ class Route {
 	 *
 	 *     $route = new Route(function($uri)
 	 *     {
-	 *     	if (list($controller, $action, $param) = explode('/', $uri) AND $controller == 'foo' AND $action == 'bar')
-	 *     	{
-	 *     		return array(
-	 *     			'controller' => 'foobar',
-	 *     			'action' => $action,
-	 *     			'id' => $param,
-	 *     		);
-	 *     	},
-	 *     	'foo/bar/<id>'
+	 *         if (list($controller, $action, $param) = explode('/', $uri) AND $controller == 'foo' AND $action == 'bar')
+	 *         {
+	 *             return array(
+	 *                 'controller' => 'foobar',
+	 *                 'action' => $action,
+	 *                 'id' => $param,
+	 *             );
+	 *         },
+	 *         'foo/bar/<id>'
 	 *     });
 	 *
 	 * @param   mixed   $uri    route URI pattern or lambda/callback function
 	 * @param   array   $regex  key patterns
+	 *
 	 * @return  void
 	 * @uses    Route::_compile
 	 */
@@ -286,6 +307,7 @@ class Route {
 	 * If no parameter is passed, this method will act as a getter.
 	 *
 	 * @param   array   $defaults   key values
+	 *
 	 * @return  $this or array
 	 */
 	public function defaults(array $defaults = NULL) {
@@ -314,6 +336,7 @@ class Route {
 	 *     }
 	 *
 	 * @param   string  $uri    URI to match
+	 *
 	 * @return  array   on success
 	 * @return  FALSE   on failure
 	 */
@@ -324,8 +347,7 @@ class Route {
 
 			if (!is_array($params))
 				return FALSE;
-		}
-		else {
+		} else {
 			if (!preg_match($this->_route_regex, $uri, $matches))
 				return FALSE;
 
@@ -362,6 +384,7 @@ class Route {
 	 *     ));
 	 *
 	 * @param   array   $params URI parameters
+	 *
 	 * @return  string
 	 * @throws  Exception
 	 * @uses    Route::REGEX_Key
@@ -460,15 +483,20 @@ class Route {
 		$controller = null;
 		try {
 			$class = $this->getControllerClassName();
-			$controller = new $class;
+			$controller = new $class($this->area);
 			/* @var $controller Controller */
 			$controller->setController($this->getController());
 //			$controller->setAction($this->getAction());
 //			$controller->setParams($this->params);
 		} catch (Exception $e) {
-			$controller = new Controller();
-			//throw new RouteNotFoundException('Dispatch controller: <er>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</er>: ' . $e->getMessage());
+			$controller = new Controller($this->area);
+//			throw new RouteNotFoundException('Dispatch controller: <er>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</er>: ' . $e->getMessage());
 		}
+
+		if (empty($this->_route_regex)) {
+			$this->setHttpStatusAction();
+		}
+
 		$controller->setAction($this->getAction());
 		$controller->setParams($this->params);
 
@@ -482,9 +510,8 @@ class Route {
 
 			try {
 				$method = $reflection->getMethod($this->getActionMethodName());
-			} catch (Exception $ref) {
-				Core::app()->response->status(404);
-				$this->setAction('httpStatus');
+			} catch (Exception $e) {
+				$this->setHttpStatusAction();
 				//throw new RouteNotFoundException('Unknown action');
 			}
 
@@ -540,6 +567,7 @@ class Route {
 
 			Log::addLog('Overwriting body using last controller action');
 
+//			Core::app()->response->status(200);
 			Core::app()->response->body($response);
 		} catch (DbError $e) {
 			ob_get_clean();
@@ -555,7 +583,7 @@ class Route {
 	}
 
 	public function getControllerClassName() {
-		return ucfirst($this->getController()) . 'Controller';
+		return ucfirst((!empty($this->area) ? ucfirst($this->area) . '_' : '') . $this->getController()) . 'Controller';
 	}
 
 	public function getAction() {
@@ -568,6 +596,12 @@ class Route {
 
 	public function setAction($action) {
 		return $this->params['action'] = $action;
+	}
+
+	public function setHttpStatusAction($status = 404) {
+		$this->params['action'] = 'httpStatus';
+		$this->params['status'] = $status;
+		return true;
 	}
 
 	public function getDirectory() {

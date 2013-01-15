@@ -44,6 +44,7 @@ class Tikori {
 	 *
 	 * @param type $path Path to APP parent dir
 	 * @param string $config config file name without .json, usually 'default'
+	 *
 	 * @throws RouteNotFoundException
 	 */
 	public function init($path = '', $config = 'default') {
@@ -81,7 +82,7 @@ class Tikori {
 						'modules/' . $module . '/controllers',
 						'modules/' . $module . '/models',
 						'modules/' . $module . '/views',
-						), $includeCoreDir);
+					), $includeCoreDir);
 				}
 				$moduleClass = ucfirst($module) . 'Module';
 				if (Core::autoload($moduleClass, false)) {
@@ -102,9 +103,9 @@ class Tikori {
 ////		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))(.html)')
 		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))')
 			->defaults(array(
-				'controller' => ($this->cfg('default') !== null) ? $this->cfg('default') : 'default',
-				'action' => 'index',
-			));
+			'controller' => ($this->cfg('default') !== null) ? $this->cfg('default') : 'default',
+			'action'     => 'index',
+		));
 
 		// request
 		$this->request = new Request();
@@ -115,23 +116,11 @@ class Tikori {
 		// process route
 		$this->route = Route::process_uri($this->request->getRouterPath());
 
-//		try {
 		if ($this->route == null) {
-			throw new RouteNotFoundException('Route not found');
+			$this->route = new Route();
 		}
 
 		$this->route->dispatch();
-		/* } catch (RouteNotFoundException $e) {
-		  $view = new Controller();
-		  $body = $view->renderPartial('error.404', array('content' => 'Requested url cannot be found', 'debug' => $e->getMessage()), true);
-		  $this->response->status(404);
-		  $this->response->write($body, true);
-		  }/* catch (Exception $e) {
-		  $view = new Controller();
-		  $body = $view->renderPartial('error.404', array('content' => $e->getMessage()), true);
-		  $this->response->status(404);
-		  $this->response->write($body, true);
-		  } */
 
 		Log::addLog('Route handled');
 
@@ -183,7 +172,7 @@ class Tikori {
 				'helpers',
 				'widgets',
 				'tikori',
-				), $i);
+			), $i);
 		}
 
 //		var_dump($this->autoloadPaths);
@@ -195,6 +184,7 @@ class Tikori {
 	 * Usually it should be set in config and not called from app.
 	 *
 	 * @param string|array $paths Paths to add as array values
+	 *
 	 * @return type
 	 */
 	public function addAutoloadPaths($paths, $core = false) {
@@ -220,7 +210,9 @@ class Tikori {
 	 * @return int (Core::MODE_DEBUG, Core::MODE_DEV, Core::MODE_PROD)
 	 */
 	public function getMode() {
-		if (/* $this->cfg('mode') */ $this->mode === null) {
+		if ( /* $this->cfg('mode') */
+			$this->mode === null
+		) {
 			if (isset($_ENV['TIKORI_MODE'])) {
 				$this->mode = $_ENV['TIKORI_MODE'];
 			} else {
@@ -238,14 +230,15 @@ class Tikori {
 
 	public function defaultCfg() {
 		$this->_config = new Config(array(
-				'appname' => 'Unknown application',
+			'appname' => 'Unknown application',
 //				'url' => DefC_Url::getDefValues(),
 //				'db' => DefC_Db::getDefValues(),
-			));
+		));
 	}
 
 	/**
 	 * Reconfigures application using json string or array
+	 *
 	 * @param array|string $config
 	 */
 	public function reconfigure($config) {

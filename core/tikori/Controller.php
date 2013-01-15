@@ -6,6 +6,11 @@ class Controller {
 	public $controller = 'default';
 	public $action = 'default';
 	public $params = array();
+	public $area = '';
+
+	public function Controller($area = null) {
+		$this->area = $area;
+	}
 
 	public function setController($controller = '') {
 		$this->controller = $controller;
@@ -23,8 +28,8 @@ class Controller {
 		$this->params = array_merge($this->params, $params);
 	}
 
-	public function httpStatusAction() {
-		$status = Core::app()->response->status();
+	public function httpStatusAction($status = 404) {
+		Core::app()->response->status($status);
 		$this->render('http404', array('status' => $status, 'message' => Response::getMessageForCode($status)));
 	}
 
@@ -88,14 +93,20 @@ class Controller {
 			if (!empty($modules)) {
 				foreach ($modules as $module => $config) {
 					$module = strtolower($module);
-					$paths[] = Core::app()->appDir . '/modules/' . $module . '/views/' /* strtolower($this->controller) . */;
-					$paths[] = Core::app()->coreDir . '/modules/' . $module . '/views/' /* strtolower($this->controller) . */;
+					$paths[] = Core::app()->appDir . '/modules/' . $module . '/views/'; /* strtolower($this->controller) . */
+					$paths[] = Core::app()->coreDir . '/modules/' . $module . '/views/'; /* strtolower($this->controller) . */
 				}
 			}
 		}
 
 		$paths[] = Core::app()->appDir . '/views/';
 		$paths[] = Core::app()->coreDir . '/views/';
+
+		if (!empty($this->area)) {
+			foreach ($paths as $entry) {
+				array_unshift($paths, $entry . $this->area . '/');
+			}
+		}
 
 		$file = ltrim($file, '/');
 

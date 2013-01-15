@@ -5,6 +5,7 @@
 		"addScriptName": false,
 		"pathInsteadGet": false
 	},
+	"areas": ["admin"],
 	"db": {
 		"dblink": "mysql:host=localhost;dbname=tikori5",
 		"dbuser": "root"

@@ -16,7 +16,7 @@ class Core {
 	const MODE_DEBUG = -1;
 	const MODE_DEV = 0;
 	const MODE_PROD = 1;
-	const VERSION = '1.0.0&alpha;';
+	const VERSION = '5.0.0&alpha;';
 
 	/**
 	 * @var Core Main app class 

@@ -23,6 +23,8 @@
 			foreach ($files as $entry) {
 				echo $entry;
 			}
+
+			Log::getLogs();
 			?>
 		<?php endif; ?>
 		<hr/>
