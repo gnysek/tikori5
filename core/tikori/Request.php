@@ -121,7 +121,8 @@ class Request {
 		$env['REQUEST_METHOD'] = $_SERVER['REQUEST_METHOD'];
 
 		//The IP
-		$env['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
+//		$env['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
+		$env['ip'] = $_SERVER['REMOTE_ADDR'];
 
 		/**
 		 * Application paths

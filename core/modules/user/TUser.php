@@ -8,7 +8,7 @@ class User_TUser {
 
 	const U_ANONIM = -1;
 	const U_BOT = -2;
-	const D_NAME = 'Anonim';
+	const DEFAULT_NAME = 'Guest';
 	const SKEY_GET = 1;
 	const SKEY_COOKIE = 2;
 	const SKEY_OTHER = 3;
@@ -29,7 +29,15 @@ class User_TUser {
 	private $_posts = 0;
 
 	public function __construct() {
-		$this->_ip = Core::app()->request->env;
+		$this->_ip = Core::app()->cfg('request/ip');
+	}
+
+	public function isLogged() {
+		return $this->_logged;
+	}
+
+	public function isAdmin() {
+		return $this->_admin;
 	}
 
 }

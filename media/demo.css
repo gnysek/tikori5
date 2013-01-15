@@ -1,16 +1,17 @@
 @import url('reset.css');
 
-body{
+body {
 	color: #333;
 	background-color: #202E3B;
 }
 
-#layout{
+#layout {
 	max-width: 800px;
 	margin: 0px auto;
 	margin-bottom: 10px;
 }
-#inner-layout{
+
+#inner-layout {
 	padding: 10px 15px 5px 15px;
 	/*background-color: white;*/
 }
@@ -32,7 +33,12 @@ pre, code, blockquote {
 	border-radius: 3px;
 	background-color: #eee;
 }
-code.tt {padding: 0; border: none; background: none;}
+
+code.tt {
+	padding: 0;
+	border: none;
+	background: none;
+}
 
 hr {
 	height: 0px;
@@ -46,14 +52,35 @@ h1, h2, h3, h4, h5, h6 {
 	margin: 5px 0;
 	color: #444;
 }
-h3, h4, h6 {text-decoration: underline;}
-h1, h3 {font-size: 25px;}
-h2, h4 {font-size: 20px;}
-h5, h6 {font-size: 15px;}
 
-a, a:visited{color: steelblue; text-decoration: none;}
-a:hover, a:focus{color: #2F3F4F;}
-a.active{font-weight: bold;}
+h3, h4, h6 {
+	text-decoration: underline;
+}
+
+h1, h3 {
+	font-size: 25px;
+}
+
+h2, h4 {
+	font-size: 20px;
+}
+
+h5, h6 {
+	font-size: 15px;
+}
+
+a, a:visited {
+	color: steelblue;
+	text-decoration: none;
+}
+
+a:hover, a:focus {
+	color: #2F3F4F;
+}
+
+a.active {
+	font-weight: bold;
+}
 
 strong {
 	font-weight: bold;
@@ -74,27 +101,77 @@ blockquote {
 	color: #8C3136;
 }
 
-table{border: 1px solid #aaa; border-radius: 3px; border-collapse: separate; border-spacing: 0; background-color: white;}
-td, th{border-left: 1px solid #aaa; border-top: 1px solid #aaa; padding: 2px 5px;}
-th{background-color: #ddd; color: #555;}
-td{min-width: 50px;}
+table {
+	border: 3px solid #ccc;
+	/*border-collapse: separate;*/
+	border-collapse: collapse;
+	border-spacing: 0;
+	background-color: white;
+	padding: 1px;
+}
 
-tr:first-child *{border-top: none}
-td:first-child, th:first-child {border-left: none;}
+td, th {
+	border-left: 1px solid #aaa;
+	border-top: 1px solid #aaa;
+	padding: 2px 5px;
+}
 
-tr:first-child th:first-child{border-radius: 3px 0 0 0;}
-tr:first-child th:last-child {border-radius: 0 3px 0 0;}
-tr:first-child th:only-child {border-radius: 3px 3px 0 0; font-weight: bold;}
+th {
+	background-color: #e1e1e1;
+	color: #555;
+	border: 1px solid #e1e1e1;
+	border-bottom: 1px solid white;
+}
 
-tr:hover td{background-color: lightgoldenrodyellow; transition: all 0.2s ease-in-out; -webkit-transition: all 0.2s ease-in-out;}
-tr:hover th{background-color: #ccc; transition: all 0.2s ease-in-out; -webkit-transition: all 0.2s ease-in-out;}
+td {
+	border: 1px solid #e1e1e1;
+	min-width: 50px;
+}
 
-.footer{
+tbody tr:nth-child(even) {
+	background: #f1f1f1;
+}
+
+/*tr:first-child * {
+	border-top: none
+}
+
+td:first-child, th:first-child {
+	border-left: none;
+}
+
+tr:first-child th:first-child {
+	border-radius: 3px 0 0 0;
+}
+
+tr:first-child th:last-child {
+	border-radius: 0 3px 0 0;
+}
+*/
+tr:first-child th:only-child {
+	border-radius: 3px 3px 0 0;
+	font-weight: bold;
+}
+
+tr:hover td {
+	background-color: #e1e1e1;
+	transition: all 0.1s ease-in-out;
+	-webkit-transition: all 0.1s ease-in-out;
+}
+
+tr:hover th {
+	background-color: #d1d1d1;
+	transition: all 0.1s ease-in-out;
+	-webkit-transition: all 0.1s ease-in-out;
+}
+
+.footer {
 	font-size: 10px;
 	color: white;
 	padding: 5px;
 	border-radius: 0 0 3px 3px;
 }
+
 .footer a {
 	font-weight: bold;
 }
@@ -114,32 +191,80 @@ tr:hover th{background-color: #ccc; transition: all 0.2s ease-in-out; -webkit-tr
 ul, ol {
 	margin-left: 25px;
 }
+
 ul {
 	list-style: square;
 }
+
 ol {
 	list-style: decimal;
 }
 
-.blue-more{color: #202E3B}
-.blue-less{color: #2F3F4F;}
-.red-more{color: #762A2E;}
-.red-less{color: #8C3136;}
-.brown{color: #5A1F23;}
-.cream{color: #F4F3EE;}
-.cream-light{color: #EBE8DF;}
-.cream-dark{color: #DEDDD8;}
+.blue-more {
+	color: #202E3B
+}
 
-.blue-more-bg{background-color: #202E3B}
-.blue-less-bg{background-color: #2F3F4F;}
-.red-more-bg{background-color: #762A2E;}
-.red-less-bg{background-color: #8C3136;}
-.brown-bg{background-color: #5A1F23;}
-.cream-bg{background-color: #F4F3EE;}
-.cream-light-bg{background-color: #EBE8DF;}
-.cream-dark-bg{background-color: #DEDDD8;}
+.blue-less {
+	color: #2F3F4F;
+}
 
-.breadcrumbs{
+.red-more {
+	color: #762A2E;
+}
+
+.red-less {
+	color: #8C3136;
+}
+
+.brown {
+	color: #5A1F23;
+}
+
+.cream {
+	color: #F4F3EE;
+}
+
+.cream-light {
+	color: #EBE8DF;
+}
+
+.cream-dark {
+	color: #DEDDD8;
+}
+
+.blue-more-bg {
+	background-color: #202E3B
+}
+
+.blue-less-bg {
+	background-color: #2F3F4F;
+}
+
+.red-more-bg {
+	background-color: #762A2E;
+}
+
+.red-less-bg {
+	background-color: #8C3136;
+}
+
+.brown-bg {
+	background-color: #5A1F23;
+}
+
+.cream-bg {
+	background-color: #F4F3EE;
+}
+
+.cream-light-bg {
+	background-color: #EBE8DF;
+}
+
+.cream-dark-bg {
+	background-color: #DEDDD8;
+}
+
+.breadcrumbs {
 	font-size: 11px;
 	font-weight: bold;
 }

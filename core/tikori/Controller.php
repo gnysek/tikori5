@@ -7,9 +7,13 @@ class Controller {
 	public $action = 'default';
 	public $params = array();
 	public $area = '';
+	public $checkPermissions = false;
 
-	public function Controller($area = null) {
+	public function __construct($area = null) {
 		$this->area = $area;
+		if (is_callable($this,'afterConstruct')) {
+			$this->afterConstruct();
+		}
 	}
 
 	public function setController($controller = '') {
