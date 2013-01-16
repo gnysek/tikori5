@@ -4,7 +4,7 @@
  * @author Piotr Gnys <gnysek@gnysek.pl>
  * @package content
  */
-class ContentController extends Controller {
+class ContentController extends ContentAuth {
 
 	public function nodeAction($id) {
 		$result = ContentTranslation::model()->findBy('page_id', $id, true);

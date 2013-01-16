@@ -562,6 +562,7 @@ class Route {
 			Log::addLog('Calling controller: <tt>' . $this->getControllerClassName() . '::' . $this->getActionMethodName() . '</tt>');
 
 			ob_start();
+			$controller->beforeAction();
 			call_user_func_array(array($controller, $this->getAction() . 'Action'), $finalParams);
 			$response = ob_get_clean();
 

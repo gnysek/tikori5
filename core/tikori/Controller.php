@@ -11,8 +11,17 @@ class Controller {
 
 	public function __construct($area = null) {
 		$this->area = $area;
-		if (is_callable($this,'afterConstruct')) {
+//		if (is_callable(array($this, 'afterConstruct'), true)) {
+		if (method_exists($this, 'afterConstruct')) {
 			$this->afterConstruct();
+		}
+	}
+
+	public function beforeAction() {
+		if ($this->checkPermissions) {
+			if (Core::registry('session') == false) {
+				throw new Exception('Session module need to be activated in config if you want to check Permissions');
+			}
 		}
 	}
 
