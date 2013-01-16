@@ -124,31 +124,33 @@ class Tikori {
 
 		Log::addLog('Route handled');
 
-		Log::addLog('Finalizing response');
-		list($status, $header, $body) = $this->response->finalize();
-		Log::addLog('Response finalized');
+		$this->response->send();
 
-		//Send headers
-		if (headers_sent() === false) {
-			//Send status
-			if (strpos(PHP_SAPI, 'cgi') === 0) {
-				header(sprintf('Status: %s', Response::getMessageForCode($status)));
-			} else {
-				header(sprintf('HTTP/%s %s', '1.1', Response::getMessageForCode($status)), false);
-			}
-
-			//Send headers
-			foreach ($header as $name => $value) {
-				$hValues = explode("\n", $value);
-				foreach ($hValues as $hVal) {
-					header("$name: $hVal", false);
-				}
-			}
-		}
-
-		Log::addLog('Headers:<br/>' . implode('<br/>', headers_list()));
-
-		echo $body;
+//		Log::addLog('Finalizing response');
+//		list($status, $header, $body) = $this->response->finalize();
+//		Log::addLog('Response finalized');
+//
+//		//Send headers
+//		if (headers_sent() === false) {
+//			//Send status
+//			if (strpos(PHP_SAPI, 'cgi') === 0) {
+//				header(sprintf('Status: %s', Response::getMessageForCode($status)));
+//			} else {
+//				header(sprintf('HTTP/%s %s', '1.1', Response::getMessageForCode($status)), false);
+//			}
+//
+//			//Send headers
+//			foreach ($header as $name => $value) {
+//				$hValues = explode("\n", $value);
+//				foreach ($hValues as $hVal) {
+//					header("$name: $hVal", false);
+//				}
+//			}
+//		}
+//
+//		Log::addLog('Headers:<br/>' . implode('<br/>', headers_list()));
+//
+//		echo $body;
 
 		Log::addLog('Finishing application');
 		if ($this->mode != Core::MODE_PROD) {

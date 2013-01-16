@@ -20,7 +20,7 @@ class Html {
 
 		$script = '';
 		if (Core::app()->cfg('url/addScriptName') == true) {
-			$script = 'index.php';
+			$script = 'index.php/';
 		}
 		$addon = '';
 		$path = '';
@@ -31,7 +31,12 @@ class Html {
 		}
 
 		if (!empty($url[0])) {
-			if (Core::app()->cfg('url/pathInsteadGet') == true) {
+			if (count($url) == 1) {
+				if (Core::app()->cfg('default') == $url[0]) {
+					$url[0] = '';
+				}
+			}
+			else if (Core::app()->cfg('url/pathInsteadGet') == true) {
 				$addon = '?' . Request::GET_PATH_PARAM . '=';
 				foreach (array_slice($url, 1) as $key => $entry) {
 					$path .= '&' . $key . '=' . $entry;

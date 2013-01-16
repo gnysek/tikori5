@@ -73,8 +73,10 @@ class Response {
 
 	/**
 	 * Get and set status
-	 * @param	int|null $status
-	 * @return	int
+	 *
+	 * @param    int|null $status
+	 *
+	 * @return    int
 	 */
 	public function status($status = null) {
 		if (!is_null($status)) {
@@ -85,8 +87,10 @@ class Response {
 
 	/**
 	 * Get and set header
+	 *
 	 * @param   string          $name   Header name
 	 * @param   string|null     $value  Header value
+	 *
 	 * @return  string                  Header value
 	 */
 //    public function header( $name, $value = null ) {
@@ -98,7 +102,9 @@ class Response {
 
 	/**
 	 * Get and set body
+	 *
 	 * @param   string|null  $body   Content of HTTP response body
+	 *
 	 * @return  string
 	 */
 	public function body($body = null) {
@@ -110,8 +116,10 @@ class Response {
 
 	/**
 	 * Append HTTP response body
+	 *
 	 * @param   string  $body       Content to append to the current HTTP response body
 	 * @param   bool    $replace    Overwrite existing response body?
+	 *
 	 * @return  string              The updated HTTP response body
 	 */
 	public function write($body, $replace = false) {
@@ -126,7 +134,9 @@ class Response {
 
 	/**
 	 * Get and set length
+	 *
 	 * @param   int|null     $length
+	 *
 	 * @return  int
 	 */
 	public function length($length = null) {
@@ -152,6 +162,34 @@ class Response {
 		} else {
 			return array($this->_status, $this->_header, $this->_body);
 		}
+	}
+
+	public function send() {
+		Log::addLog('Sending response');
+		list($status, $header, $body) = $this->finalize();
+
+		//Send headers
+		if (headers_sent() === false) {
+			//Send status
+			if (strpos(PHP_SAPI, 'cgi') === 0) {
+				header(sprintf('Status: %s', Response::getMessageForCode($status)));
+			} else {
+				header(sprintf('HTTP/%s %s', '1.1', Response::getMessageForCode($status)), false);
+			}
+
+			//Send headers
+			foreach ($header as $name => $value) {
+				$hValues = explode("\n", $value);
+				foreach ($hValues as $hVal) {
+					header("$name: $hVal", false);
+				}
+			}
+		}
+
+		echo $body;
+
+		Log::addLog('Response sended');
+//		exit;
 	}
 
 	/**
@@ -199,6 +237,7 @@ class Response {
 	 * Etag
 	 *
 	 * Set or check etag
+	 *
 	 * @param string $etag
 	 * @param boolean $notModifiedExit
 	 */
