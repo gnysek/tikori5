@@ -33,6 +33,10 @@ class Controller {
 		$c->runAction('', 'httpStatus');
 	}
 
+	protected function _beforeRun() {
+		return true;
+	}
+
 	public function run($route, $action = null) {
 		if ($route instanceof Route) {
 			$this->area = $route->area;
@@ -77,6 +81,8 @@ class Controller {
 				throw new Exception('Cannot use Reflection on Controller: ' . $e->getMessage());
 			}
 
+			$this->checkPermissions();
+
 			// finally perform action
 			try {
 				ob_start();
@@ -118,16 +124,21 @@ class Controller {
 	}
 
 	public function beforeAction() {
+		return true;
+	}
+
+	public function afterAction() {
+		return true;
+	}
+
+	public function checkPermissions() {
+		//		var_dump($this->checkPermissions);
 		if ($this->checkPermissions) {
 			if (Core::registry('session') == false) {
 				throw new Exception('Session module need to be activated in config if you want to check Permissions');
 			}
 		}
 
-		return true;
-	}
-
-	public function afterAction() {
 		return true;
 	}
 

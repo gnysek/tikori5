@@ -2,10 +2,10 @@
 /**
  * Created by JetBrains PhpStorm.
  * User: user
- * Date: 16.01.13
- * Time: 17:31
+ * Date: 17.01.13
+ * Time: 13:30
  * To change this template use File | Settings | File Templates.
  */
-class Session extends TSession {
+class UserModule extends TUserModule {
 
 }

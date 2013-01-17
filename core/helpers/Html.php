@@ -31,6 +31,8 @@ class Html {
 				$url[0] = str_replace('@', Core::app()->route->area, $url[0]);
 			}
 		}
+		$url[0] = str_replace(array('@/', '@'), '', $url[0]);
+
 
 		if (!empty($url[0])) {
 			if (count($url) == 1) {

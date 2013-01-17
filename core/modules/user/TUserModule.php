@@ -4,7 +4,7 @@
  * @author Piotr Gnys <gnysek@gnysek.pl>
  * @package user
  */
-class User_TUser {
+class TUserModule {
 
 	const U_ANONIM = -1;
 	const U_BOT = -2;
@@ -14,7 +14,7 @@ class User_TUser {
 	const SKEY_OTHER = 3;
 
 	private $_id = self::U_ANONIM;
-	private $_name = self::D_NAME;
+	private $_name = self::DEFAULT_NAME;
 	private $_ip = '0.0.0.0';
 	private $_logged = false;
 	private $_admin = false;

@@ -11,7 +11,7 @@ class BreadcrumbsWidget extends Widget {
 		}
 
 		$links = array();
-		$links[] = Html::link($this->homeLink, '');
+		$links[] = Html::link($this->homeLink, '@');
 
 		foreach ($this->links as $k => $v) {
 			if (is_array($v)) {

@@ -3,11 +3,18 @@
 class ContentAuth extends Controller {
 
 
-	public function afterConstruct() {
+	protected function _beforeRun() {
 		if ($this->area == 'admin') {
 			// set auth
 			$this->checkPermissions = true;
 		}
+
+		return true;
+	}
+
+	public function checkPermissions() {
+		$this->_beforeRun();
+		parent::checkPermissions();
 	}
 
 	public function getPermissions() {
