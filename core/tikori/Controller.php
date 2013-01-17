@@ -11,10 +11,110 @@ class Controller {
 
 	public function __construct($area = null) {
 		$this->area = $area;
-//		if (is_callable(array($this, 'afterConstruct'), true)) {
-		if (method_exists($this, 'afterConstruct')) {
-			$this->afterConstruct();
+		$this->afterConstruct();
+	}
+
+	public function afterConstruct() {
+		return true;
+	}
+
+	public function runAction($controller = null, $action = null) {
+		if (get_called_class() == $controller) {
+			$this->run(Core::app()->route, $action);
+		} else {
+			$class = $this->getControllerClassName($controller);
+			$c = new $class;
+			$c->run(Core::app()->route, $action);
 		}
+	}
+
+	public static function forward404() {
+		$c = new Controller;
+		$c->runAction('', 'httpStatus');
+	}
+
+	public function run($route, $action = null) {
+		if ($route instanceof Route) {
+			$this->area = $route->area;
+			$this->action = ($action === null) ? $route->action : $action;
+			$this->controller = $route->controller;
+			$this->params = $route->params;
+		} else if ($action !== null) {
+			$this->action = $action;
+		}
+
+		if (empty($this->action) or !method_exists($this, $this->getActionMethodName())) {
+			$this->action = 'default';
+		}
+
+		if (!method_exists($this, $this->getActionMethodName())) {
+			$this->forward404();
+		} else {
+			Log::addLog('Calling controller: <tt>' . $this->getControllerClassName() . '::' . $this->getActionMethodName() . '</tt>');
+
+			// check params
+			try {
+				$finalParams = array();
+				$reflection = new ReflectionClass($this);
+				$method = $reflection->getMethod($this->getActionMethodName());
+				/* @var $method ReflectionMethod */
+
+				if ($method->getNumberOfRequiredParameters() > 0) {
+//						var_dump($method->getNumberOfRequiredParameters());
+
+					foreach ($method->getParameters() as $paramObject) {
+						/* @var $paramObject ReflectionParameter */
+
+						if ($paramObject->isOptional() === false and empty($this->params[$paramObject->name])) {
+							//throw new RouteNotFoundException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
+							throw new ErrorException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
+						}
+
+						$finalParams[] = (empty($this->params[$paramObject->name])) ? null : $this->params[$paramObject->name];
+					}
+				}
+			} catch (Exception $e) {
+				throw new Exception('Cannot use Reflection on Controller: ' . $e->getMessage());
+			}
+
+			// finally perform action
+			try {
+				ob_start();
+				// buffer
+				$this->beforeAction();
+				call_user_func_array(array($this, $this->getActionMethodName()), $finalParams);
+				$this->afterAction();
+				// end buffer
+				$response = ob_get_clean();
+
+				Log::addLog('Setting reponse using last controller action');
+				Core::app()->response->body($response);
+			} catch (Exception $e) {
+//				if (($this instanceof ErrorController)==false)
+				$this->forward404();
+			}
+		}
+//		} else {
+//			throw new Exception('$route need to be instance of Route class!');
+//		}
+	}
+
+	public function getControllerClassName($controller = null, $suffix = 'Controller') {
+		if (isset($this)) {
+			if ($controller === null) $controller = $this->controller;
+		}
+
+		return ucfirst(strtolower(($controller))) . $suffix;
+	}
+
+	public function getActionMethodName($action = null, $suffix = 'Action') {
+		if (isset($this)) {
+			if ($action === null) $action = $this->action;
+		} else {
+			if ($action === null) $action = 'default';
+		}
+
+		return strtolower($action) . $suffix;
 	}
 
 	public function beforeAction() {
@@ -23,6 +123,12 @@ class Controller {
 				throw new Exception('Session module need to be activated in config if you want to check Permissions');
 			}
 		}
+
+		return true;
+	}
+
+	public function afterAction() {
+		return true;
 	}
 
 	public function setController($controller = '') {

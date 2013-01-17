@@ -117,10 +117,12 @@ class Tikori {
 		$this->route = Route::process_uri($this->request->getRouterPath());
 
 		if ($this->route == null) {
-			$this->route = new Route();
+			//$this->route = new Route();
+			Controller::forward404();
+		} else {
+			$this->route->dispatch();
 		}
 
-		$this->route->dispatch();
 
 		Log::addLog('Route handled');
 

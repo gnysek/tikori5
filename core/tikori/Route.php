@@ -199,6 +199,10 @@ class Route {
 				if (!empty($area)) {
 					$route->area = $area;
 				}
+
+				$route->action = (!empty($params['action'])) ? $params['action'] : $route->action;
+				$route->controller = (!empty($params['controller'])) ? $params['controller'] : $route->controller;
+
 				return $route;
 //				return array(
 //					'params' => $params,
@@ -240,6 +244,8 @@ class Route {
 	 */
 	public $params = array();
 	public $area = '';
+	public $action = 'default';
+	public $controller = '';
 
 	/**
 	 * Creates a new route. Sets the URI and regular expressions for keys.
@@ -373,6 +379,50 @@ class Route {
 		return $params;
 	}
 
+
+	/**
+	 * Dispatches current route
+	 * @throws Exception
+	 */
+	public function dispatch() {
+		$controller = null;
+		try {
+			$class = Controller::getControllerClassName($this->controller);
+			$controller = new $class; //($this->area);
+		} catch (Exception $e) {
+			return Controller::forward404();
+		}
+
+		if (empty($this->_route_regex)) {
+			return Controller::forward404();
+		} else {
+			try {
+				$controller->run($this);
+			} catch (DbError $e) {
+				ob_get_clean();
+				throw new Exception('DB Error: ' . $e->getMessage());
+			} catch (Exception $e) {
+				ob_get_clean();
+				throw new Exception('Dispatch action: <er>' . $this->controller . '->' . $this->action . '</er> :<br/>' . $e->getMessage());
+			}
+		}
+	}
+
+	public function getDirectory() {
+		$dir = $this->_getParam('directory', '');
+		return (empty($dir)) ? '' : $dir . '/';
+	}
+
+	private function _getParam($key, $def = 'default') {
+		if (!empty($this->params[$key])) {
+			return $this->params[$key];
+		} else if (!empty($this->_defaults[$key])) {
+			return $this->_defaults[$key];
+		} else {
+			return $def;
+		}
+	}
+
 	/**
 	 * Generates a URI for the current route based on the parameters given.
 	 *
@@ -389,6 +439,7 @@ class Route {
 	 * @throws  Exception
 	 * @uses    Route::REGEX_Key
 	 */
+	/*
 	public function uri(array $params = NULL) {
 		// Start with the routed URI
 		$uri = $this->_uri;
@@ -472,152 +523,6 @@ class Route {
 
 		return $uri;
 	}
-
-	public function dispatch() {
-		// check for app
-		# don't need to check that anymore, default controller can be in core
-//		if (!file_exists(Core::app()->appDir)) {
-//			throw new Exception('app/ path not found');
-//		}
-		// get controller first
-		$controller = null;
-		try {
-			$class = $this->getControllerClassName();
-			$controller = new $class($this->area);
-			/* @var $controller Controller */
-			$controller->setController($this->getController());
-//			$controller->setAction($this->getAction());
-//			$controller->setParams($this->params);
-		} catch (Exception $e) {
-			$controller = new Controller($this->area);
-//			throw new RouteNotFoundException('Dispatch controller: <er>' . $this->getDirectory() . $this->getController() . '/' . $this->getAction() . '</er>: ' . $e->getMessage());
-		}
-
-		if (empty($this->_route_regex)) {
-			$this->setHttpStatusAction();
-		}
-
-		$controller->setAction($this->getAction());
-		$controller->setParams($this->params);
-
-		if (!method_exists($controller, $this->getActionMethodName())) {
-			$this->setAction('default');
-		}
-
-		try {
-			$reflection = new ReflectionClass($controller);
-			$finalParams = array();
-
-			try {
-				$method = $reflection->getMethod($this->getActionMethodName());
-			} catch (Exception $e) {
-				$this->setHttpStatusAction();
-				//throw new RouteNotFoundException('Unknown action');
-			}
-
-			// check agains param numbers - if it was an error (method not found), skip
-			if (!empty($method)) {
-				/* @var $method ReflectionMethod */
-				if ($method->getNumberOfRequiredParameters() > 0) {
-//				var_dump($method->getNumberOfRequiredParameters());
-
-					foreach ($method->getParameters() as $paramObject) {
-						/* @var $paramObject ReflectionParameter */
-
-						if ($paramObject->isOptional() === false and empty($this->params[$paramObject->name])) {
-							//throw new RouteNotFoundException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
-							throw new ErrorException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
-						}
-
-						$finalParams[] = (empty($this->params[$paramObject->name])) ? null : $this->params[$paramObject->name];
-					}
-//				var_dump($this->params);
-//				var_dump($method->getParameters());
-//				if (empty($this->params['id'])) {
-//					throw new RouteNotFoundException('Not enough arguments');
-//				} else {
-//					$finalParams[] = $this->params['id'];
-//				}
-				}
-			}
-
-//			$params = explode('/', $);
-//			if (count($th) < $method->getNumberOfRequiredParameters()) {
-//				// 404 my dear... not enough required params
-//				throw new Exception('Less params than required');
-//			}
-//			foreach ($method->getParameters() as $param) {
-//				/* @var $param ReflectionParameter */
-//				if (!empty($params[$param->name])) {
-//					$finalParams[$param->name] = $params[$param->name];
-//				} else {
-//					if ($param->isDefaultValueAvailable()) {
-//						continue;
-//					} else {
-//						throw new Exception('At least one of required params isn\'t available');
-//					}
-//				}
-//			}
-
-			Log::addLog('Calling controller: <tt>' . $this->getControllerClassName() . '::' . $this->getActionMethodName() . '</tt>');
-
-			ob_start();
-			$controller->beforeAction();
-			call_user_func_array(array($controller, $this->getAction() . 'Action'), $finalParams);
-			$response = ob_get_clean();
-
-			Log::addLog('Overwriting body using last controller action');
-
-//			Core::app()->response->status(200);
-			Core::app()->response->body($response);
-		} catch (DbError $e) {
-			ob_get_clean();
-			throw new Exception('DB Error: ' . $e->getMessage());
-		} catch (Exception $e) {
-			ob_get_clean();
-			throw new Exception('Dispatch action: <er>' . $this->getController() . '->' . $this->getAction() . '</er> :<br/>' . $e->getMessage());
-		}
-	}
-
-	public function getController() {
-		return $this->_getParam('controller');
-	}
-
-	public function getControllerClassName() {
-		return ucfirst((!empty($this->area) ? ucfirst($this->area) . '_' : '') . $this->getController()) . 'Controller';
-	}
-
-	public function getAction() {
-		return $this->_getParam('action', 'index');
-	}
-
-	public function getActionMethodName() {
-		return $this->getAction() . 'Action';
-	}
-
-	public function setAction($action) {
-		return $this->params['action'] = $action;
-	}
-
-	public function setHttpStatusAction($status = 404) {
-		$this->params['action'] = 'httpStatus';
-		$this->params['status'] = $status;
-		return true;
-	}
-
-	public function getDirectory() {
-		$dir = $this->_getParam('directory', '');
-		return (empty($dir)) ? '' : $dir . '/';
-	}
-
-	private function _getParam($key, $def = 'default') {
-		if (!empty($this->params[$key])) {
-			return $this->params[$key];
-		} else if (!empty($this->_defaults[$key])) {
-			return $this->_defaults[$key];
-		} else {
-			return $def;
-		}
-	}
+	*/
 
 }

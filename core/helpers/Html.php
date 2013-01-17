@@ -25,9 +25,11 @@ class Html {
 		$addon = '';
 		$path = '';
 
-		if (Core::app()->route->area != null) {
-			//$url[0] = Core::app()->route->area . '/' . $url[0];
-			$url[0] = str_replace('@', Core::app()->route->area, $url[0]);
+		if (Core::app()->route) {
+			if (Core::app()->route->area != null) {
+				//$url[0] = Core::app()->route->area . '/' . $url[0];
+				$url[0] = str_replace('@', Core::app()->route->area, $url[0]);
+			}
 		}
 
 		if (!empty($url[0])) {
@@ -35,8 +37,7 @@ class Html {
 				if (Core::app()->cfg('default') == $url[0]) {
 					$url[0] = '';
 				}
-			}
-			else if (Core::app()->cfg('url/pathInsteadGet') == true) {
+			} else if (Core::app()->cfg('url/pathInsteadGet') == true) {
 				$addon = '?' . Request::GET_PATH_PARAM . '=';
 				foreach (array_slice($url, 1) as $key => $entry) {
 					$path .= '&' . $key . '=' . $entry;
