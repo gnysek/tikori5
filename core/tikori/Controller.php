@@ -19,6 +19,7 @@ class Controller {
 	}
 
 	public function runAction($controller = null, $action = null) {
+		Log::addLog('-> Running Action: <tt>' . $this->getControllerClassName($controller) . '/' . $action . '</tt>');
 		if (get_called_class() == $controller) {
 			$this->run(Core::app()->route, $action);
 		} else {
@@ -250,7 +251,7 @@ class Controller {
 		return false;
 	}
 
-	public function widget($class, $properties, $captureOutput = false) {
+	public function widget($class, $properties = array(), $captureOutput = false) {
 		if ($captureOutput) {
 			ob_start();
 			ob_implicit_flush(false);

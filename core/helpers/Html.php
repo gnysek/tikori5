@@ -13,9 +13,14 @@ class Html {
 		return '<a href="' . self::url($url) . '"' . ((empty($options['class'])) ? '' : (' class="' . $options['class'] . '"')) . '>' . $text . '</a>';
 	}
 
-	public static function url($url) {
+	public static function url($url = array()) {
 		if (!is_array($url)) {
 			return self::url(array($url));
+		}
+
+		// external
+		if (preg_match('/^http.*/',$url[0])) {
+			return $url[0];
 		}
 
 		$script = '';
