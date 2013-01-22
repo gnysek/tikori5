@@ -8,9 +8,11 @@ class Controller {
 	public $params = array();
 	public $area = '';
 	public $checkPermissions = false;
+	public $pageTitle = '';
 
 	public function __construct($area = null) {
 		$this->area = $area;
+		$this->pageTitle = Core::app()->cfg('appName');
 		$this->afterConstruct();
 	}
 
@@ -135,7 +137,8 @@ class Controller {
 	public function checkPermissions() {
 		//		var_dump($this->checkPermissions);
 		if ($this->checkPermissions) {
-			if (Core::registry('session') == false) {
+			if (Core::app()->session === null) {
+			//if (Core::registry('session') == false) {
 				throw new Exception('Session module need to be activated in config if you want to check Permissions');
 			}
 		}

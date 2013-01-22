@@ -1,7 +1,18 @@
 <?php
 
 class TModule {
-	public function registerModule() {
-		
+//	public function registerModule() {
+//
+//	}
+
+	protected $__initialized = false;
+
+	public function init() {
+		$this->__initialized = true;
+		return true;
+	}
+
+	public function isInitialized() {
+		return $this->__initialized;
 	}
 }

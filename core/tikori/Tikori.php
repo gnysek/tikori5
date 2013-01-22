@@ -75,22 +75,7 @@ class Tikori {
 		$modules = $this->cfg('modules');
 		if (!empty($modules)) {
 			foreach ($this->cfg('modules') as $module => $config) {
-				foreach (array(true, false) as $includeCoreDir) {
-					$this->addAutoloadPaths(array(
-						'modules/' . $module,
-						'modules/' . $module . '/config',
-						'modules/' . $module . '/controllers',
-						'modules/' . $module . '/models',
-						'modules/' . $module . '/views',
-					), $includeCoreDir);
-				}
-				$moduleClass = ucfirst($module) . 'Module';
-				if (Core::autoload($moduleClass, false)) {
-					$class = new $moduleClass;
-					if (method_exists($class, 'init')) {
-						$class->init();
-					}
-				}
+				$this->preloadModule($module, $config);
 			}
 		}
 
@@ -159,6 +144,25 @@ class Tikori {
 			echo Log::getLogs();
 		}
 		return true;
+	}
+
+	public function preloadModule($module, $config = null) {
+		foreach (array(true, false) as $includeCoreDir) {
+			$this->addAutoloadPaths(array(
+				'modules/' . $module,
+				'modules/' . $module . '/config',
+				'modules/' . $module . '/controllers',
+				'modules/' . $module . '/models',
+				'modules/' . $module . '/views',
+				'modules/' . $module . '/widgets',
+			), $includeCoreDir);
+		}
+
+		$moduleClass = ucfirst($module) . 'Module';
+		if (Core::autoload($moduleClass, false)) {
+			$class = new $moduleClass;
+			$this->setModule($module, $class);
+		}
 	}
 
 	/**
@@ -291,6 +295,42 @@ class Tikori {
 		}
 
 		return $flat;
+	}
+
+	private $_m = array();
+
+	/**
+	 * Sets or unsets module
+	 *
+	 * @param string $id Identifier of component
+	 * @param TModule|null $module
+	 */
+	public function setModule($id, $module) {
+		if ($module === null) {
+			unset($this->_m[$id]);
+		} else {
+			$this->_m[$id] = $module;
+			if (!$module->isInitialized()) {
+				$module->init();
+			}
+		}
+	}
+
+	/**
+	 * @param array $modules
+	 */
+	public function setModules(array $modules) {
+		foreach ($modules as $id => $module) {
+			$this->setModule($id, $module);
+		}
+	}
+
+	public function __get($value) {
+		if (empty($this->_m[$value])) {
+			return null;
+		} else {
+			return $this->_m[$value];
+		}
 	}
 
 //	/**

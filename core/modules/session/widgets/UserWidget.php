@@ -22,7 +22,7 @@ class UserWidget extends Widget {
 
 	public function data() {
 		return (object) array(
-			'username'    => UserModule::DEFAULT_NAME,
+			'username'    => SessionModule::DEFAULT_NAME,
 			'logged'      => false,
 			'color'       => '',
 			'avatar'      => '',

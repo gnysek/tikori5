@@ -6,20 +6,34 @@
  * Time: 17:31
  * To change this template use File | Settings | File Templates.
  */
-class TSessionModule {
+class TSessionModule extends TModule {
 
 	const SKEY_REGEXP = '/[0-9a-f]{32}/';
+	const U_ANONIM = -1;
+	const U_BOT = -2;
+	const DEFAULT_NAME = 'Guest';
+	const SKEY_GET = 1;
+	const SKEY_COOKIE = 2;
+	const SKEY_OTHER = 3;
 
-	private $_skey = '';
-	private $_time = 0;
-	private $_lastUpdateTime = 0;
-	private $_user = null;
-	private $_bot = false;
+	protected $_id = self::U_ANONIM;
+	protected $_name = self::DEFAULT_NAME;
+	protected $_ip = '0.0.0.0';
+	protected $_logged = false;
+	protected $_admin = false;
+	protected $_bot = false;
+	protected $_blocked = false;
+	protected $_data = array();
+	protected $_skey = '';
+	protected $_skeytype = self::SKEY_OTHER;
+	protected $_abuse = '';
+	protected $_time = 0;
+	protected $_lastUpdateTime = 0;
+	protected $_loginStartTime = 0;
+	protected $_posts = 0;
 
 	public function init() {
-		$this->_user = new UserModule();
-		Core::register('user', $this->_user);
-		Core::register('session', $this);
+		$this->_user = new User();
 		$this->startSession();
 	}
 
