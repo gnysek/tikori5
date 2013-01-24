@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `content` (
   `comments` int(11) NOT NULL,
   `author` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `content_translation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -29,13 +29,13 @@ CREATE TABLE IF NOT EXISTS `content_translation` (
   PRIMARY KEY (`id`),
   KEY `page_id` (`page_id`),
   KEY `language_id` (`language_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `language` (
   `language_id` int(11) NOT NULL AUTO_INCREMENT,
   `language_code` varchar(2) CHARACTER SET utf8 NOT NULL,
   PRIMARY KEY (`language_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 
 ALTER TABLE `content_translation`
@@ -43,12 +43,13 @@ ALTER TABLE `content_translation`
   ADD CONSTRAINT `content_translation_ibfk_2` FOREIGN KEY (`page_id`) REFERENCES `content` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 SET FOREIGN_KEY_CHECKS=1;
 
-INSERT INTO `content` (`id`, `name`, `enabled`, `path`, `parent`, `type`, `created`, `updated`, `comments`, `author`) VALUES
-(1, 'Pierwszy wpis', 1, '/', NULL, 0, 2012, 2012, 0, 0);
+INSERT INTO `language` (`language_code`) VALUES
+('pl'),
+('en');
 
-INSERT INTO `content_translation` (`id`, `page_id`, `language_id`, `name`, `short`, `long`, `img`, `url`, `comm`) VALUES
-(1, 1, 1, 'Pierwszy wpis test', 'Short', NULL, NULL, 'test', 0);
+INSERT INTO `content` (`name`, `enabled`, `path`, `parent`, `type`, `created`, `updated`, `comments`, `author`) VALUES
+('Pierwszy wpis', 1, '/', NULL, 0, 2012, 2012, 0, 0);
 
-INSERT INTO `language` (`language_id`, `language_code`) VALUES
-(1, 'pl'),
-(2, 'en');
+INSERT INTO `content_translation` (`page_id`, `language_id`, `name`, `short`, `long`, `img`, `url`, `comm`) VALUES
+(1, 1, 'Pierwszy wpis test', 'Short', NULL, NULL, 'test', 0);
+

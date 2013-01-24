@@ -19,7 +19,7 @@ class Core {
 	const VERSION = '5.0.0&alpha;';
 
 	/**
-	 * @var Core Main app class 
+	 * @var Core Main app class
 	 */
 	private static $_app = null;
 
@@ -31,6 +31,7 @@ class Core {
 
 	/**
 	 * Runs an application
+	 *
 	 * @param type $path
 	 * @param type $config
 	 */
@@ -51,7 +52,9 @@ class Core {
 
 	/**
 	 * Assigns application object
+	 *
 	 * @param Tikori $app
+	 *
 	 * @throws Exception
 	 */
 	public static function asssignApp($app = null) {
@@ -64,9 +67,11 @@ class Core {
 
 	/**
 	 * Registers values under given name
+	 *
 	 * @param string $name Name of registry
 	 * @param mixed $value Value
 	 * @param boolean $overwrite Overwrite when exists or not?
+	 *
 	 * @return boolean Whether succeded or not
 	 */
 	public static function register($name, $value = null, $overwrite = false) {
@@ -79,8 +84,10 @@ class Core {
 
 	/**
 	 * Gets value from registry
+	 *
 	 * @param string $name If null, will return everything, else will return value under key or $default
 	 * @param mixed $default Returns when $name don't exists in registry
+	 *
 	 * @return mixed Return all data when $name is null, registry value if found, or $default when not found
 	 */
 	public function registry($name = null, $default = null) {
@@ -95,7 +102,9 @@ class Core {
 
 	/**
 	 * Autoloader method
+	 *
 	 * @param type $class Class name
+	 *
 	 * @return boolean
 	 * @throws Exception
 	 */
@@ -151,6 +160,10 @@ class Core {
 
 	public static function poweredBy() {
 		return 'Powered by <a href="http://tikori5.gnysek.pl/" target="_blank">Tikori5</a> v' . self::VERSION;
+	}
+
+	public static function event($eventName, $data = null) {
+		Core::app()->observer->fireEvent($eventName, $data);
 	}
 
 }

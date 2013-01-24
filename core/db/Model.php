@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 
+ *
  */
 class Model {
 
@@ -28,12 +28,20 @@ class Model {
 		$this->_scopes = $this->scopes();
 		$this->_relations = $this->relations();
 		$this->_fields = $this->getFields();
+		if (!empty($this->_fields)) {
+			foreach ($this->_fields as $v) {
+				$this->_values[$v] = null;
+			}
+		}
 		$this->_rules = $this->rules();
 		$this->_table = $this->getTable();
 		$this->_primaryKey = $this->getPK();
 	}
 
 	public function getTable() {
+		if (empty($this->_table)) {
+			return strtolower(get_called_class());
+		}
 		return $this->_table;
 	}
 
@@ -41,7 +49,10 @@ class Model {
 		return $this->_primaryKey;
 	}
 
-	public static function model($model = __CLASS__) {
+	public static function model($model = null) {
+		if ($model == null) {
+			$model = get_called_class();
+		}
 		return new $model();
 	}
 
@@ -116,7 +127,7 @@ class Model {
 		return $this;
 	}
 
-	public function findAll($limit = -1, $offset =0) {
+	public function findAll($limit = -1, $offset = 0) {
 		$sql = DbQuery::sql()->select()->from($this->_table)->limit($limit, $offset);
 		$result = $sql->execute();
 		$return = array();
@@ -132,16 +143,16 @@ class Model {
 
 	// eager
 	public function with($with) {
-		
+
 	}
 
-	/**	 * */
+	/**     * */
 	public function delete() {
-		
+
 	}
 
 	public function deleteAll() {
-		
+
 	}
 
 	public function deleteByPK($value) {
@@ -149,53 +160,66 @@ class Model {
 	}
 
 	public function deleteBy($key, $value) {
-		
+
 	}
 
-	/**	 * */
+	/**     * */
 	public function insert() {
-		
+		DbQuery::sql()->insert()->from($this->_table)->fields($this->_values)->execute();
+		$this->afterSave();
 	}
 
 	public function update() {
-		
+
+	}
+
+	public function beforeSave() {
+		return true;
+	}
+
+	public function afterSave() {
+		return true;
 	}
 
 	public function save() {
-		return ($this->_isNewRecord) ? $this->insert() : $this->save();
+		if ($this->beforeSave()) {
+			return ($this->_isNewRecord) ? $this->insert() : $this->update();
+		}
+
+		throw new DbError('Cannot save record');
 	}
 
-	/**	 * */
+	/**     * */
 	public function validate() {
 		return true;
 	}
 
 	public function getErrors() {
-		
+
 	}
 
 	public function addError($field, $error) {
-		
+
 	}
 
 	public function addErrors($errors = array()) {
-		
+
 	}
 
 	public function hasErrors() {
-		
+
 	}
 
 	public function clearErrors() {
-		
+
 	}
 
 	public function getFields() {
-		
+
 	}
 
 	public function attributeLabels() {
-		
+
 	}
 
 	public function getAttributeLabel($attribute) {
@@ -212,7 +236,9 @@ class Model {
 	 * This is done by replacing underscores or dashes with blanks and
 	 * changing the first letter of each word to upper case.
 	 * For example, 'department_name' or 'DepartmentName' becomes 'Department Name'.
+	 *
 	 * @param string $name the column name
+	 *
 	 * @return string the attribute label
 	 */
 	public function generateAttributeLabel($name) {
@@ -224,7 +250,7 @@ class Model {
 	}
 
 	public function scopes() {
-		
+
 	}
 
 	/**
@@ -255,6 +281,15 @@ class Model {
 			return $this->$getter();
 		} else {
 			return null;
+		}
+	}
+
+	public function __set($name, $value) {
+		$setter = 'set' . ucfirst($name);
+		if (array_key_exists($name, $this->_values)) {
+			$this->_values[$name] = $value;
+		} else if (method_exists($this, $setter)) {
+			$this->$setter($value);
 		}
 	}
 
@@ -312,7 +347,8 @@ class Model {
 
 		$head = '<th colspan="' . $headerCount . '">' . get_called_class() . '</th></tr><tr>' . $head;
 
-		return /* 'Data in ' . get_called_class() . ' model instance:<br/>' . */ '<table><tr>' . $head . '</tr><tr>' . $row . '</tr></table>';
+		return /* 'Data in ' . get_called_class() . ' model instance:<br/>' . */
+			'<table><tr>' . $head . '</tr><tr>' . $row . '</tr></table>';
 	}
 
 }

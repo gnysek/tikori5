@@ -15,4 +15,8 @@ class TModule {
 	public function isInitialized() {
 		return $this->__initialized;
 	}
+
+	public function addObserver($eventName) {
+		Core::app()->observer->addObserver($eventName, $this);
+	}
 }

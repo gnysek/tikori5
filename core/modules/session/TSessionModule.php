@@ -33,7 +33,12 @@ class TSessionModule extends TModule {
 	protected $_posts = 0;
 
 	public function init() {
-		$this->_user = new User();
+		$this->_user = User::model();
+		$this->addObserver(Tikori::EVENT_BEFORE_DISPATCH);
+		//$this->startSession();
+	}
+
+	public function beforeDispatchEvent() {
 		$this->startSession();
 	}
 
@@ -51,14 +56,29 @@ class TSessionModule extends TModule {
 		}
 
 		if (empty($this->_skey)) {
+			Log::addLog('New session');
 			$this->_newSession();
 		} else {
+			Log::addLog('Old session');
 			$this->_continueSession();
 		}
 	}
 
 	protected function _newSession() {
+		$this->_skeytype = self::SKEY_OTHER;
 
+//		do
+//		{
+		$this->_skey = md5(uniqid(mt_rand(), true));
+
+//		$cookie = new Cookie();
+//		$cookie->set('tk5_sid', $this->_skey);
+//		}
+
+		$session = Session::model();
+		$session->sid = $this->_skey;
+		$session->save();
+//		while ( array_key_exists( $this->userSid, $this->sidKeys) );
 	}
 
 	protected function _continueSession() {

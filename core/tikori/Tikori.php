@@ -10,6 +10,8 @@
  */
 class Tikori {
 
+	const EVENT_BEFORE_DISPATCH = 'before_dispatch';
+	const EVENT_AFTER_DISPATCH = 'after_dispatch';
 	/**
 	 * @var Config
 	 */
@@ -71,6 +73,9 @@ class Tikori {
 		Route::reconfigure();
 		Log::addLog('Reconfigured');
 
+
+		$this->observer = new Observer();
+
 		// configure modules
 		$modules = $this->cfg('modules');
 		if (!empty($modules)) {
@@ -101,6 +106,8 @@ class Tikori {
 		// process route
 		$this->route = Route::process_uri($this->request->getRouterPath());
 
+		Core::event(self::EVENT_BEFORE_DISPATCH);
+
 		if ($this->route == null) {
 			//$this->route = new Route();
 			Controller::forward404();
@@ -108,6 +115,7 @@ class Tikori {
 			$this->route->dispatch();
 		}
 
+		Core::event(self::EVENT_AFTER_DISPATCH);
 
 		Log::addLog('Route handled');
 
@@ -159,7 +167,7 @@ class Tikori {
 		}
 
 		$moduleClass = ucfirst($module) . 'Module';
-		if (Core::autoload($moduleClass, false)) {
+		if (Core::autoload($moduleClass, true)) {
 			$class = new $moduleClass;
 			$this->setModule($module, $class);
 		}

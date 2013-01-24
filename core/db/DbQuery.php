@@ -28,6 +28,9 @@ class DbQuery {
 	private $_fromInsteadJoin = false;
 	private $_preparedSql = '';
 
+	/**
+	 * @return DbQuery
+	 */
 	public static function sql() {
 		return new DbQuery();
 	}
@@ -56,21 +59,33 @@ class DbQuery {
 		}
 	}
 
+	/**
+	 * @return DbQuery
+	 */
 	public function select() {
 		$this->_type = self::Q_SELECT;
 		return $this;
 	}
 
+	/**
+	 * @return DbQuery
+	 */
 	public function update() {
 		$this->_type = self::Q_UPDATE;
 		return $this;
 	}
 
+	/**
+	 * @return DbQuery
+	 */
 	public function delete() {
 		$this->_type = self::Q_DELETE;
 		return $this;
 	}
 
+	/**
+	 * @return DbQuery
+	 */
 	public function insert() {
 		$this->_type = self::Q_INSERT;
 		return $this;
@@ -143,15 +158,20 @@ class DbQuery {
 
 		// type
 		switch ($this->_type) {
-			case self::Q_UPDATE: $sql[] = 'UPDATE';
+			case self::Q_UPDATE:
+				$sql[] = 'UPDATE';
 				break;
-			case self::Q_REPLACE: $sql[] = 'REPLACE INTO';
+			case self::Q_REPLACE:
+				$sql[] = 'REPLACE INTO';
 				break;
-			case self::Q_INSERT: $sql[] = 'INSERT INTO';
+			case self::Q_INSERT:
+				$sql[] = 'INSERT INTO';
 				break;
-			case self::Q_DELETE: $sql[] = 'DELETE FROM';
+			case self::Q_DELETE:
+				$sql[] = 'DELETE FROM';
 				break;
-			default: $sql[] = 'SELECT';
+			default:
+				$sql[] = 'SELECT';
 				if (empty($this->_fields)) {
 					$fields = array();
 					foreach ($this->_from as $val) {
@@ -165,7 +185,7 @@ class DbQuery {
 		// from
 		$from = array();
 		foreach ($this->_from as $key => $val) {
-			$from[] = '`' . $val . '` `' . $this->_fromAliases[$val] . '`';
+			$from[] = '`' . $val . '` ' . (($this->_type == self::Q_SELECT) ? ' `' . $this->_fromAliases[$val] . '`' : '');
 		}
 		$sql[] = implode(', ', $from);
 
@@ -199,7 +219,7 @@ class DbQuery {
 				$sql[] = implode(' AND ', $where);
 			}
 
-			if ($this->_limit>0) {
+			if ($this->_limit > 0) {
 				$sql[] = 'LIMIT ' . $this->_offset . ', ' . $this->_limit;
 			}
 		} else {
@@ -210,11 +230,11 @@ class DbQuery {
 			if ($this->_isAssoc($this->_fields)) {
 				foreach ($this->_fields as $fname => $fvalue) {
 					$fld[] = '`' . $fname . '`';
-					$val[] = is_string($fvalue) ? DB::protect($fvalue) : intval($fvalue);
+					$val[] = is_string($fvalue) ? DB::protect($fvalue) : $this->_nullify($fvalue);
 				}
 			} else {
 				foreach ($this->_fields as $fvalue) {
-					$val[] = is_string($fvalue) ? DB::protect($fvalue) : intval($fvalue);
+					$val[] = is_string($fvalue) ? DB::protect($fvalue) : $this->_nullify($fvalue);
 				}
 			}
 
@@ -227,6 +247,10 @@ class DbQuery {
 		$this->_preparedSql = implode(' ', $sql) . ';';
 
 		return $this->_preparedSql;
+	}
+
+	private function _nullify($value = null) {
+		return ($value === null) ? 'NULL' : $value;
 	}
 
 	public function __toString() {
