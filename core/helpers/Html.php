@@ -2,6 +2,8 @@
 
 class Html {
 
+	public static $sidAddon = '';
+
 	public static function link($text, $url, $options = array()) {
 		if (trim(Core::app()->request->getRouterPath(), '/') == $url) {
 			if (!empty($options['class'])) {
@@ -19,7 +21,7 @@ class Html {
 		}
 
 		// external
-		if (preg_match('/^http.*/',$url[0])) {
+		if (preg_match('/^http.*/', $url[0])) {
 			return $url[0];
 		}
 
@@ -54,6 +56,11 @@ class Html {
 					$path .= '/' . $key . '/' . $entry;
 				}
 			}
+		}
+
+		if (!empty(self::$sidAddon)) {
+			$path = (!empty($addon)) ? '&' : '?';
+			$path .= 'sid=' . self::$sidAddon;
 		}
 
 		return Core::app()->baseUrl() . $script . $addon . $url[0] . $path;

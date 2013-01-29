@@ -14,6 +14,7 @@
 class Session extends Model {
 
 	protected $_table = 'sessions';
+	protected $_primaryKey = 'sid';
 
 	/**
 	 * @param string|null $model
