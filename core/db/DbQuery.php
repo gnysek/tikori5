@@ -208,29 +208,18 @@ class DbQuery {
 			}
 		}
 
-		// where
-		if (!in_array($this->_type, array(self::Q_INSERT, self::Q_REPLACE))) {
-			if (!empty($this->_where)) {
-				$sql[] = 'WHERE';
-				$where = array();
-				foreach ($this->_where as $w) {
-					$where[] = '`' . $this->_fromAliases[(empty($w[3])) ? array_shift(array_values($this->_from)) : $w[3]] . '`.`' . $w[0] . '` ' . $w[1] . ' ' . $w[2];
-				}
-				$sql[] = implode(' AND ', $where);
-			}
-
-			if ($this->_limit > 0) {
-				$sql[] = 'LIMIT ' . $this->_offset . ', ' . $this->_limit;
-			}
-		} else {
+		// values
+		if (in_array($this->_type, array(self::Q_INSERT, self::Q_REPLACE, self::Q_UPDATE))) {
 			// insert
 			$fld = array();
 			$val = array();
+			$upd = array();
 
 			if ($this->_isAssoc($this->_fields)) {
 				foreach ($this->_fields as $fname => $fvalue) {
 					$fld[] = '`' . $fname . '`';
 					$val[] = is_string($fvalue) ? DB::protect($fvalue) : $this->_nullify($fvalue);
+					$upd[] = end($fld) . ' = ' . end($val);
 				}
 			} else {
 				foreach ($this->_fields as $fvalue) {
@@ -238,10 +227,36 @@ class DbQuery {
 				}
 			}
 
-			if (!empty($fld)) {
-				$sql[] = '(' . implode(', ', $fld) . ')';
+			if ($this->_type == self::Q_INSERT) {
+				if (!empty($fld)) {
+					$sql[] = '(' . implode(', ', $fld) . ')';
+				}
+				$sql[] = 'VALUES (' . implode(', ', $val) . ')';
+			} else {
+				$sql[] = implode(', ', $upd);
 			}
-			$sql[] = 'VALUES (' . implode(', ', $val) . ')';
+		}
+
+		// where
+		if (!in_array($this->_type, array(self::Q_INSERT, self::Q_REPLACE))) {
+			if (!empty($this->_where)) {
+				$sql[] = 'WHERE';
+				$where = array();
+//				var_dump($this->_where);
+				foreach ($this->_where as $w) {
+					$bld = '';
+					if ($this->_type != self::Q_UPDATE) {
+						$bld = '`' . $this->_fromAliases[(empty($w[3])) ? array_shift(array_values($this->_from)) : $w[3]] . '`.';
+					}
+					$bld .= '`' . $w[0] . '` ' . $w[1] . ' ' . (is_string($w[2]) ? DB::protect($w[2]) : $this->_nullify($w[2]));
+					$where[] = $bld;
+				}
+				$sql[] = implode(' AND ', $where);
+			}
+
+			if ($this->_limit > 0) {
+				$sql[] = 'LIMIT ' . $this->_offset . ', ' . $this->_limit;
+			}
 		}
 
 		$this->_preparedSql = implode(' ', $sql) . ';';

@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Session model
+ *
  * @property string $sid
  * @property int $user_id
  * @property int $logged_in

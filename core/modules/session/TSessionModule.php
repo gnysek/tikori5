@@ -54,9 +54,11 @@ class TSessionModule extends TModule {
 		if ($key = $cookie->get('tk5_sid', null)) {
 			if (preg_match(self::SKEY_REGEXP, $key)) {
 				$this->_skey = $key;
+				$this->_skeytype = self::SKEY_COOKIE;
 			}
 		} else if (!empty($_GET['sid']) && preg_match(self::SKEY_REGEXP, $_GET['sid'])) {
 			$this->_skey = $_GET['sid'];
+			$this->_skeytype = self::SKEY_GET;
 		}
 
 		if (empty($this->_skey)) {
@@ -70,6 +72,7 @@ class TSessionModule extends TModule {
 
 	protected function _newSession() {
 		$this->_skeytype = self::SKEY_OTHER;
+		Html::$sidAddon = $this->_skey;
 
 //		do
 //		{
@@ -79,17 +82,24 @@ class TSessionModule extends TModule {
 		$cookie->set('tk5_sid', $this->_skey);
 //		}
 
+//		while ( array_key_exists( $this->userSid, $this->sidKeys) );
 		$this->_session = Session::model();
 		$this->_session->sid = $this->_skey;
 		$this->_session->save();
-//		while ( array_key_exists( $this->userSid, $this->sidKeys) );
 	}
 
 	protected function _continueSession() {
 		$this->_session = Session::model()->find($this->_skey);
+
+		if ($this->_session === null) {
+			return $this->_newSession();
+		}
+
 		if ($this->_skeytype == self::SKEY_OTHER) {
 			Html::$sidAddon = $this->_skey;
 		}
+		$this->_session->time = time();
+		$this->_session->save();
 	}
 
 	public function isBot() {

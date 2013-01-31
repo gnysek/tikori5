@@ -76,7 +76,6 @@ class Db {
 				$return = array();
 				if ($result->rowCount()) {
 //					$return = new Collection();
-
 					while (( $row = $result->fetch(( $assoc == true ) ? PDO::FETCH_ASSOC : PDO::FETCH_NUM) ) !== false) {
 						$record = new Record();
 						$record->import($row, false);
@@ -89,7 +88,7 @@ class Db {
 					return $return;
 				} else {
 //					return new Collection();
-					return array(new Record());
+					return new Record();
 				}
 			} else {
 				throw new DbError('SQL ERROR ' . $sql . '<br/>' . self::conn()->errorInfo());

@@ -1,10 +1,5 @@
 <?php
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  * Description of Content
  *
@@ -18,6 +13,7 @@ class Content extends Model {
 
 	/**
 	 * @param class $model
+	 *
 	 * @return Content
 	 */
 	public static function model($model = __CLASS__) {
@@ -56,7 +52,7 @@ class Content extends Model {
 			array('name', 'maxlen', 255),
 		);
 	}
-	
+
 	protected function _beforeSave() {
 		$time = time();
 		if ($this->_isNewRecord) {

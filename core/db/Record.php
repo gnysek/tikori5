@@ -107,7 +107,7 @@ class Record implements IteratorAggregate, ArrayAccess, Countable {
 	}
 
 	public function count() {
-		return $this->count($this->_data);
+		return count($this->_data);
 	}
 
 	public function getIterator() {

@@ -81,17 +81,26 @@ class Model {
 
 	public function find($id) {
 		if (!is_numeric($id)) {
-			$id = DB::protect($id);
+			//$id = DB::protect($id);
 		}
 
 		$sql = DbQuery::sql()->select()->from($this->_table)->where(array($this->_primaryKey, '=', $id));
 		$result = $sql->execute();
+
 		if (count($result) > 1)
 			throw new DbError('Returned more than 1 record - PK wrongly defined?');
-		foreach ($this->_fields as $field) {
-			if ($result[0]->offsetExists($field)) {
-				$this->_values[$field] = $result[0]->$field;
+
+		//var_dump($result);
+
+		if (count($result) == 1) {
+			foreach ($this->_fields as $field) {
+				if ($result[0]->offsetExists($field)) {
+					$this->_values[$field] = $result[0]->$field;
+				}
 			}
+			$this->_isNewRecord = false;
+		} else {
+			return null;
 		}
 		return $this;
 	}
@@ -169,8 +178,15 @@ class Model {
 		$this->afterSave();
 	}
 
+	// TODO: check that where() automatically will be always good - it should be...
 	public function update() {
-
+		DbQuery::sql()
+			->update()
+			->from($this->_table)
+			->fields($this->_values)
+			->where(array($this->_primaryKey, '=', $this->_values[$this->_primaryKey]))
+			->execute();
+		$this->afterSave();
 	}
 
 	public function beforeSave() {
