@@ -108,11 +108,11 @@ class Request {
 	}
 
 	public function get() {
-		return array();
+        return (empty($_GET)) ? array() : $_GET;
 	}
 
 	public function post() {
-		return array();
+		return (empty($_POST)) ? array() : $_POST;
 	}
 
 	public function __construct() {
