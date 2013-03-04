@@ -54,7 +54,7 @@ class Html
                 }
             } else {
                 if (Core::app()->cfg('url/pathInsteadGet') == true) {
-                    $addon = '?' . Request::GET_PATH_PARAM . '=';
+                    $addon = '?' . Request::ROUTE_TOKEN . '=';
                     foreach (array_slice($url, 1) as $key => $entry) {
                         $path .= '&' . $key . '=' . $entry;
                     }
