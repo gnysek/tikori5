@@ -26,10 +26,10 @@ class UserWidget extends Widget {
 			'logged'      => false,
 			'color'       => '',
 			'avatar'      => '',
-			'loginUrl'    => Html::url('@/login'),
-			'registerUrl' => Html::url('@/register'),
-			'logoutUrl'   => Html::url('@/logout'),
-			'profileUrl'  => Html::url('@/profile'),
+			'loginUrl'    => Html::url('//user/login'),
+			'registerUrl' => Html::url('//user/register'),
+			'logoutUrl'   => Html::url('//user/logout'),
+			'profileUrl'  => Html::url('//user/profile'),
 		);
 	}
 }
