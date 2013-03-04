@@ -180,10 +180,14 @@ class Model {
 
 	// TODO: check that where() automatically will be always good - it should be...
 	public function update() {
+        $values = $this->_values;
+        if (array_key_exists($this->_primaryKey, $values)) {
+            unset($values[$this->_primaryKey]);
+        }
 		DbQuery::sql()
 			->update()
 			->from($this->_table)
-			->fields($this->_values)
+			->fields($values)
 			->where(array($this->_primaryKey, '=', $this->_values[$this->_primaryKey]))
 			->execute();
 		$this->afterSave();

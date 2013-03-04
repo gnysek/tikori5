@@ -217,6 +217,10 @@ class DbQuery {
 
 			if ($this->_isAssoc($this->_fields)) {
 				foreach ($this->_fields as $fname => $fvalue) {
+                    // remove those from where
+//                    if ($this->_type == self::Q_UPDATE) {
+//
+//                    }
 					$fld[] = '`' . $fname . '`';
 					$val[] = is_string($fvalue) ? DB::protect($fvalue) : $this->_nullify($fvalue);
 					$upd[] = end($fld) . ' = ' . end($val);
