@@ -1,10 +1,30 @@
 <?php
 /**
- * @property int $id
- * @property unt $name
- * @property int $type
- * @property int $warns
- * @property int $posts
+ * @property int    id
+ * @property string name
+ * @property string password
+ * @property string loginkey
+ * @property string email
+ * @property int    sex
+ * @property int    regdate
+ * @property int    birthday
+ * @property string from
+ * @property string www
+ * @property string messenger
+ * @property string signature
+ * @property string avatar
+ * @property int    posts
+ * @property int    points
+ * @property string settings
+ * @property int    notifications
+ * @property int    pm_new
+ * @property int    pm_count
+ * @property int    last_visit_time
+ * @property int    last_update_time
+ * @property int    warns
+ * @property int    ban
+ * @property int    bantime
+ * @property int    admin
  *
  * @method int getBanType
  * @method int getBanTime
@@ -17,7 +37,8 @@
  */
 
 
-class User extends Model {
+class User extends Model
+{
 
     const USER_TYPE_ANONYMOUS = 1;
     const USER_TYPE_USER = 2;
@@ -27,15 +48,46 @@ class User extends Model {
     const BAN_TYPE_TIME = 1;
     const BAN_TYPE_PERMAMENT = 2;
 
-	protected $_table = 'users';
+    protected $_table = 'users';
 
-	/**
-	 * @param class $model
-	 *
-	 * @return ContentTranslation
-	 */
-	public static function model($model = __CLASS__) {
-		return parent::model($model);
+    /**
+     * @param class $model
+     *
+     * @return ContentTranslation
+     */
+    public static function model($model = __CLASS__)
+    {
+        return parent::model($model);
+    }
 
-	}
+    public function getFields()
+    {
+        return array(
+            'id',
+            'name',
+            'password',
+            'loginkey',
+            'email',
+            'sex',
+            'regdate',
+            'birthday',
+            'from',
+            'www',
+            'messenger',
+            'signature',
+            'avatar',
+            'posts',
+            'points',
+            'settings',
+            'notifications',
+            'pm_new',
+            'pm_count',
+            'last_visit_time',
+            'last_update_time',
+            'warns',
+            'ban',
+            'bantime',
+            'admin',
+        );
+    }
 }

@@ -35,7 +35,13 @@ class TSessionModule extends TModule
     protected $_lastUpdateTime = 0;
     protected $_loginStartTime = 0;
     protected $_posts = 0;
+    /**
+     * @var Session
+     */
     protected $_session = null;
+    /**
+     * @var User
+     */
     protected $_user = null;
 
     public function init()
@@ -107,6 +113,11 @@ class TSessionModule extends TModule
         if ($this->_skeytype == self::SKEY_OTHER) {
             Html::$sidAddon = $this->_skey;
         }
+
+        if ($this->_session->user_id > 0) {
+            $this->_user = User::model()->load($this->_session->user_id);
+        }
+
         //		$this->_session->time = time();
         //        if ($this->_session->tim)
         //		$this->_session->save();
