@@ -7,8 +7,12 @@
 	},
 	"areas":["admin"],
 	"db":{
-		"dblink":"mysql:host=localhost;dbname=tikori5",
-		"dbuser":"root"
+		"type":"mysqli",
+		"dbhost":"localhost",
+		"dbname":"tikori5",
+		"dbuser":"root",
+		"dbpass":"",
+		"dblink":"mysql:host=localhost;dbname=tikori5"
 	},
 	"routes":{
 		"forum":{

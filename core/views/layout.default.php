@@ -45,8 +45,8 @@
 		&copy; 2012 - <?php date('Y'); ?> <a href="http://gnysek.pl" target="_blank">gnysek.pl</a>
 
 		<div class="pull-right">
-			<?php if (DB::queries() > 0): ?>
-			Database queries: <strong><?php echo DB::queries(); ?></strong> &bull;
+			<?php if (Core::app()->db): ?>
+			Database queries: <strong><?php echo Core::app()->db->queries(); ?></strong> &bull;
 			<?php endif; ?>
 			Generated in: <strong><?php echo Core::genTimeNow(); ?></strong>s.
 		</div>

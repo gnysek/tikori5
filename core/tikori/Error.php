@@ -60,14 +60,16 @@ class Error {
 			$files[] = self::getFile($exception->getFile(), $exception->getLine(), array('class' => 'Error::display()'));
 		}
 
-		$body = $view->renderPartial('error.fatal', array(
-			'message' => $exception->getMessage(),
-			'file' => $exception->getFile(),
-			'line' => $exception->getLine(),
-			'reqMethod' => (empty($e)) ? '' : $e['REQUEST_METHOD'],
-			'reqPath' => (empty($e)) ? '' : $e['PATH_INFO'],
-			'files' => $files,
-			), true);
+        $body = $view->renderPartial(
+            'error.fatal', array(
+                                'message'   => $exception->getMessage(),
+                                'file'      => $exception->getFile(),
+                                'line'      => $exception->getLine(),
+                                'reqMethod' => (empty($e[Request::REQUEST_METHOD])) ? '' : $e[Request::REQUEST_METHOD],
+                                'reqPath'   => (empty($e[Request::PATH_INFO])) ? '' : $e[Request::PATH_INFO],
+                                'files'     => $files,
+                           ), true
+        );
 
 		echo $body;
 		exit;

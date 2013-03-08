@@ -36,7 +36,7 @@ class DbQuery {
 	}
 
 	public function execute() {
-		return DB::query($this->_parseSql());
+		return Core::app()->db->query($this->_parseSql());
 	}
 
 	public function __construct($from = '') {
@@ -222,12 +222,12 @@ class DbQuery {
 //
 //                    }
 					$fld[] = '`' . $fname . '`';
-					$val[] = is_string($fvalue) ? DB::protect($fvalue) : $this->_nullify($fvalue);
+					$val[] = is_string($fvalue) ? Core::app()->db->protect($fvalue) : $this->_nullify($fvalue);
 					$upd[] = end($fld) . ' = ' . end($val);
 				}
 			} else {
 				foreach ($this->_fields as $fvalue) {
-					$val[] = is_string($fvalue) ? DB::protect($fvalue) : $this->_nullify($fvalue);
+					$val[] = is_string($fvalue) ? Core::app()->db->protect($fvalue) : $this->_nullify($fvalue);
 				}
 			}
 
@@ -252,7 +252,7 @@ class DbQuery {
 					if ($this->_type != self::Q_UPDATE) {
 						$bld = '`' . $this->_fromAliases[(empty($w[3])) ? array_shift(array_values($this->_from)) : $w[3]] . '`.';
 					}
-					$bld .= '`' . $w[0] . '` ' . $w[1] . ' ' . (is_string($w[2]) ? DB::protect($w[2]) : $this->_nullify($w[2]));
+					$bld .= '`' . $w[0] . '` ' . $w[1] . ' ' . (is_string($w[2]) ? Core::app()->db->protect($w[2]) : $this->_nullify($w[2]));
 					$where[] = $bld;
 				}
 				$sql[] = implode(' AND ', $where);

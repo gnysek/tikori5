@@ -5,93 +5,66 @@
  *
  * @author user
  */
-class Db
+class DbPDO extends DBAbstract
 {
 
-    private static $_init = FALSE;
-    private static $_queries = 0;
-
-    /**
-     * @var PDO
-     */
-    private static $_conn = FALSE;
-
-    public static function connect()
+    public function connect()
     {
-        if (!self::$_init) {
-            self::$_init = TRUE;
+        if (!$this->_init) {
+            $this->_init = TRUE;
 
             if (Core::app()->cfg('db/dblink') === null) {
                 throw new DbError('Database not yet configured!');
             }
 
             try {
-                self::$_conn = new PDO(
+                $this->_conn = new PDO(
                     Core::app()->cfg('db/dblink'),
                     Core::app()->cfg('db/dbuser'),
                     Core::app()->cfg('db/dbpass')
                 );
 
-                self::$_conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                self::$_conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+                $this->_conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $this->_conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
             } catch (PDOException $e) {
                 throw new DbError('Nie można połączyć z PDO: ' . $e->getMessage());
-                return FALSE;
             }
 
-            if (!self::connected()) {
+            if (!$this->connected()) {
                 throw new DbError('Nie można połączyć z PDO');
-                return FALSE;
             }
         }
+        return FALSE;
     }
 
-    public static function conn()
-    {
-        if (!self::$_init) {
-            self::connect();
-        }
-
-        return self::$_conn;
-    }
-
-    public static function connected()
-    {
-        return (bool)self::conn();
-    }
-
-    public static function queries()
-    {
-        return self::$_queries;
-    }
 
     /**
      *
-     * @param type $sql
-     * @param type $skip
-     * @param type $assoc
+     * @param string $sql   Sql query to perform
+     * @param string $skip  Not used for now
+     * @param bool   $assoc Assoc or not?
      *
      * @return Collection
      */
-    public static function query($sql, $skip = '', $assoc = TRUE)
+    public function query($sql, $skip = '', $assoc = TRUE)
     {
         Log::addLog('SQL QUERY: <tt title="' . $sql . '">' . substr($sql, 0, 30) . '&hellip;</tt>');
 
-        self::$_queries++;
+        $this->_queries++;
 
         if (preg_match('/^(insert|update|delete|replace)/i', $sql)) {
-            $result = self::$_conn->exec($sql);
+            $result = $this->_conn->exec($sql);
             Log::addLog('Exec finished');
             return true;
         } else {
-            $result = self::conn()->query($sql);
+            $result = $this->conn()->query($sql);
             Log::addLog('Query finished');
         }
 
         if (!$result) {
-            if (self::conn()->errorCode()) {
-                throw new DbError($sql . '<br/>' . implode(': ', self::conn()->errorInfo()));
+            if ($this->conn()->errorCode()) {
+                throw new DbError($sql . '<br/>' . implode(': ', $this->conn()->errorInfo()));
             }
             return NULL;
         } else {
@@ -114,44 +87,30 @@ class Db
                     return new Record();
                 }
             } else {
-                throw new DbError('SQL ERROR ' . $sql . '<br/>' . self::conn()->errorInfo());
-                return NULL;
+                throw new DbError('SQL ERROR ' . $sql . '<br/>' . $this->conn()->errorInfo());
             }
         }
     }
 
-    public static function update($sql)
+    public function update($sql)
     {
-        $result = self::conn()->exec($sql);
+        $result = $this->conn()->exec($sql);
         if ($result === FALSE) {
-            throw new DbError('Błąd zapytania<br/>' . $sql . '<br/>' . var_export(self::conn()->errorInfo(), true));
-            return NULL;
+            throw new DbError('Błąd zapytania<br/>' . $sql . '<br/>' . var_export($this->conn()->errorInfo(), true));
         } else {
             return $result;
         }
     }
 
-    public static function lastId()
+    public function lastId()
     {
-        return self::conn()->lastInsertId();
+        return $this->conn()->lastInsertId();
     }
 
-    public static function close()
-    {
-        self::$_conn = NULL;
-    }
 
-    public static function protect($string)
+    public function protect($string)
     {
-        return self::conn()->quote($string);
-    }
-
-    /**
-     * @return Sql
-     */
-    public static function sql()
-    {
-        return new Sql();
+        return $this->conn()->quote($string);
     }
 
 }
