@@ -7,6 +7,7 @@
  * @property Route      $route
  * @property int        $mode          Core::MODE_XXX
  * @property DbAbstract $db
+ * @property Cache      $cache         Cache module
  * @property array      $autoloadPaths Array of autoload paths
  */
 class Tikori
@@ -73,10 +74,18 @@ class Tikori
 
 //		$this->defaultCfg();
 
+        // config
         $this->reconfigure($config);
-        Route::reconfigure();
-        Log::addLog('Reconfigured');
 
+        // enable cache, we need that for config
+        $this->setModule('cache', new Cache());
+        $regenerateAutloads = false;
+        if ($this->cache->findCache('config-sum')) {
+
+        }
+
+        // route
+        Route::reconfigure();
 
         $this->observer = new Observer();
 
@@ -106,11 +115,11 @@ class Tikori
 ////		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))(.html)')
         Route::set('tikori-default', '(<controller>(/<action>(/<id>)))')
             ->defaults(
-            array(
-                 'controller' => ($this->cfg('default') !== null) ? $this->cfg('default') : 'default',
-                 'action'     => 'index',
-            )
-        );
+                array(
+                     'controller' => ($this->cfg('default') !== null) ? $this->cfg('default') : 'default',
+                     'action'     => 'index',
+                )
+            );
 
         // request
         $this->request = new Request();

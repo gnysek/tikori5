@@ -28,6 +28,7 @@ class Route {
 		foreach (Core::app()->cfg('routes') as $key => $route) {
 			Route::set($key, $route['expr'], (!empty($route['params'])) ? $route['params'] : array())->defaults($route['defaults']);
 		}
+        Log::addLog('Reconfigured');
 	}
 
 	/**

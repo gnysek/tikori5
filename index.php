@@ -1,5 +1,5 @@
 <?php
 
 error_reporting(E_ALL);
-include('core/core.php');
+include('core/Core.php');
 Core::run(dirname(__FILE__));
