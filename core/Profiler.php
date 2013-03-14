@@ -1,5 +1,6 @@
 <?php
 
-class Profiler extends TProfiler {
-	
+class Profiler extends TProfiler
+{
+
 }

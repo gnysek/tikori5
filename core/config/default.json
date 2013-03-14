@@ -1,26 +1,26 @@
 {
-	"appName": "Unknown application",
-	"default": "index",
-	"url": {
-		"addScriptName": true,
-		"pathInsteadGet": true
-	},
-	"db": {
-		"dblink": "",
-		"dbuser": "",
-		"dbpass": "",
-		"dbprefix": ""
-	},
-	"routes": {
-		"static": {
-			"expr": "static(/<path>)",
-			"params": {
-				"path": "[a-zA-Z0-9_/]+"
-			},
-			"defaults": {
-				"controller": "static",
-				"action": "default"
-			}
-		}
-	}
+    "appName": "Unknown application",
+    "default": "index",
+    "url": {
+        "addScriptName": true,
+        "pathInsteadGet": true
+    },
+    "db": {
+        "dblink": "",
+        "dbuser": "",
+        "dbpass": "",
+        "dbprefix": ""
+    },
+    "routes": {
+        "static": {
+            "expr": "static(/<path>)",
+            "params": {
+                "path": "[a-zA-Z0-9_/]+"
+            },
+            "defaults": {
+                "controller": "static",
+                "action": "default"
+            }
+        }
+    }
 }

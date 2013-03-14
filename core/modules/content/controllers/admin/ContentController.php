@@ -7,6 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-class Admin_ContentController extends ContentController {
+class Admin_ContentController extends ContentController
+{
 
 }

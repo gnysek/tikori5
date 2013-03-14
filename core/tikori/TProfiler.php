@@ -72,10 +72,18 @@ class TProfiler
     {
         $style = ' style="background-color: %s"';
 
-        if ($percentage < 1) return '';
-        if ($percentage < 5) return sprintf($style, 'orange');
-        if ($percentage < 10) return sprintf($style, 'darkorange');
-        if ($percentage >= 10) return sprintf($style, 'red');
+        if ($percentage < 1) {
+            return '';
+        }
+        if ($percentage < 5) {
+            return sprintf($style, 'orange');
+        }
+        if ($percentage < 10) {
+            return sprintf($style, 'darkorange');
+        }
+        if ($percentage >= 10) {
+            return sprintf($style, 'red');
+        }
 
 
     }

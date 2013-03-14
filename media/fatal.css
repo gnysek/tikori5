@@ -1,33 +1,135 @@
 @import "reset.css";
 
-body {margin: 10px auto; max-width: 800px; font-size: 20px; line-height: 1.8em; background-color: #131313; color: white;}
-body {font-family: 'Segoe UI Light', 'Segoe UI', sans-serif;}
-em {font-style: italic; text-decoration: underline;}
-strong {font-weight: bold;}
-h1 {color: #999; background-color: #1f1f1f; padding: 1px;}
-h1 {display: inline-block; padding: 10px; font-size: 40px; color:#BB6699; font-weight: bold;}
-er {border-radius: 3px; padding: 1px 7px 2px; font-size: 18px;}
-hr{height:1px;border: none;border-top: 1px solid #444;}
-.footer {color: steelblue; font-size: 15px; letter-spacing: 1.5px;}
-.pink {color:#BB6699;}
-.hidden{display: none;}
+body {
+	margin: 10px auto;
+	max-width: 800px;
+	font-size: 20px;
+	line-height: 1.8em;
+	background-color: #131313;
+	color: white;
+}
 
+body {
+	font-family: 'Segoe UI Light', 'Segoe UI', sans-serif;
+}
 
-code{padding: 3px;}
-.code, pre, code{font-family: 'Consolas', monospace; font-size: 16px; line-height: 21px; cursor: default;}
-.code, code {background-color: #222; overflow-x: auto; border-radius: 3px;}
+em {
+	font-style: italic;
+	text-decoration: underline;
+}
 
-.num {margin-left: -50px; width: 50px; background-color: #0A0A0A; color: #888; display: inline-block; text-align: right; padding-right: 3px; margin-right: 3px;}
-code .num{margin-left:0px;}
+strong {
+	font-weight: bold;
+}
 
-.line{margin-left: 50px;}
-.line:hover{background-color: #333;}
-.line:hover .num{background-color: #2a2a2a;}
+h1 {
+	color: #999;
+	background-color: #1f1f1f;
+	padding: 1px;
+}
 
-.err, .highlight:hover, er {background-color: #391414;}
-.err:hover{background-color: #492424;}
-.err .num {background-color: darkorange; color: white}
-.err:hover .num {background-color: goldenrod;}
+h1 {
+	display: inline-block;
+	padding: 10px;
+	font-size: 40px;
+	color: #BB6699;
+	font-weight: bold;
+}
 
-.highlight{display:block; padding: 3px 0; margin: 3px 0;cursor:pointer;}
-.highlight .num{background-color: transparent;}
+er {
+	border-radius: 3px;
+	padding: 1px 7px 2px;
+	font-size: 18px;
+}
+
+hr {
+	height: 1px;
+	border: none;
+	border-top: 1px solid #444;
+}
+
+.footer {
+	color: steelblue;
+	font-size: 15px;
+	letter-spacing: 1.5px;
+}
+
+.pink {
+	color: #BB6699;
+}
+
+.hidden {
+	display: none;
+}
+
+code {
+	padding: 3px;
+}
+
+.code, pre, code {
+	font-family: 'Consolas', monospace;
+	font-size: 16px;
+	line-height: 21px;
+	cursor: default;
+}
+
+.code, code {
+	background-color: #222;
+	overflow-x: auto;
+	border-radius: 3px;
+}
+
+.num {
+	margin-left: -50px;
+	width: 50px;
+	background-color: #0A0A0A;
+	color: #888;
+	display: inline-block;
+	text-align: right;
+	padding-right: 3px;
+	margin-right: 3px;
+}
+
+code .num {
+	margin-left: 0px;
+}
+
+.line {
+	margin-left: 50px;
+}
+
+.line:hover {
+	background-color: #333;
+}
+
+.line:hover .num {
+	background-color: #2a2a2a;
+}
+
+.err, .highlight:hover, er {
+	background-color: #391414;
+}
+
+.err:hover {
+	background-color: #492424;
+}
+
+.err .num {
+	background-color: darkorange;
+	color: white
+}
+
+.err:hover .num {
+	background-color: goldenrod;
+}
+
+.highlight {
+	display: block;
+	padding: 3px 0;
+	margin: 3px 0;
+	cursor: pointer;
+}
+
+.highlight .num {
+	background-color: transparent;
+}

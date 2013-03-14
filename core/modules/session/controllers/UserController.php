@@ -2,6 +2,7 @@
 
 class UserController extends Controller
 {
+
     public function loginAction()
     {
         if ($this->request->isPost()) {

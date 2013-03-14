@@ -118,7 +118,7 @@ class Request
      * This method returns a union of GET and POST data as a key-value array, or the value
      * of the array key if requested; if the array key does not exist, NULL is returned.
      *
-     * @param  string           $key
+     * @param  string $key
      *
      * @return array|mixed|null
      */
@@ -244,7 +244,7 @@ class Request
 
         if (!empty($_GET)) {
             foreach ($_GET as $k => $v) {
-                $this->_get[$k] = trim(preg_replace('#^[a-z0-9/_\-%]#i','',$v));
+                $this->_get[$k] = trim(preg_replace('#^[a-z0-9/_\-%]#i', '', $v));
             }
         }
 

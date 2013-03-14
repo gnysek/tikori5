@@ -1,35 +1,35 @@
 {
-	"appName":"Tikori 5 Test APP",
-	"default":"content",
-	"url":{
-		"addScriptName":false,
-		"pathInsteadGet":false
-	},
-	"areas":["admin"],
-	"db":{
-		"type":"mysqli",
-		"dbhost":"localhost",
-		"dbname":"tikori5",
-		"dbuser":"root",
-		"dbpass":"",
-		"dblink":"mysql:host=localhost;dbname=tikori5"
-	},
-	"routes":{
-		"forum":{
-			"expr":"<directory>(/<controller>(/<action>(/<id>)))",
-			"params":{
-				"directory":"forum"
-			},
-			"defaults":{
-				"controller":"forum",
-				"action":"index"
-			}
-		}
-	},
-	"modules":{
-		"content":{
-		},
-		"session":{
-		}
-	}
+    "appName": "Tikori 5 Test APP",
+    "default": "content",
+    "url": {
+        "addScriptName": false,
+        "pathInsteadGet": false
+    },
+    "areas": ["admin"],
+    "db": {
+        "type": "mysqli",
+        "dbhost": "localhost",
+        "dbname": "tikori5",
+        "dbuser": "root",
+        "dbpass": "",
+        "dblink": "mysql:host=localhost;dbname=tikori5"
+    },
+    "routes": {
+        "forum": {
+            "expr": "<directory>(/<controller>(/<action>(/<id>)))",
+            "params": {
+                "directory": "forum"
+            },
+            "defaults": {
+                "controller": "forum",
+                "action": "index"
+            }
+        }
+    },
+    "modules": {
+        "content": {
+        },
+        "session": {
+        }
+    }
 }

@@ -3,6 +3,7 @@
 /**
  * Config class for Tikori 5
  */
-class Config extends TConfig {
-	
+class Config extends TConfig
+{
+
 }

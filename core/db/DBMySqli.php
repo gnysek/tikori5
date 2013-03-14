@@ -13,7 +13,7 @@ class DbMySqli extends DBAbstract
     {
         Profiler::addLog(__CLASS__ . ' connecting');
         $this->_conn = new mysqli(
-            'p:' .Core::app()->cfg('db/dbhost'),
+            'p:' . Core::app()->cfg('db/dbhost'),
             Core::app()->cfg('db/dbuser'),
             Core::app()->cfg('db/dbpass'),
             Core::app()->cfg('db/dbname')

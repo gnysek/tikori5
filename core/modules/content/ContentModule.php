@@ -1,9 +1,10 @@
 <?php
 
 /**
- * @author Piotr Gnys <gnysek@gnysek.pl>
+ * @author  Piotr Gnys <gnysek@gnysek.pl>
  * @package content
  */
-class ContentModule extends TContentModule {
-	
+class ContentModule extends TContentModule
+{
+
 }

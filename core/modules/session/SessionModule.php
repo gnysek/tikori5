@@ -6,6 +6,7 @@
  * Time: 17:31
  * To change this template use File | Settings | File Templates.
  */
-class SessionModule extends TSessionModule {
+class SessionModule extends TSessionModule
+{
 
 }

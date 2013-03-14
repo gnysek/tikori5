@@ -10,7 +10,7 @@
 <strong>Test 1:</strong>
 <br/>
 <?php foreach ($test1 as $value): ?>
-	<?php echo $value; ?><br/>
+    <?php echo $value; ?><br/>
 <?php endforeach; ?>
 <hr/>
 <h4>Test 2:</h4>

@@ -1,38 +1,38 @@
 {
-	"languages": {
-		"multi": false,
-		"dynamic": false,
-		"static": {
-			0: "pl"
-		}
-	},
-	"comments": {
-		"enabled": false
-	},
-	"seolinks": {
-		"enabled": false,
-		"routes": {
-			"content-all": {
-				"expr": "content(/<action>(/<settings>))",
-				"params": {
-					"action": "[a-z]+",
-					"settings": ".*"
-				},
-				"defaults": {
-					"controller": "content",
-					"action": "default"
-				}
-			},
-			"content-static": {
-				"expr": "<path>.html",
-				"params": {
-					"path": "[a-zA-Z0-9_/]+"
-				},
-				"defaults": {
-					"controller": "content",
-					"action": "static"
-				}
-			}
-		}
-	}
+    "languages": {
+        "multi": false,
+        "dynamic": false,
+        "static": {
+            0: "pl"
+        }
+    },
+    "comments": {
+        "enabled": false
+    },
+    "seolinks": {
+        "enabled": false,
+        "routes": {
+            "content-all": {
+                "expr": "content(/<action>(/<settings>))",
+                "params": {
+                    "action": "[a-z]+",
+                    "settings": ".*"
+                },
+                "defaults": {
+                    "controller": "content",
+                    "action": "default"
+                }
+            },
+            "content-static": {
+                "expr": "<path>.html",
+                "params": {
+                    "path": "[a-zA-Z0-9_/]+"
+                },
+                "defaults": {
+                    "controller": "content",
+                    "action": "static"
+                }
+            }
+        }
+    }
 }

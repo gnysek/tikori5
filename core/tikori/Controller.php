@@ -31,7 +31,9 @@ class Controller
 
     public function runAction($controller = null, $action = null)
     {
-        Profiler::addLog('-> Running Action: <tt>' . $this->getControllerClassName($controller) . '/' . $action . '</tt>');
+        Profiler::addLog(
+            '-> Running Action: <tt>' . $this->getControllerClassName($controller) . '/' . $action . '</tt>'
+        );
         if (get_called_class() == $controller) {
             $this->run(Core::app()->route, $action);
         } else {

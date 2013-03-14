@@ -60,11 +60,13 @@ abstract class DbAbstract
         return new Sql();
     }
 
-    public function isInitialized() {
+    public function isInitialized()
+    {
         return $this->_init;
     }
 
-    public function init() {
+    public function init()
+    {
         return $this->conn();
     }
 }
