@@ -51,7 +51,8 @@ class TSessionModule extends TModule
         //$this->startSession();
     }
 
-    public function user() {
+    public function user()
+    {
         return $this->_user;
     }
 
@@ -149,11 +150,26 @@ class TSessionModule extends TModule
         }
     }
 
-    public function login(User $user) {
-        $this->_user = $user;
-        $this->_session->user_id = $user->id;
-        $this->_session->logged_in = 1;
-        $this->_user->save();
+//    public function login(User $user)
+    public function login($data)
+    {
+        if ($user = User::model()->login($data)) {
+            $this->_user = $user;
+            $this->_session->user_id = $user->id;
+            $this->_session->logged_in = 1;
+            $this->_user->save();
+            $this->_session->save();
+        }
+
+        return true;
+    }
+
+    public function logout()
+    {
+        $this->_user = new User();
+        //TODO: _user can be magically called, and when changed, below statements will fire automatically?
+        $this->_session->user_id = -1;
+        $this->_session->logged_in = 0;
         $this->_session->save();
 
         return true;

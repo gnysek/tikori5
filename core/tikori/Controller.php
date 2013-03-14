@@ -207,6 +207,13 @@ class Controller
         $this->render('http404', array('status' => $status, 'message' => Response::getMessageForCode($status)));
     }
 
+    public function redirect($where = '/')
+    {
+        $where = HTML::url($where);
+        //TODO: what if before redirect text was send?
+        Core::app()->response->header('Location', $where);
+    }
+
     //	public function defaultAction() {
     //		throw new RouteNotFoundException('Unknown action');
     //	}
