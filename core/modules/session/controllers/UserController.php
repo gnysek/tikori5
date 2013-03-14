@@ -6,8 +6,13 @@ class UserController extends Controller
     public function loginAction()
     {
         if ($this->request->isPost()) {
-            var_dump($_POST);
+            if (User::model()->login($_POST['Login'])) {
+                $this->render('login-success');
+            } else {
+                $this->render('login-failure');
+            }
+        } else {
+            $this->render('login');
         }
-        $this->render('login');
     }
 }

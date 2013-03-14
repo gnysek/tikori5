@@ -8,5 +8,4 @@
 class DbError extends Exception
 {
 
-    //put your code here
 }

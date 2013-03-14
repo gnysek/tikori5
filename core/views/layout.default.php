@@ -16,11 +16,13 @@
             //			var_dump($user);
             ?>
 
-            Welcome, <strong><?php echo $user->username; ?></strong>!<br/>
+            Welcome, <strong style="<?php echo $user->color ?>"><?php echo $user->username; ?></strong>!<br/>
             <?php if (!$user->logged): ?>
                 <?php echo Html::link('Login', $user->loginUrl); ?> &bull;
                 <?php echo Html::link('Register', $user->registerUrl); ?>
             <?php else: ?>
+                <?php echo Html::link('Profile', $user->profileUrl); ?> &bull;
+                <?php echo Html::link('Logout', $user->logoutUrl); ?>
             <?php endif; ?>
         </div>
 

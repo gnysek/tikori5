@@ -123,9 +123,10 @@ class Model
 
     public function findBy($key, $value, $onlyFirst = false)
     {
-        if (!is_numeric($value)) {
-            $value = DB::protect($value);
-        }
+        // it's now made in DbQuery
+//        if (!is_numeric($value)) {
+//            $value = Core::app()->db->protect($value);
+//        }
         $sql = DbQuery::sql()->select()->from($this->_table)->where(array($key, '=', $value));
         $result = $sql->execute();
         $return = array();
@@ -230,7 +231,7 @@ class Model
             return ($this->_isNewRecord) ? $this->insert() : $this->update();
         }
 
-        throw new DbError('Cannot save record');
+        throw new DbError('Cannot save record [beforeSave error]');
     }
 
     /**     * */

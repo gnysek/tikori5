@@ -25,10 +25,14 @@ class UserWidget extends Widget
 
     public function data()
     {
+        $isLoggedIn = Core::app()->session->logged_in;
+        $color = ($isLoggedIn) ? ' color: red;' : '';
+
         return (object)array(
-            'username'    => SessionModule::DEFAULT_NAME,
-            'logged'      => false,
-            'color'       => '',
+            'username'    => ($isLoggedIn) ? Core::app()->session->user()->name
+                : SessionModule::DEFAULT_NAME,
+            'logged'      => $isLoggedIn,
+            'color'       => $color,
             'avatar'      => '',
             'loginUrl'    => Html::url('//user/login'),
             'registerUrl' => Html::url('//user/register'),

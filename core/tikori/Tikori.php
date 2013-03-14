@@ -1,14 +1,15 @@
 <?php
 
 /**
- * @property string     $appDir        Application main directory (where index.php is)
- * @property Request    $request
- * @property Response   $response
- * @property Route      $route
- * @property int        $mode          Core::MODE_XXX
- * @property DbAbstract $db
- * @property Cache      $cache         Cache module
- * @property array      $autoloadPaths Array of autoload paths
+ * @property string             $appDir         Application main directory (where index.php is)
+ * @property Request            $request
+ * @property Response           $response
+ * @property Route              $route
+ * @property int                $mode           Core::MODE_XXX
+ * @property DbAbstract         $db
+ * @property Cache              $cache          Cache module
+ * @property SessionModule      $session        Cache module
+ * @property array              $autoloadPaths  Array of autoload paths
  */
 class Tikori
 {

@@ -85,6 +85,9 @@ class DbMySqli extends DBAbstract
 
     public function protect($string)
     {
+        if (!is_string($string)) {
+            return $string;
+        }
         //return mysqli_escape_string($this->conn(), $string);
         $string = str_replace("'", "''", $string);
         $string = str_replace('\\', '\\\\', $string);

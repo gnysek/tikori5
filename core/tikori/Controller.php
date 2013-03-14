@@ -120,6 +120,8 @@ class Controller
 
                 Profiler::addLog('Setting reponse using last controller action');
                 Core::app()->response->body($response);
+            } catch (DbError $e) {
+                Error::exch($e);
             } catch (Exception $e) {
                 //				if (($this instanceof ErrorController)==false)
                 $this->forward404();
