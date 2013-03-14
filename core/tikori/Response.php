@@ -97,12 +97,12 @@ class Response
      *
      * @return  string                  Header value
      */
-//    public function header( $name, $value = null ) {
-//        if ( !is_null($value) ) {
-//            $this[$name] = $value;
-//        }
-//        return $this[$name];
-//    }
+    public function header( $name, $value = null ) {
+        if ( !is_null($value) ) {
+            $this->_header[$name] = $value;
+        }
+        return $this->_header[$name];
+    }
 
     /**
      * Get and set body

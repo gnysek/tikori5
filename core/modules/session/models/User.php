@@ -50,6 +50,11 @@ class User extends Model
 
     protected $_table = 'users';
 
+    /**
+     * @param null|string $model
+     *
+     * @return User|Model
+     */
     public static function model($model = __CLASS__)
     {
         return parent::model($model);
@@ -99,7 +104,8 @@ class User extends Model
 
         if (!empty($result) and $result->password == md5($data['pass'])) {
             $this->last_visit_time = $this->last_update_time + 1;
-            return Core::app()->session->login($result);
+            $this->last_update_time = time();
+            return $result;
         }
 
         return false;
