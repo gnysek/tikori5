@@ -28,14 +28,14 @@ class TObserver {
 			}
 			$methodName = lcfirst($methodName) . self::EVENT_SUFFIX;
 
-			Log::addLog('Firing event <code>' . $eventName . '</code> <tt>' . $methodName . '</tt> with ' . count($this->_observers[$eventName]) . ' observer(s)');
+			Profiler::addLog('Firing event <code>' . $eventName . '</code> <tt>' . $methodName . '</tt> with ' . count($this->_observers[$eventName]) . ' observer(s)');
 			foreach ($this->_observers[$eventName] as $observer) {
 				if (method_exists($observer, $methodName)) {
 					call_user_func_array(array($observer, $methodName), array($data));
 				}
 			}
 		} else {
-			Log::addLog('Firing event <code>' . $eventName . '</code> but there\'s no observers');
+			Profiler::addLog('Firing event <code>' . $eventName . '</code> but there\'s no observers');
 		}
 	}
 }

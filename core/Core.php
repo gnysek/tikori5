@@ -123,8 +123,8 @@ class Core {
 		foreach (Core::app()->autoloadPaths as $dir) {
 			$filename = $dir . $search;
 			if (file_exists($filename)) {
-				if (class_exists('Log')) {
-					Log::addLog('Loading <tt>' . $class . '</tt> from <tt>' . $filename . '<tt>');
+				if (class_exists('Profiler')) {
+					Profiler::addLog('Loading <tt>' . $class . '</tt> from <tt>' . $filename . '<tt>');
 				}
 				require $filename;
 				return true;

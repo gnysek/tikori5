@@ -31,7 +31,7 @@ class Controller
 
     public function runAction($controller = null, $action = null)
     {
-        Log::addLog('-> Running Action: <tt>' . $this->getControllerClassName($controller) . '/' . $action . '</tt>');
+        Profiler::addLog('-> Running Action: <tt>' . $this->getControllerClassName($controller) . '/' . $action . '</tt>');
         if (get_called_class() == $controller) {
             $this->run(Core::app()->route, $action);
         } else {
@@ -72,7 +72,7 @@ class Controller
         if (!method_exists($this, $this->getActionMethodName())) {
             $this->forward404();
         } else {
-            Log::addLog(
+            Profiler::addLog(
                 'Calling controller: <tt>' . $this->getControllerClassName() . '::' . $this->getActionMethodName()
                     . '</tt>'
             );
@@ -116,7 +116,7 @@ class Controller
                 // end buffer
                 $response = ob_get_clean();
 
-                Log::addLog('Setting reponse using last controller action');
+                Profiler::addLog('Setting reponse using last controller action');
                 Core::app()->response->body($response);
             } catch (Exception $e) {
                 //				if (($this instanceof ErrorController)==false)
@@ -244,7 +244,7 @@ class Controller
         if ($_returnNC) {
             ob_start();
             ob_implicit_flush(false);
-            Log::addLog('Rendering <tt>' . str_replace(Core::app()->appDir, '', $_fileNC) . '</tt>');
+            Profiler::addLog('Rendering <tt>' . str_replace(Core::app()->appDir, '', $_fileNC) . '</tt>');
             require($_fileNC);
             return ob_get_clean();
         } else {

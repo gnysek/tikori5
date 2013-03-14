@@ -165,7 +165,7 @@ class Response {
 	}
 
 	public function send() {
-		Log::addLog('Sending response');
+		Profiler::addLog('Sending response');
 		list($status, $header, $body) = $this->finalize();
 
 		//Send headers
@@ -188,7 +188,7 @@ class Response {
 
 		echo $body;
 
-		Log::addLog('Response sended');
+		Profiler::addLog('Response sended');
 //		exit;
 	}
 

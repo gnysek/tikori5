@@ -75,10 +75,10 @@ class TSessionModule extends TModule
         }
 
         if (empty($this->_skey)) {
-            Log::addLog('New session');
+            Profiler::addLog('New session');
             $this->_newSession();
         } else {
-            Log::addLog('Old session');
+            Profiler::addLog('Old session');
             $this->_continueSession();
         }
     }

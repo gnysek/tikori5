@@ -49,17 +49,17 @@ class DbPDO extends DBAbstract
      */
     public function query($sql, $skip = '', $assoc = TRUE)
     {
-        Log::addLog('SQL QUERY: <tt title="' . $sql . '">' . substr($sql, 0, 30) . '&hellip;</tt>');
+        Profiler::addLog('SQL QUERY: <tt title="' . $sql . '">' . substr($sql, 0, 30) . '&hellip;</tt>');
 
         $this->_queries++;
 
         if (preg_match('/^(insert|update|delete|replace)/i', $sql)) {
             $result = $this->_conn->exec($sql);
-            Log::addLog('Exec finished');
+            Profiler::addLog('Exec finished');
             return true;
         } else {
             $result = $this->conn()->query($sql);
-            Log::addLog('Query finished');
+            Profiler::addLog('Query finished');
         }
 
         if (!$result) {

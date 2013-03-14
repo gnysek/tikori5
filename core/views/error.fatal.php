@@ -24,7 +24,7 @@
 				echo $entry;
 			}
 
-			Log::getLogs();
+			Profiler::getLogs();
 			?>
 		<?php endif; ?>
 		<hr/>

@@ -28,7 +28,7 @@ class Route {
 		foreach (Core::app()->cfg('routes') as $key => $route) {
 			Route::set($key, $route['expr'], (!empty($route['params'])) ? $route['params'] : array())->defaults($route['defaults']);
 		}
-        Log::addLog('Reconfigured');
+        Profiler::addLog('Reconfigured');
 	}
 
 	/**
@@ -190,7 +190,7 @@ class Route {
 			}
 		}
 
-		Log::addLog('Processing URI <tt>/' . $uri . '</tt> against ' . count($routes) . ' routes' . (empty($area) ? '' : ' using route <tt>' . $area . '</tt>'));
+		Profiler::addLog('Processing URI <tt>/' . $uri . '</tt> against ' . count($routes) . ' routes' . (empty($area) ? '' : ' using route <tt>' . $area . '</tt>'));
 
 		/* @var $route Route */
 		foreach ($routes as $name => $route) {

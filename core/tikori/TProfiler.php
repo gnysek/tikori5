@@ -1,6 +1,6 @@
 <?php
 
-class TLog
+class TProfiler
 {
 
     const LEVEL_DEBUG = 1;
@@ -32,12 +32,12 @@ class TLog
     {
         $logs = array();
 
-        $logs[] = 'Logs:<br/>';
+        $logs[] = 'Profiler:<br/>';
         $logs[] = '<table style="width: 98%; margin: 5px auto;">';
         $logs[] = '<tr>';
         $logs[] = '<th>ID</th>';
-        $logs[] = '<th>Action</th>';
         $logs[] = '<th>Time</th>';
+        $logs[] = '<th>Action</th>';
         $logs[] = '<th>Total</th>';
         $logs[] = '<th colspan="2">%</th>';
         $logs[] = '</tr>';
@@ -53,8 +53,8 @@ class TLog
 
                 $logs[] = '<tr>';
                 $logs[] = '<td>' . $id . '</td>';
-                $logs[] = '<td>' . $log[1] . '</td>';
                 $logs[] = '<td>+' . $log[3] . 's.</td>';
+                $logs[] = '<td>' . $log[1] . '</td>';
                 $logs[] = '<td>=' . $log[2] . 's.</td>';
                 $logs[]
                     = '<td' . self::percentageColor($currentPercentage) . '>+' . sprintf('%0.2f', $currentPercentage)
