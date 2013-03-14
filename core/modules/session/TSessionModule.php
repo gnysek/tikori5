@@ -51,6 +51,10 @@ class TSessionModule extends TModule
         //$this->startSession();
     }
 
+    public function user() {
+        return $this->_user;
+    }
+
     public function beforeDispatchEvent()
     {
         $this->startSession();
@@ -75,10 +79,10 @@ class TSessionModule extends TModule
         }
 
         if (empty($this->_skey)) {
-            Log::addLog('New session');
+            Profiler::addLog('New session');
             $this->_newSession();
         } else {
-            Log::addLog('Old session');
+            Profiler::addLog('Old session');
             $this->_continueSession();
         }
     }
@@ -143,6 +147,16 @@ class TSessionModule extends TModule
         if (!empty($this->_user)) {
             return $this->_user->$name;
         }
+    }
+
+    public function login(User $user) {
+        $this->_user = $user;
+        $this->_session->user_id = $user->id;
+        $this->_session->logged_in = 1;
+        $this->_user->save();
+        $this->_session->save();
+
+        return true;
     }
 
 

@@ -6,6 +6,7 @@
  * Time: 15:07
  * To change this template use File | Settings | File Templates.
  */
-class Observer extends TObserver {
+class Observer extends TObserver
+{
 
 }

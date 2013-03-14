@@ -50,11 +50,6 @@ class User extends Model
 
     protected $_table = 'users';
 
-    /**
-     * @param class $model
-     *
-     * @return ContentTranslation
-     */
     public static function model($model = __CLASS__)
     {
         return parent::model($model);
@@ -89,5 +84,24 @@ class User extends Model
             'bantime',
             'admin',
         );
+    }
+
+    public function beforeSave()
+    {
+        $this->last_update_time = time();
+
+        return true;
+    }
+
+    public function login($data)
+    {
+        $result = $this->findBy('name', $data['login'], true);
+
+        if (!empty($result) and $result->password == md5($data['pass'])) {
+            $this->last_visit_time = $this->last_update_time + 1;
+            return Core::app()->session->login($result);
+        }
+
+        return false;
     }
 }

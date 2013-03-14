@@ -60,7 +60,6 @@ class Session extends Model
             $this->ip = Core::app()->request->env['ip'];
         }
 
-
         return true;
     }
 }

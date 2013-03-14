@@ -1,7 +1,7 @@
 <?php
 $this->breadcrumbs = array(
-	'Extend' => array('static/extend'),
-	'Controllers &amp; Routes',
+    'Extend' => array('static/extend'),
+    'Controllers &amp; Routes',
 );
 ?>
 
@@ -19,7 +19,7 @@ Route::set('default', '(&lt;controller&gt;(/&lt;action&gt;(/&lt;id&gt;)))')
 
 <h5>Syntax</h5>
 <p>
-	<code class="prettyprint lang-php">Route::set(name, uri [,options]);</code>
+    <code class="prettyprint lang-php">Route::set(name, uri [,options]);</code>
 </p>
 
 <h5>Name</h5>
@@ -27,13 +27,16 @@ Route::set('default', '(&lt;controller&gt;(/&lt;action&gt;(/&lt;id&gt;)))')
 
 <h5>URI</h5>
 <p>The uri is a string that represents the format of urls that should be matched.
-	The tokens surrounded with <code>&lt;&gt;</code> are keys and anything surrounded with <code>()</code> are optional parts of the uri.
-	In Tikori routes, any character is allowed and treated literally aside from <tt>()&lt;&gt;</tt>.
-The <code>/</code> has no meaning besides being a character that must match in the uri.
-Usually the <code>/</code> is used as a static seperator but as long as the regex makes sense, there are no restrictions to how you can format your routes.</p>
+    The tokens surrounded with <code>&lt;&gt;</code> are keys and anything surrounded with <code>()</code> are optional
+    parts of the uri.
+    In Tikori routes, any character is allowed and treated literally aside from <tt>()&lt;&gt;</tt>.
+    The <code>/</code> has no meaning besides being a character that must match in the uri.
+    Usually the <code>/</code> is used as a static seperator but as long as the regex makes sense, there are no
+    restrictions to how you can format your routes.</p>
 
 <h5>Options</h5>
-<p>In options you can specify additoinal rules of parsing URI segment. For example, if action should be one of add,edit,update,delete, you can pass:
+<p>In options you can specify additoinal rules of parsing URI segment. For example, if action should be one of
+    add,edit,update,delete, you can pass:
 <pre>
 array('action' => '(add|edit|update|delete)')
 </pre>

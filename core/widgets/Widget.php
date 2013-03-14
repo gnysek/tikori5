@@ -1,5 +1,6 @@
 <?php
 
-class Widget extends TWidget {
-	
+class Widget extends TWidget
+{
+
 }

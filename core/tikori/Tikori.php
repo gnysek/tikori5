@@ -1,14 +1,15 @@
 <?php
 
 /**
- * @property string     $appDir        Application main directory (where index.php is)
- * @property Request    $request
- * @property Response   $response
- * @property Route      $route
- * @property int        $mode          Core::MODE_XXX
- * @property DbAbstract $db
- * @property Cache      $cache         Cache module
- * @property array      $autoloadPaths Array of autoload paths
+ * @property string             $appDir         Application main directory (where index.php is)
+ * @property Request            $request
+ * @property Response           $response
+ * @property Route              $route
+ * @property int                $mode           Core::MODE_XXX
+ * @property DbAbstract         $db
+ * @property Cache              $cache          Cache module
+ * @property SessionModule      $session        Cache module
+ * @property array              $autoloadPaths  Array of autoload paths
  */
 class Tikori
 {
@@ -66,11 +67,11 @@ class Tikori
         spl_autoload_register(array('Core', 'autoload'));
         $this->registerAutoloadPaths();
 
-        Log::addLog('Registered autoload');
+        Profiler::addLog('Registered autoload');
 
         // register error handlers
         Error::registerErrors();
-        Log::addLog('Registered errors');
+        Profiler::addLog('Registered errors');
 
 //		$this->defaultCfg();
 
@@ -123,9 +124,9 @@ class Tikori
 
         // request
         $this->request = new Request();
-        Log::addLog('Request created');
+        Profiler::addLog('Request created');
         $this->response = new Response();
-        Log::addLog('Response created');
+        Profiler::addLog('Response created');
 
         // process route
         $this->route = Route::process_uri($this->request->getRouterPath());
@@ -141,13 +142,13 @@ class Tikori
 
         Core::event(self::EVENT_AFTER_DISPATCH);
 
-        Log::addLog('Route handled');
+        Profiler::addLog('Route handled');
 
         $this->response->send();
 
-//		Log::addLog('Finalizing response');
+//		Profiler::addLog('Finalizing response');
 //		list($status, $header, $body) = $this->response->finalize();
-//		Log::addLog('Response finalized');
+//		Profiler::addLog('Response finalized');
 //
 //		//Send headers
 //		if (headers_sent() === false) {
@@ -167,13 +168,13 @@ class Tikori
 //			}
 //		}
 //
-//		Log::addLog('Headers:<br/>' . implode('<br/>', headers_list()));
+//		Profiler::addLog('Headers:<br/>' . implode('<br/>', headers_list()));
 //
 //		echo $body;
 
-        Log::addLog('Finishing application');
+        Profiler::addLog('Finishing application');
         if ($this->mode != Core::MODE_PROD) {
-            echo Log::getLogs();
+            echo Profiler::getLogs();
         }
         return true;
     }

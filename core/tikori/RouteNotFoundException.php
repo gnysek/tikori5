@@ -1,5 +1,6 @@
 <?php
 
-class RouteNotFoundException extends Exception {
-	
+class RouteNotFoundException extends Exception
+{
+
 }

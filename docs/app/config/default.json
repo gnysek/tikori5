@@ -1,21 +1,21 @@
 {
-	"appName": "Documentation &ndash; Tikori5",
-	"host": "http://localhost/docs/",
-	"dblink": "",
-	"dbuser": "",
-	"dbpass": "",
-	"default": "static",
-	"routes": {
-		"static": {
-			"expr": "static(/<path>)",
-			"params": {
-				"path": "[a-zA-Z0-9_\\-/]+"
-			},
-			"defaults": {
-				"controller": "static",
-				"action": "default",
-				"path": "none"
-			}
-		}
-	}
+    "appName": "Documentation &ndash; Tikori5",
+    "host": "http://localhost/docs/",
+    "dblink": "",
+    "dbuser": "",
+    "dbpass": "",
+    "default": "static",
+    "routes": {
+        "static": {
+            "expr": "static(/<path>)",
+            "params": {
+                "path": "[a-zA-Z0-9_\\-/]+"
+            },
+            "defaults": {
+                "controller": "static",
+                "action": "default",
+                "path": "none"
+            }
+        }
+    }
 }

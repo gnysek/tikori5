@@ -2,12 +2,18 @@
 
 class UserController extends Controller
 {
+
     public function loginAction()
     {
         if ($this->request->isPost()) {
-            $user = User::model()->login($_POST['Login']['login'], $_POST['Login']['pass']);
-            var_dump($_POST);
+
+            if (User::model()->login($_POST['Login'])) {
+                $this->render('login-success');
+            } else {
+                $this->render('login-failure');
+            }
+        } else {
+            $this->render('login');
         }
-        $this->render('login');
     }
 }
