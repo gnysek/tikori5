@@ -175,5 +175,20 @@ class TSessionModule extends TModule
         return true;
     }
 
+    public function authenticated()
+    {
+        return $this->_session->logged_in;
+    }
+
+    public function admin()
+    {
+        return $this->_user->admin;
+    }
+
+    public function guest()
+    {
+        return $this->_session->logged_in != 1;
+    }
+
 
 }

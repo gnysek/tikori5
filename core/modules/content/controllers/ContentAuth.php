@@ -1,22 +1,22 @@
 <?php
 
-class ContentAuth extends Controller
+class ContentAuth extends AdminController
 {
 
 
-    protected function _beforeRun()
-    {
-        if ($this->area == 'admin') {
-            // set auth
-            $this->checkPermissions = true;
-        }
-
-        return true;
-    }
+//    protected function _beforeRun()
+//    {
+//        if ($this->area == 'admin') {
+//            // set auth
+//            $this->checkPermissions = true;
+//        }
+//
+//        return parent::_beforeRun();
+//    }
 
     public function checkPermissions()
     {
-        $this->_beforeRun();
+        //$this->_beforeRun();
         parent::checkPermissions();
     }
 

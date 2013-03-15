@@ -25,7 +25,7 @@ class UserWidget extends Widget
 
     public function data()
     {
-        $isLoggedIn = Core::app()->session->logged_in;
+        $isLoggedIn = Core::app()->session->authenticated();
         $color = ($isLoggedIn) ? ' color: red;' : '';
 
         return (object)array(

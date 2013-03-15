@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Class Controller
+ *
+ * @property Request $request
+ * @property string  $pageTitle
+ */
 class Controller
 {
 
@@ -49,6 +55,12 @@ class Controller
         $c->runAction('', 'httpStatus');
     }
 
+    public static function forward401()
+    {
+        $c = new Controller;
+        $c->httpStatusAction(401);
+    }
+
     protected function _beforeRun()
     {
         return true;
@@ -69,6 +81,10 @@ class Controller
 
         if (empty($this->action) or !method_exists($this, $this->getActionMethodName())) {
             $this->action = 'default';
+        }
+
+        if (!$this->_beforeRun()) {
+            return;
         }
 
         if (!method_exists($this, $this->getActionMethodName())) {
@@ -121,6 +137,7 @@ class Controller
                 Profiler::addLog('Setting reponse using last controller action');
                 Core::app()->response->body($response);
             } catch (DbError $e) {
+                //TODO: shouldn't be like that...
                 Error::exch($e);
             } catch (Exception $e) {
                 //				if (($this instanceof ErrorController)==false)
