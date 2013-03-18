@@ -196,7 +196,8 @@ class Route
         // get area
         $area = null;
         if (Core::app()->cfg('areas') !== null) {
-            $test = end(Core::app()->cfg('areas'));
+            $test = Core::app()->cfg('areas'); // prevent to cause E_STRICT
+            $test = end($test);
 
             if (preg_match('#^(' . $test . ')(?:/*).*#', $uri)) {
                 $area = $test;

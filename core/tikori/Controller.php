@@ -149,11 +149,12 @@ class Controller
         //		}
     }
 
-    public function getControllerClassName($controller = null, $suffix = 'Controller')
+    public static function getControllerClassName($controller = null, $suffix = 'Controller')
     {
-        if (isset($this)) {
+        $strict = 'this'; // fix for E_STRICT notice
+        if (isset($$strict)) {
             if ($controller === null) {
-                $controller = $this->controller;
+                $controller = $$strict->controller;
             }
         }
 

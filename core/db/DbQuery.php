@@ -264,6 +264,7 @@ class DbQuery
         }
 
         // where
+        reset($this->_from);
         if (!in_array($this->_type, array(self::Q_INSERT, self::Q_REPLACE))) {
             if (!empty($this->_where)) {
                 $sql[] = 'WHERE';
@@ -274,7 +275,9 @@ class DbQuery
                     if ($this->_type != self::Q_UPDATE) {
                         $bld
                             =
-                            '`' . $this->_fromAliases[(empty($w[3])) ? array_shift(array_values($this->_from)) : $w[3]]
+                            '`' . $this->_fromAliases[(empty($w[3]))
+                                ? $this->_from[key($this->_from)]
+                                : $w[3]]
                                 . '`.';
                     }
                     $bld .= '`' . $w[0] . '` ' . $w[1] . ' ' . (is_string($w[2]) ? Core::app()->db->protect($w[2])

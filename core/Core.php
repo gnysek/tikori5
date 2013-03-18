@@ -33,8 +33,9 @@ class Core
     /**
      * Runs an application
      *
-     * @param type $path
-     * @param type $config
+     * @param string $path
+     * @param string $config
+     * @return null
      */
     public static function run($path = '', $config = 'default')
     {
@@ -42,6 +43,7 @@ class Core
             return $core = new Tikori($path, $config);
         }
         self::asssignApp();
+        return true;
     }
 
     /**
@@ -110,7 +112,8 @@ class Core
     /**
      * Autoloader method
      *
-     * @param type $class Class name
+     * @param string $class Class name
+     * @param bool $throw Should it throw or not
      *
      * @return boolean
      * @throws Exception

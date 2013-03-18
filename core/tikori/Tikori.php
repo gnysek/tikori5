@@ -1,15 +1,16 @@
 <?php
 
 /**
- * @property string                     $appDir         Application main directory (where index.php is)
- * @property Request                    $request
- * @property Response                   $response
- * @property Route                      $route
- * @property int                        $mode           Core::MODE_XXX
- * @property DbAbstract                 $db
- * @property Cache                      $cache          Cache module
- * @property SessionModule|Session      $session        Cache module
- * @property array                      $autoloadPaths  Array of autoload paths
+ * @property string                        $appDir         Application main directory (where index.php is)
+ * @property Request                       $request
+ * @property Response                      $response
+ * @property Route                         $route
+ * @property int                           $mode           Core::MODE_XXX
+ * @property DbAbstract                    $db
+ * @property Cache                         $cache          Cache module
+ * @property SessionModule|Session         $session        Cache module
+ * @property array                         $autoloadPaths  Array of autoload paths
+ * @property Observer                      observer
  */
 class Tikori
 {
@@ -49,10 +50,11 @@ class Tikori
      * It runs application. Whole magic is here, abracadabra!
      * Echoes results, throw exceptions and 404s, redirects etc.
      *
-     * @param type   $path   Path to APP parent dir
+     * @param string $path   Path to APP parent dir
      * @param string $config config file name without .json, usually 'default'
      *
      * @throws RouteNotFoundException
+     * @return bool
      */
     public function init($path = '', $config = 'default')
     {
@@ -232,7 +234,9 @@ class Tikori
      *
      * @param string|array $paths Paths to add as array values
      *
-     * @return type
+     * @param bool         $core Is it core path or not ?
+     *
+     * @return null
      */
     public function addAutoloadPaths($paths, $core = false)
     {
@@ -273,6 +277,20 @@ class Tikori
                     $this->mode = ($this->cfg('mode') === null) ? Core::MODE_DEV : $this->cfg('mode');
                 }
             }
+
+            switch ($this->mode) {
+                case Core::MODE_DEBUG:
+                case Core::MODE_DEV:
+                    error_reporting(E_ALL | E_STRICT);
+                    break;
+//                case Core::MODE_PROD:
+                default:
+                    error_reporting(0);
+//                default:
+//                    header('HTTP/1.1 503 Service Unavailable.', TRUE, 503);
+//                    echo 'You need to setup application mode, sorry.';
+//                    exit(1);
+            }
         }
 
         return $this->mode;
@@ -299,7 +317,9 @@ class Tikori
     }
 
     /**
-     * @return Config
+     * @param string $item
+     * @param mixed $default
+     * @return Config|array
      */
     public function cfg($item = null, $default = null)
     {
