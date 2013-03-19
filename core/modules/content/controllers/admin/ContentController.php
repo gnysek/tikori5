@@ -10,4 +10,13 @@
 class Admin_ContentController extends ContentController
 {
 
+    public function editAction($id = 0)
+    {
+        echo 'asdf' . $id;
+    }
+
+    public function deleteAction()
+    {
+
+    }
 }

@@ -102,7 +102,8 @@ class Controller
                 $method = $reflection->getMethod($this->getActionMethodName());
                 /* @var $method ReflectionMethod */
 
-                if ($method->getNumberOfRequiredParameters() > 0) {
+//                if ($method->getNumberOfRequiredParameters() > 0) {
+                if ($method->getNumberOfParameters() > 0) {
                     //						var_dump($method->getNumberOfRequiredParameters());
 
                     foreach ($method->getParameters() as $paramObject) {
@@ -149,7 +150,7 @@ class Controller
         //		}
     }
 
-    public static function getControllerClassName($controller = null, $suffix = 'Controller')
+    public static function getControllerClassName($controller = null, $arena = null, $suffix = 'Controller')
     {
         $strict = 'this'; // fix for E_STRICT notice
         if (isset($$strict)) {
@@ -158,7 +159,7 @@ class Controller
             }
         }
 
-        return ucfirst(strtolower(($controller))) . $suffix;
+        return (!empty($arena) ? ucfirst($arena) . '_' : '') . ucfirst(strtolower(($controller))) . $suffix;
     }
 
     public function getActionMethodName($action = null, $suffix = 'Action')

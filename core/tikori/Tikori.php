@@ -133,6 +133,8 @@ class Tikori
         // process route
         $this->route = Route::process_uri($this->request->getRouterPath());
 
+        Profiler::addLog('Route processed - is ' . (($this->route == null) ? 'not found' : 'found'));
+
         Core::event(self::EVENT_BEFORE_DISPATCH);
 
         if ($this->route == null) {

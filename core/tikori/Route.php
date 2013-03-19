@@ -411,9 +411,12 @@ class Route
      */
     public function dispatch()
     {
+        Profiler::addLog(
+            'Dispatching: <code>' . $this->area . '>' . $this->controller . '/' . $this->action . '</code>'
+        );
         $controller = null;
         try {
-            $class = Controller::getControllerClassName($this->controller);
+            $class = Controller::getControllerClassName($this->controller, $this->area);
             $controller = new $class; //($this->area);
         } catch (Exception $e) {
             return Controller::forward404();
