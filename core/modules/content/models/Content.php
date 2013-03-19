@@ -3,9 +3,18 @@
 /**
  * Description of Content
  *
- * @author user
- * @property int $created
- * @property int $updated
+ * @author gnysek
+ * @property int     $id
+ * @property string  $name
+ * @property boolean $enabled
+ * @property string  $path
+ * @property int     $parent
+ * @property int     $type
+ * @property int     $created
+ * @property int     $updated
+ * @property int     $comments
+ * @property int     $author
+ * @proprety ContentTranslations content_translations
  */
 class Content extends Model
 {
@@ -13,9 +22,9 @@ class Content extends Model
 //	protected $_pkId = 'id';
 
     /**
-     * @param class $model
+     * @param string $model
      *
-     * @return Content
+     * @return Content|Model
      */
     public static function model($model = __CLASS__)
     {

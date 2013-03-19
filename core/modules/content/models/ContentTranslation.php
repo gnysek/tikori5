@@ -44,6 +44,22 @@ class ContentTranslation extends Model
         );
     }
 
+    public function getFields()
+    {
+        return array(
+            'content',
+            'id',
+            'page_id',
+            'language_id',
+            'name',
+            'short ',
+            'long',
+            'img',
+            'url',
+            'comm',
+        );
+    }
+
 }
 
 ?>

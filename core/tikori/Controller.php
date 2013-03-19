@@ -239,6 +239,8 @@ class Controller
 
     public function render($file = null, $data = null, $return = false)
     {
+        //TODO: no error when file not found?
+
         if (!empty($file) && $this->viewExists($file)) {
             $out = $this->renderPartial($file, $data);
         } else {

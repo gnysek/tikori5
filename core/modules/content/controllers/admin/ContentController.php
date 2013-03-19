@@ -12,7 +12,9 @@ class Admin_ContentController extends ContentController
 
     public function editAction($id = 0)
     {
-        echo 'asdf' . $id;
+        $model = ContentTranslation::model()->load($id);
+
+        $this->render('edit', array('model' => $model));
     }
 
     public function deleteAction()
