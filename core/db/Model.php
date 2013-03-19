@@ -1,7 +1,10 @@
 <?php
 
 /**
+ * Class Model
  *
+ * @property string $tableName  Table Name
+ * @property mixed  $attributes Attribute values
  */
 class Model
 {
@@ -14,7 +17,7 @@ class Model
 //	const MANY_MANY = 4;
 
     protected $_table = '';
-    protected $_fields;
+    protected $_fields = array();
     protected $_values = array();
     protected $_rules = array();
     protected $_related = null;
@@ -23,6 +26,7 @@ class Model
     protected $_relations = array();
     protected $_isNewRecord = true;
     protected $_errors = array();
+    public $_modified = array();
     public $tableName = '';
 
     public function __construct()
@@ -195,14 +199,14 @@ class Model
     /**     * */
     public function insert()
     {
-        DbQuery::sql()->insert()->from($this->_table)->fields($this->_values)->execute();
+        DbQuery::sql()->insert()->from($this->_table)->fields($this->_getModifiedFields())->execute();
         $this->afterSave();
     }
 
     // TODO: check that where() automatically will be always good - it should be...
     public function update()
     {
-        $values = $this->_values;
+        $values = $this->_getModifiedFields();
         if (array_key_exists($this->_primaryKey, $values)) {
             unset($values[$this->_primaryKey]);
         }
@@ -213,6 +217,16 @@ class Model
             ->where(array($this->_primaryKey, '=', $this->_values[$this->_primaryKey]))
             ->execute();
         $this->afterSave();
+    }
+
+    protected function _getModifiedFields()
+    {
+        $modified = array();
+        foreach ($this->_modified as $v) {
+            $modified[$v] = $this->_values[$v];
+        }
+
+        return $modified;
     }
 
     public function beforeSave()
@@ -228,7 +242,11 @@ class Model
     public function save()
     {
         if ($this->beforeSave()) {
-            return ($this->_isNewRecord) ? $this->insert() : $this->update();
+            if (!empty($this->_modified)) {
+                return ($this->_isNewRecord) ? $this->insert() : $this->update();
+            } else {
+                return true;
+            }
         }
 
         throw new DbError('Cannot save record [beforeSave error]');
@@ -346,6 +364,9 @@ class Model
                     if (method_exists($this, $getter)) {
                         return $this->$getter();
                     } else {
+//                        if (Core::app()->mode != Core::MODE_PROD) {
+//                            return '<span style="color: red;">' . $value . ' IS UNDEFINED!</span>';
+//                        }
                         return null;
                     }
                 }
@@ -357,11 +378,28 @@ class Model
     {
         $setter = 'set' . ucfirst($name);
         if (array_key_exists($name, $this->_values)) {
+            //TODO: choose that it should be != or !== for $value=$this->_values compare
+            if (!in_array($name, $this->_modified) && $value != $this->_values[$name]) {
+                $this->_modified[] = $name;
+            }
             $this->_values[$name] = $value;
         } else {
             if (method_exists($this, $setter)) {
                 $this->$setter($value);
             }
+        }
+    }
+
+    public function setAttributes($value)
+    {
+        if (is_array($value)) {
+            foreach ($value as $k => $v) {
+                if (in_array($k, $this->_fields)) {
+                    $this->__set($k, $v);
+                }
+            }
+        } else {
+            //TODO: throw error or no?
         }
     }
 

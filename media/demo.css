@@ -16,6 +16,10 @@ body {
 	/*background-color: white;*/
 }
 
+form {
+	display: block;
+}
+
 body, pre, code, tt {
 	font-family: "Liberation Sans", Helvetica, Arial, sans-serif;
 	font-size: 13px;
@@ -148,6 +152,7 @@ tr:first-child th:last-child {
 	border-radius: 0 3px 0 0;
 }
 */
+
 tr:first-child th:only-child {
 	border-radius: 3px 3px 0 0;
 	font-weight: bold;

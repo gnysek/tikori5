@@ -74,4 +74,119 @@ class Html
         return Core::app()->baseUrl() . $script . $addon . $url[0] . $path;
     }
 
+    public static function beginForm($action = '/', $method = 'post')
+    {
+        return '<form action="' . $action . '" method="' . $method . '">';
+    }
+
+    public static function endForm()
+    {
+        return '</form>';
+    }
+
+    public static function warnings($model)
+    {
+        return '';
+    }
+
+    public static function htmlTag($tag, $options = array(), $innerHtml = null)
+    {
+        return ($innerHtml === null)
+            ? self::htmlOpenTag($tag, $options, true)
+            : (self::htmlOpenTag($tag, $options, false) . $innerHtml . self::htmlCloseTag($tag));
+    }
+
+    public static function htmlOpenTag($tag, $options = array(), $noInnerHtml = false)
+    {
+        $html = '<' . $tag;
+
+        foreach ($options as $k => $v) {
+            $html .= ' ' . htmlspecialchars($k) . '="' . htmlspecialchars($v) . '"';
+        }
+
+        if ($noInnerHtml) {
+            $html .= '/>';
+        } else {
+            $html .= '>';
+        }
+
+        return $html;
+    }
+
+    public static function htmlCloseTag($tag)
+    {
+        return '</' . $tag . '>';
+    }
+
+    public static function labelModel($model, $field, $text = null)
+    {
+        return self::htmlTag(
+            'label', array(
+                          'for' => get_class($model) . '[' . $field . ']',
+                          #'id'  => get_class($model) . '_' . $field,
+                     ),
+            empty($text) ? ucfirst($field) : $text
+        );
+    }
+
+    public static function textFieldModel($model, $field)
+    {
+        return self::htmlTag(
+            'input', array(
+                          'name'  => get_class($model) . '[' . $field . ']',
+                          'value' => $model->$field
+                     )
+        );
+
+    }
+
+    public static function textareaFieldModel($model, $field)
+    {
+        return self::htmlTag(
+            'textarea', array(
+                             'name' => get_class($model) . '[' . $field . ']',
+                        ),
+            $model->$field . ''
+        );
+    }
+
+    public static function radioFieldModel($model, $field, $options = array(), $divider = null)
+    {
+        $html = '';
+        $i = 0;
+
+        foreach ($options as $k => $v) {
+            $opt = array(
+                'type'  => 'radio',
+                'name'  => get_class($model) . '[' . $field . ']',
+                'id'    => get_class($model) . '_' . $field . '_' . ++$i,
+                'value' => $k
+            );
+
+            if ($k == $model->$field) {
+                $opt['checked'] = 'checked';
+            }
+
+            $html .= self::htmlTag(
+                'input',
+                $opt
+            );
+
+            $html .= self::htmlTag(
+                'label', array(
+                              'for' => get_class($model) . '_' . $field . '_' . $i,
+                              #'id'  => get_class($model) . '_' . $field,
+                         ),
+                $v
+            );
+            $html .= $divider;
+        }
+
+        return $html;
+    }
+
+    public static function submitButton($text = 'Submit')
+    {
+        return self::htmlTag('input', array('type' => 'submit', 'value' => $text));
+    }
 }

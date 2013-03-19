@@ -41,6 +41,17 @@ class UserController extends Controller
 
     public function profileAction()
     {
-        $this->render('profile');
+        if (!Core::app()->session->authenticated()) {
+            return $this->redirect('/user/login');
+        }
+
+        $changed = false;
+        $user = Core::app()->session->user();
+        if ($this->request->isPost()) {
+            $user->attributes = $this->request->params('User');
+            $user->save();
+            $changed = true;
+        }
+        $this->render('profile', array('model' => $user, 'changed' => $changed));
     }
 }

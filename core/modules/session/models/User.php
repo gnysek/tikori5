@@ -13,12 +13,12 @@
  * @property string messenger
  * @property string signature
  * @property string avatar
- * @property int    posts
- * @property int    points
  * @property string settings
- * @property int    notifications
- * @property int    pm_new
+ * @property int    points
+ * @property int    notifications_new
+ * @property int    notifications_count
  * @property int    pm_count
+ * @property int    post_count
  * @property int    last_visit_time
  * @property int    last_update_time
  * @property int    warns
@@ -76,12 +76,12 @@ class User extends Model
             'messenger',
             'signature',
             'avatar',
-            'posts',
-            'points',
             'settings',
-            'notifications',
-            'pm_new',
+            'points',
+            'notifications_new',
+            'notifications_count',
             'pm_count',
+            'post_count',
             'last_visit_time',
             'last_update_time',
             'warns',
