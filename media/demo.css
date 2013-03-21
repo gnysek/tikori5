@@ -20,6 +20,16 @@ form {
 	display: block;
 }
 
+label {
+	min-width: 80px;
+	display: inline-block;
+	text-align: right;
+	vertical-align: top;
+}
+label:after{
+	content: ":";
+}
+
 body, pre, code, tt {
 	font-family: "Liberation Sans", Helvetica, Arial, sans-serif;
 	font-size: 13px;

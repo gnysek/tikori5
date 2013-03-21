@@ -4,6 +4,7 @@
 
 
 <div>
+    <?php echo Html::beginForm(''); ?>
     <div>
         <?php echo Html::labelModel($model, 'name'); ?>
         <?php echo Html::textFieldModel($model, 'name'); ?>
@@ -21,6 +22,17 @@
         <?php echo Html::textFieldModel($model, 'img'); ?>
     </div>
     <div>
+        <?php echo Html::labelModel($model, 'url'); ?>
+        <?php echo Html::textFieldModel($model, 'url', array('disabled' => 'disabled')); ?>
+    </div>
+    <div>
+        <?php echo Html::labelModel($model, 'language_id'); ?>
+        <?php echo Html::selectOptionModel(
+            $model, 'language_id', $model->getLanguages(), array('disabled' => 'disabled')
+        ); ?>
+    </div>
+    <div>
         <?php echo Html::submitButton(); ?>
     </div>
+    <?php echo Html::endForm(); ?>
 </div>

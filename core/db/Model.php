@@ -82,7 +82,11 @@ class Model
         return array();
     }
 
-    /** find * */
+    /**
+     * @param $id
+     *
+     * @return $this|Model
+     */
     public function load($id)
     {
         return $this->find($id);

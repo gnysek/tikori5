@@ -26,11 +26,12 @@ class ContentTranslation extends Model
     //put your code here
 
     protected $_table = 'content_translation';
+    protected $_languages;
 
     /**
-     * @param class $model
+     * @param null|string $model
      *
-     * @return ContentTranslation
+     * @return ContentTranslation|Model
      */
     public static function model($model = __CLASS__)
     {
@@ -52,12 +53,26 @@ class ContentTranslation extends Model
             'page_id',
             'language_id',
             'name',
-            'short ',
+            'short',
             'long',
             'img',
             'url',
             'comm',
         );
+    }
+
+    public function getLanguages()
+    {
+        if (empty($this->languages)) {
+            $this->_languages = array();
+            $languages = Language::model()->findAll();
+            foreach ($languages as $language) {
+                /* @var $langauge Language */
+                $this->_languages[$language->language_id] = $language->language_code;
+            }
+        }
+
+        return $this->_languages;
     }
 
 }

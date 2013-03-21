@@ -125,17 +125,17 @@ class Html
                           'for' => get_class($model) . '[' . $field . ']',
                           #'id'  => get_class($model) . '_' . $field,
                      ),
-            empty($text) ? ucfirst($field) : $text
+            empty($text) ? ucfirst(str_replace('_', ' ', $field)) : $text
         );
     }
 
-    public static function textFieldModel($model, $field)
+    public static function textFieldModel($model, $field, $options = array())
     {
         return self::htmlTag(
-            'input', array(
-                          'name'  => get_class($model) . '[' . $field . ']',
-                          'value' => $model->$field
-                     )
+            'input', $options + array(
+            'name'  => get_class($model) . '[' . $field . ']',
+            'value' => $model->$field
+        )
         );
 
     }
@@ -150,12 +150,12 @@ class Html
         );
     }
 
-    public static function radioFieldModel($model, $field, $options = array(), $divider = null)
+    public static function radioFieldModel($model, $field, $values = array(), $divider = null)
     {
         $html = '';
         $i = 0;
 
-        foreach ($options as $k => $v) {
+        foreach ($values as $k => $v) {
             $opt = array(
                 'type'  => 'radio',
                 'name'  => get_class($model) . '[' . $field . ']',
@@ -181,6 +181,19 @@ class Html
             );
             $html .= $divider;
         }
+
+        return $html;
+    }
+
+    public static function selectOptionModel($model, $field, $values = array(), $options = array())
+    {
+        $html = '';
+
+        $html .= self::htmlOpenTag('select', array('name' => get_class($model) . '[' . $field . ']') + $options);
+        foreach ($values as $key => $value) {
+            $html .= self::htmlTag('option', array('value' => $key), $value);
+        }
+        $html .= self::htmlCloseTag('select');
 
         return $html;
     }

@@ -30,6 +30,9 @@ class DbMySqli extends DBAbstract
         if ($this->conn()->error) {
             throw new DbError('Nie wybrać tabeli: ' . $this->conn()->error);
         }
+
+        $this->conn()->set_charset('utf8');
+
         Profiler::addLog(__CLASS__ . ' connected');
     }
 
