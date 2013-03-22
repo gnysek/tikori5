@@ -25,9 +25,12 @@
     foreach ($files as $entry) {
         echo $entry;
     }
-
-    Profiler::getLogs();
     ?>
+
+    <?php
+    echo Profiler::getLogs();
+    ?>
+
 <?php endif; ?>
 <hr/>
 <div class="footer">

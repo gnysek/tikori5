@@ -2,7 +2,6 @@
 
 body {
 	color: #333;
-	background-color: #202E3B;
 }
 
 #layout {
@@ -16,6 +15,10 @@ body {
 	/*background-color: white;*/
 }
 
+.content, .header {
+	padding: 5px;
+}
+
 form {
 	display: block;
 }
@@ -26,7 +29,8 @@ label {
 	text-align: right;
 	vertical-align: top;
 }
-label:after{
+
+label:after {
 	content: ":";
 }
 
@@ -73,6 +77,7 @@ h3, h4, h6 {
 
 h1, h3 {
 	font-size: 25px;
+	color: inherit;
 }
 
 h2, h4 {
@@ -81,6 +86,10 @@ h2, h4 {
 
 h5, h6 {
 	font-size: 15px;
+}
+
+a{
+	cursor: pointer;
 }
 
 a, a:visited {
@@ -216,23 +225,43 @@ ol {
 }
 
 .blue-more {
-	color: #202E3B
+	color: #202E3B;
+}
+
+.blue-more-bg, body {
+	background-color: #202E3B;
 }
 
 .blue-less {
 	color: #2F3F4F;
 }
 
+.blue-less-bg {
+	background-color: #2F3F4F;
+}
+
 .red-more {
 	color: #762A2E;
 }
 
+.red-more-bg {
+	background-color: #762A2E;
+}
+
 .red-less {
-	color: #8C3136;
+	color: #8c3136;
+}
+
+.red-less-bg {
+	background-color: #8c3136;
 }
 
 .brown {
-	color: #5A1F23;
+	color: #5a1f23;
+}
+
+.brown-bg {
+	background-color: #5a1f23;
 }
 
 .cream {
@@ -245,26 +274,6 @@ ol {
 
 .cream-dark {
 	color: #DEDDD8;
-}
-
-.blue-more-bg {
-	background-color: #202E3B
-}
-
-.blue-less-bg {
-	background-color: #2F3F4F;
-}
-
-.red-more-bg {
-	background-color: #762A2E;
-}
-
-.red-less-bg {
-	background-color: #8C3136;
-}
-
-.brown-bg {
-	background-color: #5A1F23;
 }
 
 .cream-bg {

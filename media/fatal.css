@@ -133,3 +133,32 @@ code .num {
 .highlight .num {
 	background-color: transparent;
 }
+
+table {
+	max-width: 800px !important;
+	word-wrap: break-word;
+	word-break: break-all;
+}
+
+td, tr, td code {
+	font-size: 12px;
+	line-height: 15px;
+	word-wrap: break-word;
+	word-break: break-all;
+	max-width: 400px;
+}
+
+td tt {font-family: monospace; background-color: #222;}
+
+td {
+	border-bottom: 1px solid gray;
+	padding: 2px;
+}
+
+tr > td {
+	border-left: 1px solid gray;
+}
+
+tr td:first-child {
+	border-left: none;
+}

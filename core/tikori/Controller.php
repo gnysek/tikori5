@@ -301,11 +301,14 @@ class Controller
             if (!empty($modules)) {
                 foreach ($modules as $module => $config) {
                     $module = strtolower($module);
-                    $paths[]
-                        = Core::app()->appDir . '/modules/' . $module . '/views/'; /* strtolower($this->controller) . */
-                    $paths[]
-                        =
-                        Core::app()->coreDir . '/modules/' . $module . '/views/'; /* strtolower($this->controller) . */
+                    if ($module == $this->controller) {
+                        $paths[]
+                            = Core::app()->appDir . '/modules/' . $module . '/views/';
+                        /* strtolower($this->controller) . */
+                        $paths[]
+                            = Core::app()->coreDir . '/modules/' . $module . '/views/';
+                        /* strtolower($this->controller) . */
+                    }
                 }
             }
         }
