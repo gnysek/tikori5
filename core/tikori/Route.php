@@ -419,6 +419,7 @@ class Route
             $class = Controller::getControllerClassName($this->controller, $this->area);
             $controller = new $class; //($this->area);
         } catch (Exception $e) {
+            //TODO: should be another one, which will fire error page
             return Controller::forward404();
         }
 

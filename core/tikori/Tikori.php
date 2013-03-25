@@ -73,6 +73,7 @@ class Tikori
 
         // register error handlers
         Error::registerErrors();
+        register_shutdown_function(array('Core', 'shutdown_handler'));
         Profiler::addLog('Registered errors');
 
 //		$this->defaultCfg();

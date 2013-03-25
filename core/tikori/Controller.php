@@ -299,15 +299,23 @@ class Controller
 
             $modules = Core::app()->cfg('modules');
             if (!empty($modules)) {
-                foreach ($modules as $module => $config) {
-                    $module = strtolower($module);
-                    if ($module == $this->controller) {
-                        $paths[]
-                            = Core::app()->appDir . '/modules/' . $module . '/views/';
-                        /* strtolower($this->controller) . */
-                        $paths[]
-                            = Core::app()->coreDir . '/modules/' . $module . '/views/';
-                        /* strtolower($this->controller) . */
+                //TODO: find a better way to get module name...
+                $reflection = new ReflectionClass($this);
+                $currentModule = strtolower(
+                    preg_replace('#(?:.*?)modules(?:\\\|/)([a-zA-Z0-9_]*)(?:.*)#i', '$1', $reflection->getFilename())
+                );
+
+                if (!empty($currentModule)) {
+                    foreach ($modules as $module => $config) {
+                        $module = strtolower($module);
+                        if ($module == $currentModule) {
+                            $paths[]
+                                = Core::app()->appDir . '/modules/' . $module . '/views/';
+                            /* strtolower($this->controller) . */
+                            $paths[]
+                                = Core::app()->coreDir . '/modules/' . $module . '/views/';
+                            /* strtolower($this->controller) . */
+                        }
                     }
                 }
             }

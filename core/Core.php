@@ -35,6 +35,7 @@ class Core
      *
      * @param string $path
      * @param string $config
+     *
      * @return null
      */
     public static function run($path = '', $config = 'default')
@@ -113,7 +114,7 @@ class Core
      * Autoloader method
      *
      * @param string $class Class name
-     * @param bool $throw Should it throw or not
+     * @param bool   $throw Should it throw or not
      *
      * @return boolean
      * @throws Exception
@@ -183,6 +184,18 @@ class Core
     public static function event($eventName, $data = null)
     {
         Core::app()->observer->fireEvent($eventName, $data);
+    }
+
+    public static function shutdown_handler()
+    {
+        if ($error = error_get_last() AND in_array($error['type'], array(E_PARSE, E_ERROR, E_USER_ERROR))) {
+            ob_get_level() AND ob_clean();
+            ob_end_clean();
+
+            Error::exch(new ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']));
+
+            exit(1); // prevent infinity-loop
+        }
     }
 
 }
