@@ -14,8 +14,9 @@ class Html
                 $options['class'] = 'active';
             }
         }
-        return '<a href="' . self::url($url) . '"' . ((empty($options['class']))
-            ? '' : (' class="' . $options['class'] . '"')) . '>' . $text . '</a>';
+
+        return html::htmlTag('a', $options + array('href' => self::url($url)), $text);
+//        return '<a href="' . self::url($url) . '"' . implode(' ', $opt) . '>' . $text . '</a>';
     }
 
     public static function url($url = array())
@@ -91,6 +92,10 @@ class Html
 
     public static function htmlTag($tag, $options = array(), $innerHtml = null)
     {
+        if ($options === false or $options === null) {
+            $options = array();
+        }
+
         return ($innerHtml === null)
             ? self::htmlOpenTag($tag, $options, true)
             : (self::htmlOpenTag($tag, $options, false) . $innerHtml . self::htmlCloseTag($tag));

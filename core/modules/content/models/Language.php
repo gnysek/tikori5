@@ -3,12 +3,12 @@
 class Language extends Model
 {
 
-    protected $_pkId = 'language_id';
+    protected $_primaryKey = 'language_id';
 
     /**
-     * @param class $model
+     * @param string $model
      *
-     * @return Content
+     * @return Language|Model
      */
     public static function model($model = __CLASS__)
     {

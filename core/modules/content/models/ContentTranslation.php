@@ -27,6 +27,7 @@ class ContentTranslation extends Model
 
     protected $_table = 'content_translation';
     protected $_languages;
+    protected $_language;
 
     /**
      * @param null|string $model
@@ -59,6 +60,17 @@ class ContentTranslation extends Model
             'url',
             'comm',
         );
+    }
+
+    //TODO: should be a relation!
+    public function getLanguage()
+    {
+        if (empty($this->_language)) {
+            $lang = Language::model()->load($this->language_id);
+            $this->_language = $lang->language_code;
+        }
+
+        return $this->_language;
     }
 
     public function getLanguages()

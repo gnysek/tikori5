@@ -30,9 +30,9 @@ ul, ol {
 	width: 100%;
 	height: 100%;
 	background: #762A2E none no-repeat center center;
-	transition: background-position 100ms ease-out;
-	-moz-transition: background-position 100ms ease-out;
-	-webkit-transition: background-position 100ms ease-out;
+	transition: background 100ms ease-out;
+	-moz-transition: background 100ms ease-out;
+	-webkit-transition: background 100ms ease-out;
 }
 
 #side-bar a:hover {

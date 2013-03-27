@@ -4,15 +4,21 @@
     'All'
 ); ?>
 
+
 <?php if (!empty($collection) and count($collection) > 0): ?>
-    <ol>
-        <?php foreach ($collection as $node): ?>
-            <?php /* @var $node ContentTranslation */ ?>
-            <li>[ <?php echo Html::link('e', array('content', 'edit' => $node->id)); ?> |
-                <?php echo Html::link('d', array('content', 'delete' => $node->id)); ?> ]
-                <?php echo Html::link($node->name, array('content', 'node' => $node->id)) ?></li>
-        <?php endforeach; ?>
-    </ol>
+    <?php echo $this->widget(
+        'Grid', array(
+                     'columns' => array('id', 'name', 'language', 'url'),
+                     'data'    => $collection,
+                     'options' => array(
+                         'Edit'   => array('url' => array('content', 'edit' => ':id')),
+                         'Delete' => array('url' => array('content', 'delete' => ':id')),
+                         'View'   => array('url' => array('content', 'view' => ':id')),
+                         'Author' => array('url' => array('content', 'author' => ':id')),
+                         'Show'   => array('url' => array('content', 'visibility' => ':id')),
+                     )
+                ), true
+    ); ?>
 <?php else: ?>
     Sorry, no articles found.
 <?php endif; ?>

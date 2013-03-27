@@ -1,22 +1,17 @@
 <h1>List of users</h1>
 
-<table>
-    <tr>
-        <th>Id</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Active</th>
-    </tr>
-
-    <?php if (!empty($users)): ?>
-        <?php foreach ($users as $user): ?>
-            <?php /* @var $user User */ ?>
-            <tr>
-                <td><?php echo $user->id ?></td>
-                <td><?php echo $user->name ?></td>
-                <td><?php echo $user->email ?></td>
-                <td><?php echo $user->ban ?></td>
-            </tr>
-        <?php endforeach; ?>
-    <?php endif; ?>
-</table>
+<?php echo $this->widget(
+    'Grid', array(
+                 'data'     => $users,
+                 'columns'  => array(
+                     'id', 'name', 'sex', 'email', 'regdate', 'last_update_time', 'ban',
+                 ),
+                 'options'  => array(
+                     'Edit'   => array('url' => array('content/edit', 'id' => ':id')),
+                     'Delete' => array('url' => array('content/delete', 'id' => ':id')),
+                     'View'   => array('url' => array('content/view', 'id' => ':id'))
+                 ),
+                 'titles'   => array('ban' => 'Inactive', 'last_update_time' => 'Last visit'),
+                 'renderer' => array('sex' => 'sex', 'regdate' => 'date_long', 'last_update_time' => 'date_long', 'ban' => 'noyes'),
+            ), true
+); ?>
