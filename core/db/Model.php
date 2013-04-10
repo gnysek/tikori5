@@ -39,7 +39,7 @@ class Model
                 $this->_values[$v] = null;
             }
         }
-        $this->_rules = $this->rules();
+        $this->_rules = $this->_prepareRules();
         $this->_table = $this->getTable();
         $this->_primaryKey = $this->getPK();
     }
@@ -80,6 +80,34 @@ class Model
     public function rules()
     {
         return array();
+    }
+
+    private function _prepareRules()
+    {
+        // TODO: caching ?
+        $rules = array();
+
+        foreach ($this->rules() as $ruleDefinition) {
+            // convert one item rule to array
+            if (!is_array($ruleDefinition[0])) {
+                $ruleDefinition[0] = array($ruleDefinition[0]);
+            }
+
+            $params = array_slice($ruleDefinition, 2);
+            foreach ($ruleDefinition[0] as $field) {
+                // create rule array if not yet exists
+                if (!array_key_exists($field, $rules)) {
+                    $rules[$field] = array();
+                }
+
+                $rules[$field]['rules'][] = $ruleDefinition[1];
+                if (!empty($params)) {
+                    $rules[$field]['params'][$ruleDefinition[1]] = $params;
+                }
+            }
+        }
+
+        return $rules;
     }
 
     /**
@@ -259,12 +287,58 @@ class Model
     /**     * */
     public function validate()
     {
-        return true;
+        $valid = true;
+        foreach ($this->_rules as $field => $entry) {
+            foreach ($entry['rules'] as $rule) {
+
+                if (!in_array($field, $this->_fields)) {
+                    $this->_errors[$field][] = 'FATAL: Unknown field: ' . $field . '.';
+                    continue;
+                }
+
+                switch ($rule) {
+                    case 'required':
+                        if (empty($this->_values[$field])) {
+                            $valid = false;
+                            $this->_errors[$field][] = 'Required';
+                        }
+                        break;
+                    case 'int':
+                        if (!is_numeric($this->_values[$field])) {
+                            $valid = false;
+                            $this->_errors[$field][] = 'Needs to be a number';
+                        }
+                        break;
+                    case 'len':
+                        $maxLen = (empty($entry['params'][$rule]['maxlen'])) ? 255
+                            : $entry['params'][$rule]['maxlen'];
+                        if (strlen($this->_values[$field]) > $maxLen) {
+                            $valid = false;
+                            $this->_errors[$field][] = 'Cannot be longer than ' . $maxLen;
+                        }
+                        break;
+                    case 'null':
+                        if (empty($this->_values[$field])) {
+                            $this->_values[$field] = null;
+                        }
+                        break;
+                    default:
+//                        var_dump($rule);
+                        break;
+                }
+            }
+        }
+        return $valid;
     }
 
     public function getErrors()
     {
+        $resultErrors = array();
+        foreach ($this->_errors as $field => $errors) {
+            $resultErrors[] = $this->getAttributeLabel($field) . ': ' . implode('<br/>', $errors);
+        }
 
+        return implode('<hr/>', $resultErrors);
     }
 
     public function addError($field, $error)
@@ -277,9 +351,23 @@ class Model
 
     }
 
+    public function getErrorsField($field)
+    {
+        if (array_key_exists($field, $this->_errors)) {
+            return $this->_errors[$field];
+        }
+
+        return array();
+    }
+
+    public function hasErrorsField($field)
+    {
+        return array_key_exists($field, $this->_errors);
+    }
+
     public function hasErrors()
     {
-
+        return (!empty($this->_errors));
     }
 
     public function clearErrors()

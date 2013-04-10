@@ -123,6 +123,21 @@ class Html
         return '</' . $tag . '>';
     }
 
+    /**
+     * @param Model  $model
+     * @param string $field
+     *
+     * @return string Html code
+     */
+    public static function errorModel($model, $field)
+    {
+        if ($model->hasErrorsField($field)) {
+            return self::htmlTag('div', array('style' => 'color: red; font-size: 10px;'), implode('<br/>', $model->getErrorsField($field)));
+        }
+
+        return '';
+    }
+
     public static function labelModel($model, $field, $text = null)
     {
         return self::htmlTag(

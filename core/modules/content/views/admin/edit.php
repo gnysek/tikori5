@@ -2,12 +2,12 @@
 
 <?php echo $model->name; ?>
 
-
 <div>
     <?php echo Html::beginForm(''); ?>
     <div>
         <?php echo Html::labelModel($model, 'name'); ?>
         <?php echo Html::textFieldModel($model, 'name'); ?>
+        <?php echo Html::errorModel($model, 'name'); ?>
     </div>
     <div>
         <?php echo Html::labelModel($model, 'short'); ?>

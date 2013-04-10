@@ -16,8 +16,10 @@ class Admin_ContentController extends ContentController
 
         if ($this->request->isPost()) {
             $model->attributes = $this->request->getPost('ContentTranslation');
-            $model->save();
-            return $this->redirect(array('content', 'node' => $id));
+            if ($model->validate()) {
+                $model->save();
+                return $this->redirect(array('content', 'node' => $id));
+            }
         }
 
         $this->render('edit', array('model' => $model));

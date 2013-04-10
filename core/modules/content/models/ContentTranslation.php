@@ -49,7 +49,7 @@ class ContentTranslation extends Model
     public function getFields()
     {
         return array(
-            'content',
+            'content', //TODO: sure?
             'id',
             'page_id',
             'language_id',
@@ -60,6 +60,20 @@ class ContentTranslation extends Model
             'url',
             'comm',
         );
+    }
+
+    public function rules()
+    {
+        // array( field[s], ruleName, ruleOptions)
+        return array(
+            array(array('page_id', 'language_id', 'name', 'short'), 'required'),
+            array(array('id', 'page_id', 'language_id', 'comm'), 'int'),
+//            array(array('name', 'short', 'long', 'img', 'url'), 'text'),
+            array(array('name', 'img', 'url'), 'len', 'maxlen' => 255),
+            array(array('long', 'img'), 'null'),
+        );
+
+        //TODO: scenarios - can add ON parameter, and when creating model scenario can be attached as first arg
     }
 
     //TODO: should be a relation!

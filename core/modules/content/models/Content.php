@@ -62,9 +62,9 @@ class Content extends Model
     public function rules()
     {
         return array(
-            array('name, enabled, path, type, created, updated, comments, author', 'required'),
-            array('id, enabled, parent, type, created, updated, comments, author', 'int'),
-            array('name', 'maxlen', 255),
+            array(array('name', 'enabled', 'path', 'type', 'created', 'updated', 'comments', 'author'), 'required'),
+            array(array('id', 'enabled', 'parent', 'type', 'created', 'updated', 'comments', 'author'), 'int'),
+            array('name', 'maxlen', 'len' => 255),
         );
     }
 
