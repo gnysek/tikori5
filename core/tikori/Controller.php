@@ -23,6 +23,7 @@ class Controller
 
     public function __construct($area = null)
     {
+        Profiler::addLog('&bull; New controller <code> ' . get_called_class() . '</code> Created');
         $this->area = $area;
         $this->pageTitle = Core::app()->cfg('appName');
         $this->afterConstruct();
@@ -44,20 +45,21 @@ class Controller
             $this->run(Core::app()->route, $action);
         } else {
             $class = $this->getControllerClassName($controller);
-            $c = new $class;
+            $c = new $class($this->area);
             $c->run(Core::app()->route, $action);
         }
     }
 
-    public static function forward404()
+    public static function forward404($area = '')
     {
-        $c = new Controller;
-        $c->runAction('', 'httpStatus');
+        $c = new Controller($area);
+        $c->httpStatusAction(404);
+        //$c->runAction('', 'httpStatus');
     }
 
-    public static function forward401()
+    public static function forward401($area = '')
     {
-        $c = new Controller;
+        $c = new Controller($area);
         $c->httpStatusAction(401);
     }
 
@@ -88,7 +90,8 @@ class Controller
         }
 
         if (!method_exists($this, $this->getActionMethodName())) {
-            $this->forward404();
+            Profiler::addLog('No method found for <code>' . $this->getActionMethodName() . '</code>');
+            $this->forward404($this->area);
         } else {
             Profiler::addLog(
                 'Calling controller: <tt>' . $this->getControllerClassName() . '::' . $this->getActionMethodName()
@@ -142,6 +145,7 @@ class Controller
                 Error::exch($e);
             } catch (Exception $e) {
                 //				if (($this instanceof ErrorController)==false)
+                Profiler::addLog('Exception' . $e->getMessage());
                 $this->forward404();
             }
         }

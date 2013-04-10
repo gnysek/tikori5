@@ -24,11 +24,6 @@
         <li><a><span>Test 2</span></a></li>
     </ul>
     <div id="inner-layout" class="cream-light-bg">
-
-        <ul class="nav-tabs">
-            <li><a><span>Test</span></a></li>
-            <li><a><span>Test</span></a></li>
-        </ul>
         <div class="content">
             <?php
             if (!empty($this->breadcrumbs)) {

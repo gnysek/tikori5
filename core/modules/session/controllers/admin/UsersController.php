@@ -11,4 +11,19 @@ class Admin_UsersController extends AdminController
 
         $this->render('list', array('users' => $users));
     }
+
+    public function editAction($id)
+    {
+        $model = User::model()->load($id);
+
+        if ($this->request->isPost()) {
+            $model->attributes = $this->request->getPost('User');
+            if ($model->validate()) {
+                $model->save();
+                return $this->redirect(array('users'));
+            }
+        }
+
+        $this->render('edit', array('model' => $model));
+    }
 }

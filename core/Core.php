@@ -136,7 +136,7 @@ class Core
             $filename = $dir . $search;
             if (file_exists($filename)) {
                 if (class_exists('Profiler')) {
-                    Profiler::addLog('Loading <tt>' . $class . '</tt> from <tt>' . $filename . '<tt>');
+                    Profiler::addLog('<div style="padding-left: 20px;"><i>Loading <code>' . $class . '</code> from <tt>' . $filename . '<tt></i></div>');
                 }
                 require $filename;
                 return true;

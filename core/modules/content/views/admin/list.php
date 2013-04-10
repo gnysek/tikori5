@@ -15,7 +15,7 @@
                          'Delete' => array('url' => array('content', 'delete' => ':id')),
                          'View'   => array('url' => array('content', 'view' => ':id')),
                          'Author' => array('url' => array('content', 'author' => ':id')),
-                         'Show'   => array('url' => array('content', 'visibility' => ':id')),
+//                         'Show'   => array('url' => array('content', 'visibility' => ':id')),
                      )
                 ), true
     ); ?>

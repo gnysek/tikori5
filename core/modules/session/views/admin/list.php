@@ -7,11 +7,11 @@
                      'id', 'name', 'sex', 'email', 'regdate', 'last_update_time', 'ban',
                  ),
                  'options'  => array(
-                     'Edit'   => array('url' => array('content/edit', 'id' => ':id')),
-                     'Delete' => array('url' => array('content/delete', 'id' => ':id')),
-                     'View'   => array('url' => array('content/view', 'id' => ':id'))
+                     'Edit'   => array('url' => array('users', 'edit' => ':id')),
+                     'Delete' => array('url' => array('users', 'delete' => ':id')),
+                     'View'   => array('url' => array('users', 'view' => ':id'))
                  ),
-                 'titles'   => array('ban' => 'Inactive', 'last_update_time' => 'Last visit'),
-                 'renderer' => array('sex' => 'sex', 'regdate' => 'date_long', 'last_update_time' => 'date_long', 'ban' => 'noyes'),
+                 'titles'   => array('ban' => 'Active', 'last_update_time' => 'Last visit'),
+                 'renderer' => array('sex' => 'sex', 'regdate' => 'date_long', 'last_update_time' => 'date_long', 'ban' => 'yesno'),
             ), true
 ); ?>

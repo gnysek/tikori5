@@ -412,7 +412,7 @@ class Route
     public function dispatch()
     {
         Profiler::addLog(
-            'Dispatching: <code>' . $this->area . '>' . $this->controller . '/' . $this->action . '</code>'
+            'Dispatching: <code>' . $this->area . '> ' . $this->controller . '/' . $this->action . '</code>'
         );
         $controller = null;
         try {
@@ -420,10 +420,14 @@ class Route
             $controller = new $class; //($this->area);
         } catch (Exception $e) {
             //TODO: should be another one, which will fire error page
-            return Controller::forward404();
+            Profiler::addLog('Cannot create controller <code>' . $this->controller . '</code>');
+            return Controller::forward404($this->area);
         }
 
+        /* @var $controller Controller */
+
         if (empty($this->_route_regex)) {
+            Profiler::addLog('No route for <code>' . $this->controller . '</code>');
             return Controller::forward404();
         } else {
             try {
