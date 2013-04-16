@@ -77,6 +77,13 @@ class Content extends Model
         $this->updated = $time;
     }
 
+
+    public function getChildrenCount()
+    {
+        $result = DbQuery::sql()->select('COUNT(*) AS total')->from($this->_table)->where(array('parent', '=', $this->id))->execute();
+        //TODO: return as one Record, not as array?
+        return $result[0]->total;
+    }
 }
 
 ?>

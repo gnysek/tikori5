@@ -34,11 +34,19 @@ class ContentController extends ContentAuth
 //		return $this->nodeAction($path);
     }
 
+    public function nodesAction($id)
+    {
+        $content = Content::model()->findWhere(array('parent', '=', $id), 10);
+
+        $this->render('list', array('content' => $content));
+    }
+
     public function defaultAction()
     {
+        $content = Content::model()->findWhere(array('parent', 'IS', null), 10);
         $result = ContentTranslation::model()->findAll(10);
 
-        $this->render('list', array('collection' => $result));
+        $this->render('list', array('collection' => $result, 'content' => $content));
     }
 
 }

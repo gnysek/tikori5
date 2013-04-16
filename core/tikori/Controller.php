@@ -115,7 +115,10 @@ class Controller
                         if ($paramObject->isOptional() === false and empty($this->params[$paramObject->name])) {
                             //throw new RouteNotFoundException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
                             throw new ErrorException(
-                                'Not enough arguments or wrong argument name [' . $paramObject->name . ']');
+                                'Not enough arguments on method ' . $this->getActionMethodName()
+                                    . '() or wrong argument name [' . $paramObject->name . '] - should be one of <code>'
+                                    . implode(', ', array_keys($this->params)) . '</code>'
+                            );
                         }
 
                         $finalParams[] = (empty($this->params[$paramObject->name])) ? null

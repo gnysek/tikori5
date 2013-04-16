@@ -181,14 +181,13 @@ class Model
 //		return $this;
     }
 
-    public function findWhere($where)
+    public function findWhere($where = null, $offset = 0, $limit = -1)
     {
-        return $this;
-    }
-
-    public function findAll($limit = -1, $offset = 0)
-    {
-        $sql = DbQuery::sql()->select()->from($this->_table)->limit($limit, $offset);
+        $sql = DbQuery::sql()->select()->from($this->_table);
+        if (!empty($where)) {
+            $sql->where($where);
+        }
+        $sql->limit($limit, $offset);
         $result = $sql->execute();
         $return = array();
         foreach ($result as $row) {
@@ -199,6 +198,11 @@ class Model
             $return[] = $c;
         }
         return $return;
+    }
+
+    public function findAll($limit = -1, $offset = 0)
+    {
+        return $this->findWhere(null, $limit, $offset);
     }
 
     // eager

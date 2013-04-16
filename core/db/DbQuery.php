@@ -50,6 +50,11 @@ class DbQuery
         return $this;
     }
 
+    /**
+     * @param $from
+     *
+     * @return DbQuery
+     */
     public function from($from)
     {
         $this->_from = (is_array($from)) ? $from : array($this->alias => $from);
@@ -68,8 +73,11 @@ class DbQuery
     /**
      * @return DbQuery
      */
-    public function select()
+    public function select($fields = null)
     {
+        if (!empty($fields)) {
+            $this->fields($fields);
+        }
         $this->_type = self::Q_SELECT;
         return $this;
     }
@@ -107,6 +115,12 @@ class DbQuery
         return $this;
     }
 
+    /**
+     * @param $where
+     *
+     * @return DbQuery
+     * @throws DbError
+     */
     public function where($where)
     {
         if (!is_array($where)) {
@@ -147,6 +161,9 @@ class DbQuery
 
     public function fields($fields)
     {
+        if (!is_array($fields)) {
+            $fields = array($fields);
+        }
         $this->_fields = $fields;
         return $this;
     }
@@ -199,6 +216,13 @@ class DbQuery
                         $fields[] = '`' . $this->_fromAliases[$val] . '`.*';
                     }
                     $sql[] = implode(', ', $fields);
+                } else {
+                    $fields = array();
+                    foreach($this->_fields as $field) {
+                        //TODO: aliases
+                        $fields[] = $field;
+                    }
+                    $sql[] = implode(',', $fields);
                 }
                 $sql[] = 'FROM';
         }
@@ -274,11 +298,10 @@ class DbQuery
                     $bld = '';
                     if ($this->_type != self::Q_UPDATE) {
                         $bld
-                            =
-                            '`' . $this->_fromAliases[(empty($w[3]))
-                                ? $this->_from[key($this->_from)]
-                                : $w[3]]
-                                . '`.';
+                            = '`' . $this->_fromAliases[(empty($w[3]))
+                            ? $this->_from[key($this->_from)]
+                            : $w[3]]
+                            . '`.';
                     }
                     $bld .= '`' . $w[0] . '` ' . $w[1] . ' ' . (is_string($w[2]) ? Core::app()->db->protect($w[2])
                         : $this->_nullify($w[2]));
