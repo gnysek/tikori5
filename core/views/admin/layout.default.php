@@ -13,11 +13,24 @@
         <h1>ADMIN <?php echo Core::app()->cfg('appName'); ?></h1>
     </div>
     <div id="side-bar">
-        <ul class="unstyled">
-            <li><a href="<?php echo Html::url(''); ?>" class="admin-home" title="Admin home"></a></li>
-            <li class="active"><a href="<?php echo Html::url('content'); ?>" class="admin-content" title="Content"></a></li>
-            <li><a href="<?php echo Html::url('users'); ?>" class="admin-users" title="Users"></a></li>
-        </ul>
+        <?php
+        echo $this->widget(
+            'AdminMenu', array('links' => array(
+                array('', 'admin-home', 'Admin Home'),
+                array('content', 'admin-content', 'Content'),
+                array('users', 'admin-users', 'Users'),
+                array('warns', 'admin-users', 'Warns'),
+                array('comments', 'admin-users', 'Users'),
+                array('tags', 'admin-users', 'Users'),
+                array('forum', 'admin-users', 'Users'),
+                array('shoutbox', 'admin-users', 'Users'),
+                array('media', 'admin-users', 'Users'),
+                array('logs', 'admin-users', 'Users'),
+                array('core', 'admin-users', 'Users'),
+                array('widgets', 'admin-users', 'Users'),
+            )), true
+        );
+        ?>
     </div>
     <ul class="nav-tabs">
         <li><a><span>Test</span></a></li>
