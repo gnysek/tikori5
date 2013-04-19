@@ -41,32 +41,48 @@ class Tikori
      */
     public $route = null;
 
-    public function __construct($path = '', $config = 'default')
+    public function __construct($config = 'default')
     {
-        $this->init($path, $config);
+        // assign reference
+        Core::setApplication($this);
+
+        //TODO: enable
+        //$this->registerCoreModules();
+        //$this->configure();
+        //$this->preloadModules();
+
+        $this->init($config);
+    }
+
+    public function registerCoreModules()
+    {
+        $modules = array(
+            'errorHandler'  => array('class' => 'Error'),
+            'session'       => array('class' => 'TSession'),
+            'user'          => array('class' => 'TUser'),
+            'cache'         => array('class' => 'TCache'),
+            'widgetFactory' => array('class' => 'TWidgetFactory'),
+        );
+        //TODO: enable
+//        $this->setModules($modules);
     }
 
     /**
      * It runs application. Whole magic is here, abracadabra!
      * Echoes results, throw exceptions and 404s, redirects etc.
      *
-     * @param string $path   Path to APP parent dir
      * @param string $config config file name without .json, usually 'default'
      *
      * @throws RouteNotFoundException
      * @return bool
      */
-    public function init($path = '', $config = 'default')
+    public function init($config = 'default')
     {
-        // assign reference
-        Core::asssignApp($this);
-
         // set directories
-        $this->appDir = (empty($path)) ? dirname(__FILE__) . '../app' : $path . '/app';
-        $this->coreDir = TIKORI_CPATH;
+        $this->appDir = TIKORI_ROOT . DIRECTORY_SEPARATOR . 'app';
+        $this->coreDir = TIKORI_FPATH;
 
         // register autoloads
-        spl_autoload_register(array('Core', 'autoload'));
         $this->registerAutoloadPaths();
 
         Profiler::addLog('Registered autoload');
@@ -151,32 +167,6 @@ class Tikori
 
         $this->response->send();
 
-//		Profiler::addLog('Finalizing response');
-//		list($status, $header, $body) = $this->response->finalize();
-//		Profiler::addLog('Response finalized');
-//
-//		//Send headers
-//		if (headers_sent() === false) {
-//			//Send status
-//			if (strpos(PHP_SAPI, 'cgi') === 0) {
-//				header(sprintf('Status: %s', Response::getMessageForCode($status)));
-//			} else {
-//				header(sprintf('HTTP/%s %s', '1.1', Response::getMessageForCode($status)), false);
-//			}
-//
-//			//Send headers
-//			foreach ($header as $name => $value) {
-//				$hValues = explode("\n", $value);
-//				foreach ($hValues as $hVal) {
-//					header("$name: $hVal", false);
-//				}
-//			}
-//		}
-//
-//		Profiler::addLog('Headers:<br/>' . implode('<br/>', headers_list()));
-//
-//		echo $body;
-
         Profiler::addLog('Finishing application');
         if ($this->mode != Core::MODE_PROD) {
             echo Profiler::getLogs();
@@ -237,7 +227,7 @@ class Tikori
      *
      * @param string|array $paths Paths to add as array values
      *
-     * @param bool         $core Is it core path or not ?
+     * @param bool         $core  Is it core path or not ?
      *
      * @return null
      */
@@ -321,7 +311,8 @@ class Tikori
 
     /**
      * @param string $item
-     * @param mixed $default
+     * @param mixed  $default
+     *
      * @return Config|array
      */
     public function cfg($item = null, $default = null)

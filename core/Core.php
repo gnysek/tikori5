@@ -2,9 +2,9 @@
 
 defined('TIKORI_STARTED') or define('TIKORI_STARTED', microtime());
 defined('TIKORI_DEBUG') or define('TIKORI_DEBUG', false);
-defined('TIKORI_CPATH') or define('TIKORI_CPATH', dirname(__FILE__));
+defined('TIKORI_FPATH') or define('TIKORI_FPATH', dirname(__FILE__));
 
-require_once TIKORI_CPATH . '/tikori/Tikori.php';
+require_once TIKORI_FPATH . '/tikori/Tikori.php';
 
 /**
  * @author  Piotr Gnys <gnysek@gnysek.pl>
@@ -40,11 +40,40 @@ class Core
      */
     public static function run($path = '', $config = 'default')
     {
+        defined('TIKORI_ROOT') or define('TIKORI_ROOT', $path);
+        self::createTikoriApplication($config);
+    }
+
+    public static function createTikoriApplication($config = null)
+    {
+        return self::createApplication('Tikori', $config);
+    }
+
+    /**
+     * @param $class
+     * @param $config
+     *
+     * @return Tikori
+     */
+    public static function createApplication($class, $config)
+    {
+        return new $class($config);
+    }
+
+    /**
+     * Assigns application object
+     *
+     * @param Tikori $app
+     *
+     * @throws Exception
+     */
+    public static function setApplication($app)
+    {
         if (self::$_app === null) {
-            return $core = new Tikori($path, $config);
+            self::$_app = $app;
+        } else {
+            throw new Exception('Tikori application can be created only once!');
         }
-        self::asssignApp();
-        return true;
     }
 
     /**
@@ -55,22 +84,6 @@ class Core
     public static function app()
     {
         return self::$_app;
-    }
-
-    /**
-     * Assigns application object
-     *
-     * @param Tikori $app
-     *
-     * @throws Exception
-     */
-    public static function asssignApp($app = null)
-    {
-        if (self::$_app === null and $app instanceof Tikori) {
-            self::$_app = $app;
-        } else {
-            throw new Exception('Tikori5 cannot be run more than once!');
-        }
     }
 
     /**
@@ -136,7 +149,10 @@ class Core
             $filename = $dir . $search;
             if (file_exists($filename)) {
                 if (class_exists('Profiler')) {
-                    Profiler::addLog('<div style="padding-left: 20px;"><i>Loading <code>' . $class . '</code> from <tt>' . $filename . '<tt></i></div>');
+                    Profiler::addLog(
+                        '<div style="padding-left: 20px;"><i>Loading <code>' . $class . '</code> from <tt>' . $filename
+                            . '<tt></i></div>'
+                    );
                 }
                 require $filename;
                 return true;
@@ -181,6 +197,11 @@ class Core
         return 'Powered by <a href="http://tikori5.gnysek.pl/" target="_blank">Tikori5</a> v' . self::VERSION;
     }
 
+    public static function getFrameworkPath()
+    {
+        return TIKORI_FPATH;
+    }
+
     public static function event($eventName, $data = null)
     {
         Core::app()->observer->fireEvent($eventName, $data);
@@ -198,4 +219,11 @@ class Core
         }
     }
 
+    private static $_tiCoreClasses
+        = array(
+            'Tikori' => 'tikori/Tikori.php',
+        );
+
 }
+
+spl_autoload_register(array('Core', 'autoload'));

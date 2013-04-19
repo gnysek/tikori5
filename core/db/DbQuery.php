@@ -224,7 +224,7 @@ class DbQuery
                     }
                     $sql[] = implode(',', $fields);
                 }
-                $sql[] = 'FROM';
+                $sql[] = "\nFROM";
         }
 
         // from
@@ -244,7 +244,7 @@ class DbQuery
         if ($this->_type == self::Q_SELECT) {
             if (!empty($this->_joinTables)) {
                 foreach ($this->_joinTables as $k => $table) {
-                    $sql[] = $this->_joinType;
+                    $sql[] = "\n" . $this->_joinType;
                     $sql[] = '`' . $table . '`.`' . $this->alias . ($k + 1) . '`';
                     $sql[] = 'ON';
                     $sql[] = '`' . $this->alias . ($k + 1) . '`.`' . $this->_joinOn[$table][0] . '`';

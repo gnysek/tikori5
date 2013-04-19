@@ -6,7 +6,7 @@
  * @property string $tableName  Table Name
  * @property mixed  $attributes Attribute values
  */
-class Model
+class Model implements IteratorAggregate, ArrayAccess
 {
 
     const BELONGS_TO = 'BELONGS_TO';
@@ -28,6 +28,7 @@ class Model
     protected $_errors = array();
     public $_modified = array();
     public $tableName = '';
+    public $_new = false;
 
     public function __construct()
     {
@@ -42,6 +43,7 @@ class Model
         $this->_rules = $this->_prepareRules();
         $this->_table = $this->getTable();
         $this->_primaryKey = $this->getPK();
+        //$this->_new = true;
     }
 
     public function getTable()
@@ -558,5 +560,70 @@ class Model
         return /* 'Data in ' . get_called_class() . ' model instance:<br/>' . */
             '<table><tr>' . $head . '</tr><tr>' . $row . '</tr></table>';
     }
+
+    /**
+     * Returns an iterator for traversing the attributes in the model.
+     * This method is required by the interface IteratorAggregate.
+     *
+     * @return ArrayIterator an iterator for traversing the items in the list.
+     */
+    public function getIterator()
+    {
+        $attributes = $this->_values;
+        return new ArrayIterator($attributes);
+    }
+
+    /**
+     * Returns whether there is an element at the specified offset.
+     * This method is required by the interface ArrayAccess.
+     *
+     * @param mixed $offset the offset to check on
+     *
+     * @return boolean
+     */
+    public function offsetExists($offset)
+    {
+        return property_exists($this, $offset);
+    }
+
+    /**
+     * Returns the element at the specified offset.
+     * This method is required by the interface ArrayAccess.
+     *
+     * @param integer $offset the offset to retrieve element.
+     *
+     * @return mixed the element at the offset, null if no element is found at the offset
+     */
+    public function offsetGet($offset)
+    {
+        return $this->$offset;
+    }
+
+    /**
+     * Sets the element at the specified offset.
+     * This method is required by the interface ArrayAccess.
+     *
+     * @param integer $offset the offset to set element
+     * @param mixed   $item   the element value
+     */
+    public function offsetSet($offset, $item)
+    {
+        $this->$offset = $item;
+    }
+
+    /**
+     * Unsets the element at the specified offset.
+     * This method is required by the interface ArrayAccess.
+     *
+     * @param mixed $offset the offset to unset element
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->$offset);
+    }
+
+}
+
+class ModelData {
 
 }
