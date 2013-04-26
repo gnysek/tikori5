@@ -1,6 +1,6 @@
 <?php
 
-class Admin_UsersController extends AdminController
+class UsersController extends AdminController
 {
 
     public function indexAction()

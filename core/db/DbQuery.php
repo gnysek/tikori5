@@ -130,7 +130,14 @@ class DbQuery
             }
         }
 
-        $this->_where[] = $where;
+        if (is_array($where[0])) {
+            // multiarrays
+            foreach($where as $subWhere) {
+                $this->_where[] = $subWhere;
+            }
+        } else {
+            $this->_where[] = $where;
+        }
         return $this;
     }
 
@@ -218,7 +225,7 @@ class DbQuery
                     $sql[] = implode(', ', $fields);
                 } else {
                     $fields = array();
-                    foreach($this->_fields as $field) {
+                    foreach ($this->_fields as $field) {
                         //TODO: aliases
                         $fields[] = $field;
                     }

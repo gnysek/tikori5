@@ -173,7 +173,7 @@ class Tikori
     {
         if (($ca = $this->_createController($route)) !== null) {
             list($controller, $action) = $ca;
-
+            /* @var $route Route */
             $route->dispatch($controller);
         }
     }
@@ -193,6 +193,8 @@ class Tikori
         $className = ucfirst($route->controller) . 'Controller';
         $areaName = (!empty($route->area) ? $route->area . '/' : '');
 
+//        var_dump($areaName);
+
         foreach (array('app', 'core') as $module => $source) {
             foreach ($paths as $path) {
                 $file = $source . $path . 'controllers/' . $areaName . $className . '.php';
@@ -202,9 +204,9 @@ class Tikori
                         $class = new $className($route);
                         $class->module = $module;
 //                        $route->dispatch($class);
-
                         return (array($class, $route->action));
                     } catch (Exception $e) {
+//                        var_dump($e);
                         //$class = new Controller($route);
                         //$class->forward404($route->area);
                     }
