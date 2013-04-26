@@ -41,7 +41,7 @@ class ContentController extends ContentAuth
         $this->render('list', array('content' => $content));
     }
 
-    public function defaultAction()
+    public function indexAction()
     {
         $content = Content::model()->findWhere(array('parent', 'IS', null), 10);
         $result = ContentTranslation::model()->findAll(10);

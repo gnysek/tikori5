@@ -36,6 +36,31 @@ class Controller
         return true;
     }
 
+    /*public function run($actionID) {
+        if (($action = $this->createAction($actionID)) !== null) {
+//            if ($this->beforeAction()) {
+                $this->runActionNew($action);
+//                $this->afterAction();
+//            }
+        } else {
+            throw new CHttpException(404, 'Action not found');
+        }
+    }*/
+
+    public function unknownAction() {
+            $this->httpStatusAction(404);
+    }
+
+    public function runActionNew($action) {
+        if ($this->beforeAction()) {
+            if ($action->runWithParams()) {
+                $this->afterAction();
+            } else {
+                $this->invalidActionParams();
+            }
+        }
+    }
+
     public function runAction($controller = null, $action = null)
     {
         Profiler::addLog(
@@ -78,10 +103,12 @@ class Controller
         } else {
             if ($action !== null) {
                 $this->action = $action;
+            } else {
+                $this->action = 'default';
             }
         }
 
-        if (empty($this->action) or !method_exists($this, $this->getActionMethodName())) {
+        if (empty($this->action) /*or !method_exists($this, $this->getActionMethodName())*/) {
             $this->action = 'default';
         }
 
@@ -91,7 +118,7 @@ class Controller
 
         if (!method_exists($this, $this->getActionMethodName())) {
             Profiler::addLog('No method found for <code>' . $this->getActionMethodName() . '</code>');
-            $this->forward404($this->area);
+            $this->unknownAction();
         } else {
             Profiler::addLog(
                 'Calling controller: <tt>' . $this->getControllerClassName() . '::' . $this->getActionMethodName()
@@ -101,9 +128,7 @@ class Controller
             // check params
             try {
                 $finalParams = array();
-                $reflection = new ReflectionClass($this);
-                $method = $reflection->getMethod($this->getActionMethodName());
-                /* @var $method ReflectionMethod */
+                $method = new ReflectionMethod($this, $this->getActionMethodName());
 
 //                if ($method->getNumberOfRequiredParameters() > 0) {
                 if ($method->getNumberOfParameters() > 0) {
@@ -149,7 +174,7 @@ class Controller
             } catch (Exception $e) {
                 //				if (($this instanceof ErrorController)==false)
                 Profiler::addLog('Exception' . $e->getMessage());
-                $this->forward404();
+                $this->unknownAction();
             }
         }
         //		} else {

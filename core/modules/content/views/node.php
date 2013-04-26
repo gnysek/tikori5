@@ -1,5 +1,5 @@
 <?php $this->breadcrumbs = array(
-    'Admin' => array(''),
+    #'Admin' => array(''),
     'Content' => array('content'),
     '#' . $node->content->id . ' - ' . $node->name
 ); ?>

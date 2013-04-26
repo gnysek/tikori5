@@ -409,29 +409,26 @@ class Route
      *
      * @throws Exception
      */
-    public function dispatch()
+    public function dispatch($controller = null)
     {
         Profiler::addLog(
             'Dispatching: <code>' . $this->area . '> ' . $this->controller . '/' . $this->action . '</code>'
         );
-        $controller = null;
-        try {
-            $class = Controller::getControllerClassName($this->controller, $this->area);
-            $controller = new $class; //($this->area);
-        } catch (Exception $e) {
-            //TODO: should be another one, which will fire error page
-            Profiler::addLog('Cannot create controller <code>' . $this->controller . '</code>');
-            return Controller::forward404($this->area);
-        }
+        // Tikori->_runController will always provide controller
+//        if ($controller === null) {
+//            //TODO: should be another one, which will fire error page
+//            Profiler::addLog('Cannot create controller <code>' . $this->controller . '</code>');
+//            return Controller::forward404($this->area);
+//        }
 
         /* @var $controller Controller */
 
         if (empty($this->_route_regex)) {
             Profiler::addLog('No route for <code>' . $this->controller . '</code>');
-            return Controller::forward404();
+            return $controller->unknownAction();
         } else {
             try {
-                $controller->run($this);
+                return $controller->run($this);
             } catch (DbError $e) {
                 ob_get_clean();
                 throw new Exception('DB Error: ' . $e->getMessage());

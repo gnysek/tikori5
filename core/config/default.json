@@ -1,6 +1,6 @@
 {
     "appName": "Unknown application",
-    "default": "index",
+    "default": "static",
     "url": {
         "addScriptName": true,
         "pathInsteadGet": true

@@ -154,12 +154,7 @@ class Tikori
 
         Core::event(self::EVENT_BEFORE_DISPATCH);
 
-        if ($this->route == null) {
-            //$this->route = new Route();
-            Controller::forward404();
-        } else {
-            $this->route->dispatch();
-        }
+        $this->_runController($this->route);
 
         Core::event(self::EVENT_AFTER_DISPATCH);
 
@@ -172,6 +167,52 @@ class Tikori
             echo Profiler::getLogs();
         }
         return true;
+    }
+
+    private function _runController($route)
+    {
+        if (($ca = $this->_createController($route)) !== null) {
+            list($controller, $action) = $ca;
+
+            $route->dispatch($controller);
+        }
+    }
+
+    /**
+     * @param $route
+     *
+     * @return array (controller, action)
+     */
+    private function _createController($route)
+    {
+        $paths = array('/');
+
+        foreach (array_keys($this->_m) as $path) {
+            $paths[$path] = '/modules/' . $path . '/';
+        }
+        $className = ucfirst($route->controller) . 'Controller';
+        $areaName = (!empty($route->area) ? $route->area . '/' : '');
+
+        foreach (array('app', 'core') as $module => $source) {
+            foreach ($paths as $path) {
+                $file = $source . $path . 'controllers/' . $areaName . $className . '.php';
+                if (file_exists($file)) {
+                    try {
+                        include_once $file;
+                        $class = new $className($route);
+                        $class->module = $module;
+//                        $route->dispatch($class);
+
+                        return (array($class, $route->action));
+                    } catch (Exception $e) {
+                        //$class = new Controller($route);
+                        //$class->forward404($route->area);
+                    }
+                }
+            }
+        }
+
+        return array(new Controller($route), null);
     }
 
     public function preloadModule($module, $config = null)
