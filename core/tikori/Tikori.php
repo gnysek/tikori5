@@ -133,7 +133,7 @@ class Tikori
 //				'action' => 'index',
 //			));
 ////		Route::set('tikori-default', '(<controller>(/<action>(/<id>)))(.html)')
-        Route::set('tikori-default', '(<controller>(/<action>(/<id>)))')
+        Route::set('tikori-default', '(<controller>(/<action>(/<tparams>)))', array('tparams' => '[a-zA-Z0-9_/]+'))
             ->defaults(
                 array(
                      'controller' => ($this->cfg('default') !== null) ? $this->cfg('default') : 'default',
@@ -174,7 +174,34 @@ class Tikori
         if (($ca = $this->_createController($route)) !== null) {
             list($controller, $action) = $ca;
             /* @var $route Route */
-            $route->dispatch($controller);
+            /* @var $controller Controller */
+
+//            if ($route !== null) {
+
+                Profiler::addLog(
+                    'Dispatching: <code>' . $controller->area . '> ' . get_class($controller) . '/' . $action
+                        . '</code>'
+                );
+
+                /* @var $controller Controller */
+
+//                if (empty($this->_route_regex)) {
+//                    Profiler::addLog('No route for <code>' . $this->controller . '</code>');
+//                    return $controller->unknownAction();
+//                } else {
+                try {
+                    return $controller->run($route);
+                } catch (DbError $e) {
+                    ob_get_clean();
+                    throw new Exception('DB Error: ' . $e->getMessage());
+                } catch (Exception $e) {
+                    ob_get_clean();
+                    throw new Exception(
+                        'Dispatch action: <er>' . get_class($controller) . '->' . $action . '</er> :<br/>'
+                            . $e->getMessage());
+                }
+//                }
+//            }
         }
     }
 
@@ -187,34 +214,36 @@ class Tikori
     {
         $paths = array('/');
 
-        foreach (array_keys($this->_m) as $path) {
-            $paths[$path] = '/modules/' . $path . '/';
-        }
-        $className = ucfirst($route->controller) . 'Controller';
-        $areaName = (!empty($route->area) ? $route->area . '/' : '');
+        if ($route != null) {
+            foreach (array_keys($this->_m) as $path) {
+                $paths[$path] = '/modules/' . $path . '/';
+            }
+            $className = ucfirst($route->controller) . 'Controller';
+            $areaName = (!empty($route->area) ? $route->area . '/' : '');
 
 //        var_dump($areaName);
 
-        foreach (array('app', 'core') as $module => $source) {
-            foreach ($paths as $path) {
-                $file = $source . $path . 'controllers/' . $areaName . $className . '.php';
-                if (file_exists($file)) {
-                    try {
-                        include_once $file;
-                        $class = new $className($route);
-                        $class->module = $module;
+            foreach (array('app', 'core') as $module => $source) {
+                foreach ($paths as $path) {
+                    $file = $source . $path . 'controllers/' . $areaName . $className . '.php';
+                    if (file_exists($file)) {
+                        try {
+                            include_once $file;
+                            $class = new $className($route->area);
+                            $class->module = $module;
 //                        $route->dispatch($class);
-                        return (array($class, $route->action));
-                    } catch (Exception $e) {
+                            return (array($class, $route->action));
+                        } catch (Exception $e) {
 //                        var_dump($e);
-                        //$class = new Controller($route);
-                        //$class->forward404($route->area);
+                            //$class = new Controller($route);
+                            //$class->forward404($route->area);
+                        }
                     }
                 }
             }
         }
 
-        return array(new Controller($route), null);
+        return array(new Controller(), null);
     }
 
     public function preloadModule($module, $config = null)

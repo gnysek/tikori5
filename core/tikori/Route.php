@@ -46,7 +46,7 @@ class Route
      *
      * @param   string $name           route name
      * @param   string $uri_callback   URI pattern
-     * @param   array  $regex          regex patterns for route keys
+     * @param   array  $regex          params/regex patterns for route keys
      *
      * @return  Route
      */
@@ -100,10 +100,10 @@ class Route
      *
      * @return  string
      */
-    public static function name(Route $route)
+    /*public static function name(Route $route)
     {
         return array_search($route, Route::$_routes);
-    }
+    }*/
 
     /**
      * Create a URL from a route name. This is a shortcut for:
@@ -118,7 +118,7 @@ class Route
      * @since   3.0.7
      * @uses    URL::site
      */
-    public static function url($name, array $params = NULL, $protocol = NULL)
+    /*public static function url($name, array $params = NULL, $protocol = NULL)
     {
         $route = Route::get($name);
 
@@ -128,7 +128,7 @@ class Route
         } else {
             return URL::site(Route::get($name)->uri($params), $protocol);
         }
-    }
+    }*/
 
     /**
      * Returns the compiled regular expression for the route. This translates
@@ -141,6 +141,9 @@ class Route
      *           'id' => '\d+',
      *         )
      *     );
+     *
+     * @param string $uri
+     * @param array  $regex
      *
      * @return  string
      * @uses    Route::REGEX_ESCAPE
@@ -214,13 +217,35 @@ class Route
         foreach ($routes as $name => $route) {
             // We found something suitable
             if ($params = $route->matches($uri)) {
-                $route->params = $params;
+
                 if (!empty($area)) {
                     $route->area = $area;
                 }
 
                 $route->action = (!empty($params['action'])) ? $params['action'] : $route->action;
                 $route->controller = (!empty($params['controller'])) ? $params['controller'] : $route->controller;
+
+                // special param: tparams - it will be exploded from key/value/key/value
+                // if any of key/values is empty, loop will break and will skip rest of params!
+                if (!empty($params['tparams'])) {
+                    $tp = explode('/', $params['tparams']);
+                    $key = null;
+
+                    foreach ($tp as $v) {
+                        if ($v == '') break; // if value is empty, break, even if there's already key set (value is empty for that key!)
+
+                        if ($key === null) {
+                            $key = $v; // set temporary key name
+                        } else {
+                            $params[$key] = $v; // if we already have key, we can set value
+                            $key = null;
+                        }
+                    }
+
+                    unset($params['tparams']);
+                }
+
+                $route->params = $params;
 
                 return $route;
 //				return array(
@@ -295,7 +320,6 @@ class Route
      * @param   mixed $uri    route URI pattern or lambda/callback function
      * @param   array $regex  key patterns
      *
-     * @return  void
      * @uses    Route::_compile
      */
     public function __construct($uri = NULL, $regex = NULL)
@@ -401,43 +425,6 @@ class Route
         }
 
         return $params;
-    }
-
-
-    /**
-     * Dispatches current route
-     *
-     * @throws Exception
-     */
-    public function dispatch($controller = null)
-    {
-        Profiler::addLog(
-            'Dispatching: <code>' . $this->area . '> ' . $this->controller . '/' . $this->action . '</code>'
-        );
-        // Tikori->_runController will always provide controller
-//        if ($controller === null) {
-//            //TODO: should be another one, which will fire error page
-//            Profiler::addLog('Cannot create controller <code>' . $this->controller . '</code>');
-//            return Controller::forward404($this->area);
-//        }
-
-        /* @var $controller Controller */
-
-        if (empty($this->_route_regex)) {
-            Profiler::addLog('No route for <code>' . $this->controller . '</code>');
-            return $controller->unknownAction();
-        } else {
-            try {
-                return $controller->run($this);
-            } catch (DbError $e) {
-                ob_get_clean();
-                throw new Exception('DB Error: ' . $e->getMessage());
-            } catch (Exception $e) {
-                ob_get_clean();
-                throw new Exception('Dispatch action: <er>' . $this->controller . '->' . $this->action . '</er> :<br/>'
-                    . $e->getMessage());
-            }
-        }
     }
 
     public function getDirectory()
