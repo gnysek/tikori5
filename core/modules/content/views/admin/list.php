@@ -9,11 +9,11 @@
                  'columns' => array('id', 'enabled', 'name', 'path', 'childrenCount', 'parent'),
                  'data'    => $content,
                  'options' => array(
-                     'Edit'     => array('url' => array('content', 'edit' => ':id')),
-                     'Delete'   => array('url' => array('content', 'delete' => ':id')),
-                     'View'     => array('url' => array('content', 'view' => ':id')),
-                     'Subnodes' => array('url' => array('content', 'nodes' => ':id')),
-                     'Author'   => array('url' => array('content', 'author' => ':id')),
+                     'Edit'     => array('url' => array('content/edit', 'id' => ':id')),
+                     'Delete'   => array('url' => array('content/delete', 'id' => ':id')),
+                     'View'     => array('url' => array('content/view', 'id' => ':id')),
+                     'Subnodes' => array('url' => array('content/nodes', 'id' => ':id')),
+                     'Author'   => array('url' => array('content/author', 'id' => ':id')),
 //                         'Show'   => array('url' => array('content', 'visibility' => ':id')),
                  )
             ), true
@@ -27,10 +27,10 @@
                      'columns' => array('id', 'name', 'language', 'url'),
                      'data'    => $collection,
                      'options' => array(
-                         'Edit'   => array('url' => array('content', 'edit' => ':id')),
-                         'Delete' => array('url' => array('content', 'delete' => ':id')),
-                         'View'   => array('url' => array('content', 'view' => ':id')),
-                         'Author' => array('url' => array('content', 'author' => ':id')),
+                         'Edit'   => array('url' => array('content/edit', 'id' => ':id')),
+                         'Delete' => array('url' => array('content/delete', 'id' => ':id')),
+                         'View'   => array('url' => array('content/view', 'id' => ':id')),
+                         'Author' => array('url' => array('content/author', 'id' => ':id')),
 //                         'Show'   => array('url' => array('content', 'visibility' => ':id')),
                      )
                 ), true
