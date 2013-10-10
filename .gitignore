@@ -168,3 +168,7 @@ pip-log.txt
 
 # Mac crap
 .DS_Store
+
+# Tikori
+microframeworks
+microframeworks/*

@@ -16,7 +16,6 @@ class Request
     const METHOD_PUT = 'PUT';
     const METHOD_DELETE = 'DELETE';
     const METHOD_OPTIONS = 'OPTIONS';
-    const METHOD_OVERRIDE = '_METHOD';
     const ROUTE_TOKEN = 'p';
 
     const REQUEST_METHOD = 'request-method';
@@ -34,12 +33,44 @@ class Request
     const URL_SCHEME = 'protocol-scheme';
 
     public $env = array();
-    private $_scriptUrl = null;
-    private $_baseUrl = null;
-    private $_hostInfo = null;
+    private $_scriptUrl = NULL;
+    private $_baseUrl = NULL;
+    private $_hostInfo = NULL;
 
     private $_post = array();
     private $_get = array();
+
+    // Mimetypes
+    protected $_mimeTypes = array(
+        'txt'   => 'text/plain',
+        'html'  => 'text/html',
+        'xhtml' => 'application/xhtml+xml',
+        'xml'   => 'application/xml',
+        'css'   => 'text/css',
+        'js'    => 'application/javascript',
+        'json'  => 'application/json',
+        'csv'   => 'text/csv',
+
+        // images
+        'png'   => 'image/png',
+        'jpe'   => 'image/jpeg',
+        'jpeg'  => 'image/jpeg',
+        'jpg'   => 'image/jpeg',
+        'gif'   => 'image/gif',
+        'bmp'   => 'image/bmp',
+        'ico'   => 'image/vnd.microsoft.icon',
+        'tiff'  => 'image/tiff',
+        'tif'   => 'image/tiff',
+        'svg'   => 'image/svg+xml',
+        'svgz'  => 'image/svg+xml',
+
+        // archives
+        'zip'   => 'application/zip',
+        'rar'   => 'application/x-rar-compressed',
+
+        // adobe
+        'pdf'   => 'application/pdf'
+    );
 
     public static function mock()
     {
@@ -52,7 +83,7 @@ class Request
             self::SERVER_PORT    => 80,
             self::ACCEPT         => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             self::ACCEPT_LANG    => 'en-US,en;q=0.8',
-            self::ACCEPT_CHARSET => 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+            self::ACCEPT_CHARSET => 'ISO-8859-2,utf-8;q=0.7,*;q=0.3',
             self::USER_AGENT     => 'Tikori Framework',
             self::REMOTE_ADDR    => '127.0.0.1',
             self::URL_SCHEME     => 'http',
@@ -113,6 +144,16 @@ class Request
     }
 
     /**
+     * Is the request from CLI (Command-Line Interface)?
+     *
+     * @return boolean
+     */
+    public function isCli()
+    {
+        return !isset($_SERVER['HTTP_HOST']);
+    }
+
+    /**
      * Fetch GET and POST data
      *
      * This method returns a union of GET and POST data as a key-value array, or the value
@@ -122,14 +163,14 @@ class Request
      *
      * @return array|mixed|null
      */
-    public function params($key = null)
+    public function params($key = NULL)
     {
         $union = array_merge($this->get(), $this->post());
         if ($key) {
             if (isset($union[$key])) {
                 return $union[$key];
             } else {
-                return null;
+                return NULL;
             }
         } else {
             return $union;
@@ -148,6 +189,17 @@ class Request
 
     public function __construct()
     {
+        // Die magic_quotes, just die...
+        if(get_magic_quotes_gpc()) {
+            $stripslashes_gpc = function(&$value, $key) {
+                $value = stripslashes($value);
+            };
+            array_walk_recursive($_GET, $stripslashes_gpc);
+            array_walk_recursive($_POST, $stripslashes_gpc);
+            array_walk_recursive($_COOKIE, $stripslashes_gpc);
+            array_walk_recursive($_REQUEST, $stripslashes_gpc);
+        }
+
         $env = array();
         //The HTTP request method
         $env[self::REQUEST_METHOD] = $_SERVER['REQUEST_METHOD'];
@@ -266,7 +318,7 @@ class Request
         return Core::app()->cfg('env/PATH_INFO');
     }
 
-    public function getPost($key, $default = null)
+    public function getPost($key, $default = NULL)
     {
         if (empty($key)) {
             return $this->_post;
@@ -275,7 +327,7 @@ class Request
         return (array_key_exists($key, $this->_post)) ? $this->_post[$key] : $default;
     }
 
-    public function getParam($key = null, $default = null)
+    public function getParam($key = NULL, $default = NULL)
     {
         if (empty($key)) {
             return array_merge($this->_get, $this->_post);
@@ -286,7 +338,7 @@ class Request
 
     public function getBaseUrl($absolute = false)
     {
-        if ($this->_baseUrl === null) {
+        if ($this->_baseUrl === NULL) {
             $this->_baseUrl = rtrim(dirname($this->getScriptUrl()), '\\/');
         }
 
@@ -300,7 +352,7 @@ class Request
 
     public function getHostInfo()
     {
-        if ($this->_hostInfo === null) {
+        if ($this->_hostInfo === NULL) {
             if (isset($_SERVER['HTTP_HOST'])) {
                 $this->_hostInfo = $this->env['tikori.url_scheme'] . '://' . $_SERVER['HTTP_HOST'];
             } else {
@@ -345,11 +397,12 @@ class Request
      * Returns the relative URL of the entry script.
      * The implementation of this method referenced Zend_Controller_Request_Http in Zend Framework.
      *
+     * @throws Exception
      * @return string the relative URL of the entry script.
      */
     public function getScriptUrl()
     {
-        if ($this->_scriptUrl === null) {
+        if ($this->_scriptUrl === NULL) {
             $scriptName = basename($_SERVER['SCRIPT_FILENAME']);
             if (basename($_SERVER['SCRIPT_NAME']) === $scriptName) {
                 $this->_scriptUrl = $_SERVER['SCRIPT_NAME'];

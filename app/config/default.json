@@ -12,7 +12,7 @@
         "dbname": "tikori5",
         "dbuser": "root",
         "dbpass": "",
-        "dblink": "mysql:host=localhost;dbname=tikori5"
+        "dblink": "mysql:host=127.0.0.1;dbname=tikori5"
     },
     "routes": {
         "forum": {

@@ -22,7 +22,7 @@ class Core
     /**
      * @var Core Main app class
      */
-    private static $_app = null;
+    private static $_app = NULL;
 
     /**
      *
@@ -44,7 +44,7 @@ class Core
         self::createTikoriApplication($config);
     }
 
-    public static function createTikoriApplication($config = null)
+    public static function createTikoriApplication($config = NULL)
     {
         return self::createApplication('Tikori', $config);
     }
@@ -69,7 +69,7 @@ class Core
      */
     public static function setApplication($app)
     {
-        if (self::$_app === null) {
+        if (self::$_app === NULL) {
             self::$_app = $app;
         } else {
             throw new Exception('Tikori application can be created only once!');
@@ -95,7 +95,7 @@ class Core
      *
      * @return boolean Whether succeded or not
      */
-    public static function register($name, $value = null, $overwrite = false)
+    public static function register($name, $value = NULL, $overwrite = false)
     {
         if (array_key_exists($name, self::$_registry) and $overwrite === false) {
             return false;
@@ -112,9 +112,9 @@ class Core
      *
      * @return mixed Return all data when $name is null, registry value if found, or $default when not found
      */
-    public function registry($name = null, $default = null)
+    public function registry($name = NULL, $default = NULL)
     {
-        if ($name === null) {
+        if ($name === NULL) {
             return self::$_registry;
         }
         if (array_key_exists($name, self::$_registry)) {
@@ -134,7 +134,18 @@ class Core
      */
     public static function autoload($class, $throw = true)
     {
-        $search = str_replace('_', '/', $class);
+        $namespace = '';
+        $class = ltrim($class, '\\');
+//        $parts = explode('\\', $class);
+//        $class = end($parts);
+//        $search = implode('/', $parts);
+
+        if ($ns_pos = strripos($class, '\\')) {
+            $namespace = substr($class, 0, $ns_pos);
+            $class = substr($class, $ns_pos + 1);
+        }
+
+        $search = strtolower(str_replace('_', '/', (($namespace) ? ($namespace . '/') : '') . $class));
 
         preg_match('#(.*)/(.*)#i', $search, $match);
         if (!empty($match)) {
@@ -145,13 +156,17 @@ class Core
 
         $search = '/' . $search . '.php';
 
+        $filenames = array();
+
         foreach (Core::app()->autoloadPaths as $dir) {
             $filename = $dir . $search;
+            $filenames[] = $filename;
             if (file_exists($filename)) {
                 if (class_exists('Profiler')) {
                     Profiler::addLog(
-                        '<div style="padding-left: 20px;"><i>Loading <code>' . $class . '</code> from <tt>' . $filename
-                            . '<tt></i></div>'
+                        '<div style="padding-left: 20px;"><i>Loading <code>' . $namespace . '\\' . $class
+                        . '</code> from <tt>' . $filename
+                        . '<tt></i></div>'
                     );
                 }
                 require $filename;
@@ -160,7 +175,7 @@ class Core
         }
 
         if ($throw) {
-            throw new Exception("Cannot autoload class " . $class . ' [' . $search . ']');
+            throw new Exception("Cannot autoload class " . $class . ' [' . $search . '] ' . implode(', ', $filenames));
         }
         return false;
     }
@@ -202,7 +217,7 @@ class Core
         return TIKORI_FPATH;
     }
 
-    public static function event($eventName, $data = null)
+    public static function event($eventName, $data = NULL)
     {
         Core::app()->observer->fireEvent($eventName, $data);
     }

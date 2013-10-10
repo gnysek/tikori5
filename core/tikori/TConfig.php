@@ -47,9 +47,9 @@ class TConfig
      * set('param/another')
      * set('param', 'ok')
      *
-     * @param type $path      Path to append
-     * @param type $value     true | Value to set
-     * @param type $overwrite Whether to overwrite setting if already exists
+     * @param mixed $path      Path to append
+     * @param mixed $value     true | Value to set
+     * @param mixed $overwrite Whether to overwrite setting if already exists
      *
      * @return bool Wheter value was set or not
      */
@@ -89,7 +89,7 @@ class TConfig
     //load('x') loads x.json, load('forum:x') loads modules/forum/config/x.json :)
     public function load($file, $reload = false)
     {
-        foreach (Core::app()->autoloadPaths as $path) {
+        foreach (\Core::app()->namespaces as $path) {
             $filename = $path . '/config/' . $file . '.json';
 
             if (file_exists($filename)) {

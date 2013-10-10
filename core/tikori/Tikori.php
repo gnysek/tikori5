@@ -35,6 +35,7 @@ class Tikori
     public $response = null;
     public $mode = null;
     public $autoloadPaths = array();
+    public $namespaces = array('app', 'core');
 
     /**
      * @var Route
@@ -309,13 +310,14 @@ class Tikori
             return $this->addAutoloadPaths(array($paths), $core);
         } else {
             foreach ($paths as $k => $dir) {
-                $dir = rtrim((($core) ? $this->coreDir : $this->appDir) . '/' . $dir, '/');
-                if (!in_array($dir, $this->autoloadPaths) and file_exists($dir)) {
-//					$this->autoloadPaths[] = $dir;
-                    if (!empty($this->autoloadPaths)) {
-                        array_unshift($this->autoloadPaths, $dir);
-                    } else {
-                        $this->autoloadPaths[] = $dir;
+                foreach ($this->namespaces as $namespace) {
+                    $autodir = rtrim(TIKORI_ROOT . DIRECTORY_SEPARATOR . $namespace . '/' . trim($dir,'/'), '/');
+                    if (!in_array($autodir, $this->autoloadPaths) /*and file_exists($autodir)*/) {
+                        if (!empty($this->autoloadPaths)) {
+                            array_unshift($this->autoloadPaths, $autodir);
+                        } else {
+                            $this->autoloadPaths[] = $autodir;
+                        }
                     }
                 }
             }
@@ -363,7 +365,7 @@ class Tikori
 
     public function defaultCfg()
     {
-        $this->_config = new Config(array(
+        $this->_config = new \Config(array(
                                          'appname' => 'Unknown application',
                                          //				'url' => DefC_Url::getDefValues(),
                                          //				'db' => DefC_Db::getDefValues(),
