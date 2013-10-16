@@ -38,11 +38,11 @@ class TSessionModule extends TModule
     /**
      * @var Session
      */
-    protected $_session = null;
+    protected $_session = NULL;
     /**
      * @var User
      */
-    protected $_user = null;
+    protected $_user = NULL;
 
     public function init()
     {
@@ -67,7 +67,7 @@ class TSessionModule extends TModule
 
         $cookie = new Cookie();
 
-        if ($key = $cookie->get('tk5_sid', null)) {
+        if ($key = $cookie->get('tk5_sid', NULL)) {
             if (preg_match(self::SKEY_REGEXP, $key)) {
                 $this->_skey = $key;
                 $this->_skeytype = self::SKEY_COOKIE;
@@ -111,7 +111,7 @@ class TSessionModule extends TModule
     {
         $this->_session = Session::model()->find($this->_skey);
 
-        if ($this->_session === null) {
+        if ($this->_session === NULL) {
             return $this->_newSession();
         }
 
@@ -156,12 +156,13 @@ class TSessionModule extends TModule
         if ($user = User::model()->login($data)) {
             $this->_user = $user;
             $this->_session->user_id = $user->id;
-            $this->_session->logged_in = 1;
+            $this->_session->logged_in = true;
             $this->_user->save();
             $this->_session->save();
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     public function logout()

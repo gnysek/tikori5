@@ -1,11 +1,5 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: user
- * Date: 18.01.13
- * Time: 15:10
- * To change this template use File | Settings | File Templates.
- *
  * @property string username
  * @property bool   logged
  * @property string color
@@ -20,6 +14,7 @@ class UserWidget extends Widget
 
     public function run()
     {
+        $this->data();
         return false;
     }
 
@@ -28,16 +23,13 @@ class UserWidget extends Widget
         $isLoggedIn = Core::app()->session->authenticated();
         $color = ($isLoggedIn) ? ' color: red;' : '';
 
-        return (object)array(
-            'username'    => ($isLoggedIn) ? Core::app()->session->user()->name
-                : SessionModule::DEFAULT_NAME,
-            'logged'      => $isLoggedIn,
-            'color'       => $color,
-            'avatar'      => '',
-            'loginUrl'    => Html::url('//user/login'),
-            'registerUrl' => Html::url('//user/register'),
-            'logoutUrl'   => Html::url('//user/logout'),
-            'profileUrl'  => Html::url('//user/profile'),
-        );
+        $this->username = ($isLoggedIn) ? Core::app()->session->user()->name : SessionModule::DEFAULT_NAME;
+        $this->logged = $isLoggedIn;
+        $this->color = $color;
+        $this->avatar = '';
+        $this->loginUrl = Html::url('//user/login');
+        $this->registerUrl = Html::url('//user/register');
+        $this->logoutUrl = Html::url('//user/logout');
+        $this->profileUrl = Html::url('//user/profile');
     }
 }

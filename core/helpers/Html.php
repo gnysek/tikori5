@@ -188,17 +188,18 @@ class Html
             }
 
             $html .= self::htmlTag(
-                'input',
-                $opt
-            );
-
-            $html .= self::htmlTag(
                 'label', array(
                               'for' => get_class($model) . '_' . $field . '_' . $i,
                               #'id'  => get_class($model) . '_' . $field,
                          ),
                 $v
             );
+
+            $html .= self::htmlTag(
+                'input',
+                $opt
+            );
+
             $html .= $divider;
         }
 

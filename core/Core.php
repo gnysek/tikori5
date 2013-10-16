@@ -170,6 +170,7 @@ class Core
                     );
                 }
                 require $filename;
+                #class_alias($class, '\Tikori\\' . $class);
                 return true;
             }
         }

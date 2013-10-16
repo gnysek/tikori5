@@ -12,8 +12,7 @@
             <?php
             /* @var $this Controller */
             /* @var $user UserWidget */
-            $user = $this->widget('User')->data();
-            //			var_dump($user);
+            $user = $this->widget('User');
             ?>
 
             Welcome, <strong style="<?php echo $user->color ?>"><?php echo $user->username; ?></strong>!<br/>

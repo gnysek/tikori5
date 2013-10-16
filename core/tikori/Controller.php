@@ -6,7 +6,7 @@
  * @property Request $request
  * @property string  $pageTitle
  */
-class Controller
+class Controller extends ControllerView
 {
 
     public $layout = '//layout.default';
@@ -19,9 +19,9 @@ class Controller
     /**
      * @var Request
      */
-    public $request = null;
+    public $request = NULL;
 
-    public function __construct($area = null)
+    public function __construct($area = NULL)
     {
         Profiler::addLog('&bull; New controller <code> ' . get_called_class() . '</code> Created');
         $this->area = $area;
@@ -47,11 +47,13 @@ class Controller
         }
     }*/
 
-    public function unknownAction() {
-            $this->httpStatusAction(404);
+    public function unknownAction()
+    {
+        $this->httpStatusAction(404);
     }
 
-    public function runActionNew($action) {
+    public function runActionNew($action)
+    {
         if ($this->beforeAction()) {
             if ($action->runWithParams()) {
                 $this->afterAction();
@@ -61,7 +63,7 @@ class Controller
         }
     }
 
-    public function runAction($controller = null, $action = null)
+    public function runAction($controller = NULL, $action = NULL)
     {
         Profiler::addLog(
             '-> Running Action: <tt>' . $this->getControllerClassName($controller) . '/' . $action . '</tt>'
@@ -93,15 +95,15 @@ class Controller
         return true;
     }
 
-    public function run($route, $action = null)
+    public function run($route, $action = NULL)
     {
         if ($route instanceof Route) {
             $this->area = $route->area;
-            $this->action = ($action === null) ? $route->action : $action;
+            $this->action = ($action === NULL) ? $route->action : $action;
             $this->controller = $route->controller;
             $this->params = $route->params;
         } else {
-            if ($action !== null) {
+            if ($action !== NULL) {
                 $this->action = $action;
             } else {
                 $this->action = 'default';
@@ -122,7 +124,7 @@ class Controller
         } else {
             Profiler::addLog(
                 'Calling controller: <tt>' . $this->getControllerClassName() . '::' . $this->getActionMethodName()
-                    . '</tt>'
+                . '</tt>'
             );
 
             // check params
@@ -141,12 +143,12 @@ class Controller
                             //throw new RouteNotFoundException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
                             throw new ErrorException(
                                 'Not enough arguments on method ' . $this->getActionMethodName()
-                                    . '() or wrong argument name [' . $paramObject->name . '] - should be one of <code>'
-                                    . implode(', ', array_keys($this->params)) . '</code>'
+                                . '() or wrong argument name [' . $paramObject->name . '] - should be one of <code>'
+                                . implode(', ', array_keys($this->params)) . '</code>'
                             );
                         }
 
-                        $finalParams[] = (empty($this->params[$paramObject->name])) ? null
+                        $finalParams[] = (empty($this->params[$paramObject->name])) ? NULL
                             : $this->params[$paramObject->name];
                     }
                 }
@@ -182,11 +184,11 @@ class Controller
         //		}
     }
 
-    public static function getControllerClassName($controller = null, $arena = null, $suffix = 'Controller')
+    public static function getControllerClassName($controller = NULL, $arena = NULL, $suffix = 'Controller')
     {
         $strict = 'this'; // fix for E_STRICT notice
         if (isset($$strict)) {
-            if ($controller === null) {
+            if ($controller === NULL) {
                 $controller = $$strict->controller;
             }
         }
@@ -194,14 +196,14 @@ class Controller
         return (!empty($arena) ? ucfirst($arena) . '_' : '') . ucfirst(strtolower(($controller))) . $suffix;
     }
 
-    public function getActionMethodName($action = null, $suffix = 'Action')
+    public function getActionMethodName($action = NULL, $suffix = 'Action')
     {
         if (isset($this)) {
-            if ($action === null) {
+            if ($action === NULL) {
                 $action = $this->action;
             }
         } else {
-            if ($action === null) {
+            if ($action === NULL) {
                 $action = 'default';
             }
         }
@@ -223,7 +225,7 @@ class Controller
     {
         //		var_dump($this->checkPermissions);
         if ($this->checkPermissions) {
-            if (Core::app()->session === null) {
+            if (Core::app()->session === NULL) {
                 //if (Core::registry('session') == false) {
                 throw new Exception('Session module need to be activated in config if you want to check Permissions');
             }
@@ -269,7 +271,7 @@ class Controller
     //		throw new RouteNotFoundException('Unknown action');
     //	}
 
-    public function render($file = null, $data = null, $return = false)
+    public function render($file = NULL, $data = NULL, $return = false)
     {
         //TODO: no error when file not found?
 
@@ -288,7 +290,7 @@ class Controller
         }
     }
 
-    public function renderPartial($file, $data = null, $return = true)
+    public function renderPartial($file, $data = NULL, $return = true)
     {
         if ($filename = $this->_findViewFile($file)) {
             return $this->renderInternal($filename, $data, $return);
@@ -297,7 +299,7 @@ class Controller
         }
     }
 
-    public function renderInternal($_fileNC, $_dataNC = null, $_returnNC = false)
+    public function renderInternal($_fileNC, $_dataNC = NULL, $_returnNC = false)
     {
         if (is_array($_dataNC)) {
             extract($_dataNC, EXTR_PREFIX_SAME, 'data');
@@ -372,32 +374,6 @@ class Controller
         }
 
         return false;
-    }
-
-    public function widget($class, $properties = array(), $captureOutput = false)
-    {
-        if ($captureOutput) {
-            ob_start();
-            ob_implicit_flush(false);
-        }
-
-        $widget = $this->_createWidget($class, $properties);
-        $widget->run();
-
-        if ($captureOutput) {
-            return ob_get_clean();
-        }
-
-        return $widget;
-    }
-
-    private function _createWidget($class, $properties)
-    {
-        $className = ucfirst($class) . 'Widget';
-        $widget = new $className;
-        $widget->setupProperties($properties);
-        $widget->init();
-        return $widget;
     }
 
 }
