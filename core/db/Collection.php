@@ -1,6 +1,199 @@
 <?php
+/**
+ * @copyright   Copyright (c) 2011, Flight Framework, Mike Cao <mike@mikecao.com>
+ * @license     MIT, http://flightphp.com/license
+ */
 
-class Collection
-{
+/**
+ * The Collection class allows you to access a set of data
+ * using both array and object notation.
+ */
+class Collection implements ArrayAccess, Iterator, Countable {
+    /**
+     * Collection data.
+     *
+     * @var array
+     */
+    private $_data;
 
+    /**
+     * Constructor.
+     *
+     * @param array $data Initial data
+     */
+    public function __construct(array $data = array()) {
+        $this->_data = $data;
+    }
+
+    /**
+     * Gets an item.
+     *
+     * @param string $key Key
+     * @return mixed Value
+     */
+    public function __get($key) {
+        return isset($this->_data[$key]) ? $this->_data[$key] : null;
+    }
+
+    /**
+     * Set an item.
+     *
+     * @param string $key Key
+     * @param mixed $value Value
+     */
+    public function __set($key, $value) {
+        $this->_data[$key] = $value;
+    }
+
+    /**
+     * Checks if an item exists.
+     *
+     * @param string $key Key
+     * @return bool Item status
+     */
+    public function __isset($key) {
+        return isset($this->_data[$key]);
+    }
+
+    /**
+     * Removes an item.
+     *
+     * @param string $key Key
+     */
+    public function __unset($key) {
+        unset($this->_data[$key]);
+    }
+
+    /**
+     * Gets an item at the offset.
+     *
+     * @param string $offset Offset
+     * @return mixed Value
+     */
+    public function offsetGet($offset) {
+        return isset($this->_data[$offset]) ? $this->_data[$offset] : null;
+    }
+
+    /**
+     * Sets an item at the offset.
+     *
+     * @param string $offset Offset
+     * @param mixed $value Value
+     */
+    public function offsetSet($offset, $value) {
+        if (is_null($offset)) {
+            $this->_data[] = $value;
+        }
+        else {
+            $this->_data[$offset] = $value;
+        }
+    }
+
+    /**
+     * Checks if an item exists at the offset.
+     *
+     * @param string $offset Offset
+     * @return bool Item status
+     */
+    public function offsetExists($offset) {
+        return isset($this->_data[$offset]);
+    }
+
+    /**
+     * Removes an item at the offset.
+     *
+     * @param string $offset Offset
+     */
+    public function offsetUnset($offset) {
+        unset($this->_data[$offset]);
+    }
+
+    /**
+     * Resets the collection.
+     */
+    public function rewind() {
+        reset($this->_data);
+    }
+
+    /**
+     * Gets current collection item.
+     *
+     * @return mixed Value
+     */
+    public function current() {
+        return current($this->_data);
+    }
+
+    /**
+     * Gets current collection key.
+     *
+     * @return mixed Value
+     */
+    public function key() {
+        return key($this->_data);
+    }
+
+    /**
+     * Gets the next collection value.
+     *
+     * @return mixed Value
+     */
+    public function next()
+    {
+        return next($this->_data);
+    }
+
+    /**
+     * Checks if the current collection key is valid.
+     *
+     * @return bool Key status
+     */
+    public function valid()
+    {
+        $key = key($this->_data);
+        return ($key !== NULL && $key !== FALSE);
+    }
+
+    /**
+     * Gets the size of the collection.
+     *
+     * @return int Collection size
+     */
+    public function count() {
+        return sizeof($this->_data);
+    }
+
+    /**
+     * Gets the item keys.
+     *
+     * @return array Collection keys
+     */
+    public function keys() {
+        return array_keys($this->_data);
+    }
+
+    /**
+     * Gets the collection data.
+     *
+     * @return array Collection data
+     */
+    public function getData() {
+        return $this->_data;
+    }
+
+    /**
+     * Sets the collection data.
+     *
+     * @param array $data New collection data
+     */
+    public function setData(array $data) {
+        $this->_data = $data;
+    }
+
+    /**
+     * Removes all items from the collection.
+     */
+    public function clear() {
+        $this->_data = array();
+    }
 }
