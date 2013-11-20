@@ -4,9 +4,9 @@
  * Class Model
  *
  * @property string $tableName  Table Name
- * @property mixed  $attributes Attribute values
+ * @property $this  $attributes Attribute values
  */
-class Model implements IteratorAggregate, ArrayAccess
+abstract class Model implements IteratorAggregate, ArrayAccess
 {
 
     const BELONGS_TO = 'BELONGS_TO';
@@ -59,6 +59,11 @@ class Model implements IteratorAggregate, ArrayAccess
         return $this->_primaryKey;
     }
 
+    /**
+     * @param string $model
+     *
+     * @return Model
+     */
     public static function model($model = null)
     {
         if ($model == null) {
@@ -183,13 +188,18 @@ class Model implements IteratorAggregate, ArrayAccess
 //		return $this;
     }
 
-    public function findWhere($where = null, $offset = 0, $limit = -1)
+    public function findWhere($where = null, $limit = -1, $offset = 0, $conditions = array())
     {
         $sql = DbQuery::sql()->select()->from($this->_table);
         if (!empty($where)) {
             $sql->where($where);
         }
         $sql->limit($limit, $offset);
+
+        if (!empty($conditions)) {
+            $sql->conditions($conditions);
+        }
+
         $result = $sql->execute();
         $return = array();
         foreach ($result as $row) {
@@ -199,12 +209,18 @@ class Model implements IteratorAggregate, ArrayAccess
 
             $return[] = $c;
         }
-        return $return;
+        return new Collection($return);
     }
 
     public function findAll($limit = -1, $offset = 0)
     {
         return $this->findWhere(null, $limit, $offset);
+    }
+
+    public function count($by = null)
+    {
+        $result = DbQuery::sql()->select('COUNT(*) AS tikori_total')->from($this->_table)->execute();
+        return $result[0]->tikori_total;
     }
 
     // eager
@@ -238,7 +254,10 @@ class Model implements IteratorAggregate, ArrayAccess
     public function insert()
     {
         DbQuery::sql()->insert()->from($this->_table)->fields($this->_getModifiedFields())->execute();
+        $this->_values[$this->getPK()] = Core::app()->db->lastId();
         $this->afterSave();
+
+        return true;
     }
 
     // TODO: check that where() automatically will be always good - it should be...
@@ -255,6 +274,8 @@ class Model implements IteratorAggregate, ArrayAccess
             ->where(array($this->_primaryKey, '=', $this->_values[$this->_primaryKey]))
             ->execute();
         $this->afterSave();
+
+        return true;
     }
 
     protected function _getModifiedFields()
@@ -381,10 +402,7 @@ class Model implements IteratorAggregate, ArrayAccess
 
     }
 
-    public function getFields()
-    {
-
-    }
+    public abstract function getFields();
 
     public function attributeLabels()
     {
@@ -506,7 +524,12 @@ class Model implements IteratorAggregate, ArrayAccess
         switch ($this->_relations[$relationName][0]) {
             case self::HAS_MANY:
                 $rel = self::model($this->_relations[$relationName][1]);
-                $result = $rel->findBy($this->_relations[$relationName][2], $this->_values[$this->getPK()]);
+//                $result = $rel->findBy($this->_relations[$relationName][2], $this->_values[$this->getPK()]);
+                $conditions = array();
+                if (array_key_exists(3, $this->_relations[$relationName])) {
+                    $conditions = $this->_relations[$relationName][3];
+                }
+                $result = $rel->findWhere(array(array($this->_relations[$relationName][2], '=', $this->_values[$this->getPK()])), -1, 0, $conditions);
                 $this->_related[$relationName] = $result;
                 return $this->_related[$relationName];
                 break;
@@ -624,6 +647,7 @@ class Model implements IteratorAggregate, ArrayAccess
 
 }
 
-class ModelData {
+class ModelData
+{
 
 }

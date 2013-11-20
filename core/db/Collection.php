@@ -8,7 +8,9 @@
  * The Collection class allows you to access a set of data
  * using both array and object notation.
  */
-class Collection implements ArrayAccess, Iterator, Countable {
+class Collection implements ArrayAccess, Iterator, Countable
+{
+
     /**
      * Collection data.
      *
@@ -21,7 +23,8 @@ class Collection implements ArrayAccess, Iterator, Countable {
      *
      * @param array $data Initial data
      */
-    public function __construct(array $data = array()) {
+    public function __construct(array $data = array())
+    {
         $this->_data = $data;
     }
 
@@ -29,19 +32,22 @@ class Collection implements ArrayAccess, Iterator, Countable {
      * Gets an item.
      *
      * @param string $key Key
+     *
      * @return mixed Value
      */
-    public function __get($key) {
+    public function __get($key)
+    {
         return isset($this->_data[$key]) ? $this->_data[$key] : null;
     }
 
     /**
      * Set an item.
      *
-     * @param string $key Key
-     * @param mixed $value Value
+     * @param string $key   Key
+     * @param mixed  $value Value
      */
-    public function __set($key, $value) {
+    public function __set($key, $value)
+    {
         $this->_data[$key] = $value;
     }
 
@@ -49,9 +55,11 @@ class Collection implements ArrayAccess, Iterator, Countable {
      * Checks if an item exists.
      *
      * @param string $key Key
+     *
      * @return bool Item status
      */
-    public function __isset($key) {
+    public function __isset($key)
+    {
         return isset($this->_data[$key]);
     }
 
@@ -60,7 +68,8 @@ class Collection implements ArrayAccess, Iterator, Countable {
      *
      * @param string $key Key
      */
-    public function __unset($key) {
+    public function __unset($key)
+    {
         unset($this->_data[$key]);
     }
 
@@ -68,9 +77,11 @@ class Collection implements ArrayAccess, Iterator, Countable {
      * Gets an item at the offset.
      *
      * @param string $offset Offset
+     *
      * @return mixed Value
      */
-    public function offsetGet($offset) {
+    public function offsetGet($offset)
+    {
         return isset($this->_data[$offset]) ? $this->_data[$offset] : null;
     }
 
@@ -78,13 +89,13 @@ class Collection implements ArrayAccess, Iterator, Countable {
      * Sets an item at the offset.
      *
      * @param string $offset Offset
-     * @param mixed $value Value
+     * @param mixed  $value  Value
      */
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value)
+    {
         if (is_null($offset)) {
             $this->_data[] = $value;
-        }
-        else {
+        } else {
             $this->_data[$offset] = $value;
         }
     }
@@ -93,9 +104,11 @@ class Collection implements ArrayAccess, Iterator, Countable {
      * Checks if an item exists at the offset.
      *
      * @param string $offset Offset
+     *
      * @return bool Item status
      */
-    public function offsetExists($offset) {
+    public function offsetExists($offset)
+    {
         return isset($this->_data[$offset]);
     }
 
@@ -104,14 +117,16 @@ class Collection implements ArrayAccess, Iterator, Countable {
      *
      * @param string $offset Offset
      */
-    public function offsetUnset($offset) {
+    public function offsetUnset($offset)
+    {
         unset($this->_data[$offset]);
     }
 
     /**
      * Resets the collection.
      */
-    public function rewind() {
+    public function rewind()
+    {
         reset($this->_data);
     }
 
@@ -120,7 +135,8 @@ class Collection implements ArrayAccess, Iterator, Countable {
      *
      * @return mixed Value
      */
-    public function current() {
+    public function current()
+    {
         return current($this->_data);
     }
 
@@ -129,7 +145,8 @@ class Collection implements ArrayAccess, Iterator, Countable {
      *
      * @return mixed Value
      */
-    public function key() {
+    public function key()
+    {
         return key($this->_data);
     }
 
@@ -159,7 +176,8 @@ class Collection implements ArrayAccess, Iterator, Countable {
      *
      * @return int Collection size
      */
-    public function count() {
+    public function count()
+    {
         return sizeof($this->_data);
     }
 
@@ -168,7 +186,8 @@ class Collection implements ArrayAccess, Iterator, Countable {
      *
      * @return array Collection keys
      */
-    public function keys() {
+    public function keys()
+    {
         return array_keys($this->_data);
     }
 
@@ -177,7 +196,8 @@ class Collection implements ArrayAccess, Iterator, Countable {
      *
      * @return array Collection data
      */
-    public function getData() {
+    public function getData()
+    {
         return $this->_data;
     }
 
@@ -186,14 +206,35 @@ class Collection implements ArrayAccess, Iterator, Countable {
      *
      * @param array $data New collection data
      */
-    public function setData(array $data) {
+    public function setData(array $data)
+    {
         $this->_data = $data;
     }
 
     /**
      * Removes all items from the collection.
      */
-    public function clear() {
+    public function clear()
+    {
         $this->_data = array();
+    }
+
+    public function toOptionArray($key, $value)
+    {
+        $optionArray = array();
+        foreach ($this->_data as $record) {
+            $optionArray[$record->$key] = (is_array($value)) ? $this->_getArrayValueFromRecord($record, $value) : $record->$value;
+        }
+
+        return $optionArray;
+    }
+
+    private function _getArrayValueFromRecord($record, array $values)
+    {
+        $data = array();
+        foreach ($values as $value) {
+            $data[] = $record->$value;
+        }
+        return implode(' ', $data);
     }
 }

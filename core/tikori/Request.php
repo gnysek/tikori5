@@ -40,6 +40,41 @@ class Request
     private $_post = array();
     private $_get = array();
 
+    const UNKNOWN_BROWSER = 'Unknown';
+
+    public $requestMethod = 'POST';
+    public $scriptName = 'index.php';
+    public $pathInfo;
+    public $queryString;
+    public $serverName;
+    public $serverPort = 80;
+    public $accept = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+    public $acceptLang = 'en-US,en;q=0.8';
+    public $acceptCharset = 'ISO-8859-2,utf-8;q=0.7,*;q=0.3';
+    public $userAgent = self::UNKNOWN_BROWSER;
+    public $ip = '127.0.0.1';
+    public $proxyIp = '127.0.0.1';
+    public $urlScheme = 'http';
+    public $isSecure = false;
+    public $route = array();
+
+    public $url = '/';
+    public $referer = 'organic';
+    public $isAjax = false;
+    public $requestData = '';
+    public $contentType;
+    public $contentLength;
+
+    public $getData = array();
+    public $postData = array();
+    public $cookiesData = array();
+    public $files = array();
+
+    //public $secure // move to method ?
+
+
+
+
     // Mimetypes
     protected $_mimeTypes = array(
         'txt'   => 'text/plain',
@@ -72,8 +107,27 @@ class Request
         'pdf'   => 'application/pdf'
     );
 
-    public static function mock()
+    public function mock()
     {
+        $runDir = str_replace(array('\\',' '), array('/','%20'), dirname($_SERVER['SCRIPT_NAME']));
+        $this->_baseUrl = $runDir;
+        $this->requestMethod = getenv('REQUEST_METHOD') ?: 'GET';
+        $this->referer = getenv('HTTP_REFERER') ?: '';
+        $this->ip = getenv('REMOTE_ADDR') ?: '';
+        $this->proxyIp = $this->getProxyIpAddress();
+        $this->isAjax = $this->isAjax();
+        $this->scheme = getenv('SERVER_PROTOCOL') ?: 'HTTP/1.1';
+        $this->userAgent = getenv('HTTP_USER_AGENT') ?: self::UNKNOWN_BROWSER;
+        $this->requestData = file_get_contents('php://input');
+        $this->contentType =  getenv('CONTENT_TYPE') ?: '';
+        $this->contentLength = getenv('CONTENT_LENGTH') ?: 0;
+        $this->getData = new Collection($_GET);
+        $this->postData = new Collection($_GET);
+        $this->cookiesData = new Collection($_COOKIE);
+        $this->files = new Collection($_FILES);
+        $this->isSecure = getenv('HTTPS') && getenv('HTTPS') != 'off';
+        $this->accept = getenv('HTTP_ACCEPT') ?: '';
+
         return array(
             self::REQUEST_METHOD => 'GET',
             self::SCRIPT_NAME    => 'index.php',
@@ -90,6 +144,30 @@ class Request
             self::ROUTE          => array(),
 //			'tikori.input' => ''
         );
+    }
+
+    private function getProxyIpAddress() {
+        static $forwarded = array(
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_X_CLUSTER_CLIENT_IP',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED'
+        );
+
+        $flags = FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
+
+        foreach ($forwarded as $key) {
+            if (array_key_exists($key, $_SERVER)) {
+                sscanf($_SERVER[$key], '%[^,]', $ip);
+                if (filter_var($ip, FILTER_VALIDATE_IP, $flags) !== false) {
+                    return $ip;
+                }
+            }
+        }
+
+        return '';
     }
 
     public function isGet()
@@ -131,7 +209,7 @@ class Request
     {
         if ($this->params('isajax')) {
             return true;
-        } elseif (isset($this->env['X_REQUESTED_WITH']) && $this->env['X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+        } elseif (getenv('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest') {
             return true;
         } else {
             return false;
@@ -199,6 +277,8 @@ class Request
             array_walk_recursive($_COOKIE, $stripslashes_gpc);
             array_walk_recursive($_REQUEST, $stripslashes_gpc);
         }
+
+        $this->mock();
 
         $env = array();
         //The HTTP request method

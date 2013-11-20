@@ -15,8 +15,8 @@
 class Tikori
 {
 
-    const EVENT_BEFORE_DISPATCH = 'before_dispatch';
-    const EVENT_AFTER_DISPATCH = 'after_dispatch';
+    const EVENT_BEFORE_DISPATCH = '_before_dispatch';
+    const EVENT_AFTER_DISPATCH = '_after_dispatch';
     /**
      * @var Config
      */
@@ -74,7 +74,7 @@ class Tikori
      *
      * @param string $config config file name without .json, usually 'default'
      *
-     * @throws RouteNotFoundException
+     * @throws Exception
      * @return bool
      */
     public function init($config = 'default')
@@ -92,6 +92,10 @@ class Tikori
         Error::registerErrors();
         register_shutdown_function(array('Core', 'shutdown_handler'));
         Profiler::addLog('Registered errors');
+
+        if (ini_get('short_open_tag') != 1) {
+            throw new Exception('Tikori 5 requires short_open_tag enabled!');
+        }
 
 //		$this->defaultCfg();
 
@@ -219,8 +223,12 @@ class Tikori
             foreach (array_keys($this->_m) as $path) {
                 $paths[$path] = '/modules/' . $path . '/';
             }
-            $className = ucfirst($route->controller) . 'Controller';
-            $areaName = (!empty($route->area) ? $route->area . '/' : '');
+            $classToCreate = $className = ucfirst($route->controller) . 'Controller';
+            $areaName = '';
+            if (!empty($route->area)) {
+                $areaName = $route->area . '/';
+                $classToCreate = ucfirst($route->area) . '_' . $className;
+            }
 
 //        var_dump($areaName);
 
@@ -230,7 +238,7 @@ class Tikori
                     if (file_exists($file)) {
                         try {
                             include_once $file;
-                            $class = new $className($route->area);
+                            $class = new $classToCreate($route->area);
                             $class->module = $module;
 //                        $route->dispatch($class);
                             return (array($class, $route->action));
@@ -311,7 +319,11 @@ class Tikori
         } else {
             foreach ($paths as $k => $dir) {
                 foreach ($this->namespaces as $namespace) {
-                    $autodir = rtrim(TIKORI_ROOT . DIRECTORY_SEPARATOR . $namespace . '/' . trim($dir,'/'), '/');
+                    if ($namespace == 'core') {
+                        $autodir = TIKORI_FPATH . '/' . trim($dir, '/');
+                    } else {
+                        $autodir = rtrim(TIKORI_ROOT . DIRECTORY_SEPARATOR . $namespace . '/' . trim($dir, '/'), '/');
+                    }
                     if (!in_array($autodir, $this->autoloadPaths) /*and file_exists($autodir)*/) {
                         if (!empty($this->autoloadPaths)) {
                             array_unshift($this->autoloadPaths, $autodir);

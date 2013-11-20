@@ -32,7 +32,10 @@ class Html
 
         $script = '';
         if (Core::app()->cfg('url/addScriptName') == true) {
-            $script = 'index.php/';
+            $script = 'index.php';
+            if (Core::app()->cfg('url/pathInsteadGet') == false) {
+                $script .= '/';
+            }
         }
         $addon = '';
         $path = '';
@@ -47,11 +50,14 @@ class Html
         $url[0] = ltrim($url[0], '/');
         $url[0] = str_replace('//', '/', $url[0]);
 
-
         if (!empty($url[0])) {
             if (count($url) == 1) {
                 if (Core::app()->cfg('default') == $url[0]) {
                     $url[0] = '';
+                }
+                //TODO: check that it should be moved higher
+                if (Core::app()->cfg('url/pathInsteadGet') == true) {
+                    $addon = '?' . Request::ROUTE_TOKEN . '=';
                 }
             } else {
                 if (Core::app()->cfg('url/pathInsteadGet') == true) {
@@ -77,7 +83,7 @@ class Html
 
     public static function beginForm($action = '/', $method = 'post')
     {
-        return '<form action="' . $action . '" method="' . $method . '">';
+        return '<form action="' . self::url($action) . '" method="' . $method . '">';
     }
 
     public static function endForm()
@@ -153,9 +159,9 @@ class Html
     {
         return self::htmlTag(
             'input', $options + array(
-            'name'  => get_class($model) . '[' . $field . ']',
-            'value' => $model->$field
-        )
+                'name'  => get_class($model) . '[' . $field . ']',
+                'value' => $model->$field
+            )
         );
 
     }
@@ -212,7 +218,11 @@ class Html
 
         $html .= self::htmlOpenTag('select', array('name' => get_class($model) . '[' . $field . ']') + $options);
         foreach ($values as $key => $value) {
-            $html .= self::htmlTag('option', array('value' => $key), $value);
+            $_options = array('value' => $key);
+            if ($key == $model->$field) {
+                $_options['selected'] = 'selected';
+            }
+            $html .= self::htmlTag('option', array_merge($options, $_options), $value);
         }
         $html .= self::htmlCloseTag('select');
 
@@ -222,5 +232,10 @@ class Html
     public static function submitButton($text = 'Submit')
     {
         return self::htmlTag('input', array('type' => 'submit', 'value' => $text));
+    }
+
+    public static function favicon($url)
+    {
+        return '<link href="' . Core::app()->baseUrl() . $url . '" rel="icon" type="image/x-icon" />';
     }
 }

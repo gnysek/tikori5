@@ -12,15 +12,20 @@ class DbMySqli extends DBAbstract
     public function connect()
     {
         Profiler::addLog(__CLASS__ . ' connecting');
+
+        if (!class_exists('mysqli')) {
+            throw new DbError('MySqli disabled');
+        }
+
         $this->_conn = new mysqli(
-            /*'p:' . */Core::app()->cfg('db/dbhost'),
+            Core::app()->cfg('db/dbhost'),
             Core::app()->cfg('db/dbuser'),
             Core::app()->cfg('db/dbpass'),
             Core::app()->cfg('db/dbname')
         );
 
         if (mysqli_connect_error()) {
-            throw new DbError('Nie można połączyć z MySqli: ' . mysqli_connect_error());
+            throw new DbError('Can\'t connect to database: ' . mysqli_connect_error());
         }
 
         $this->_init = true;

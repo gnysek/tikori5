@@ -4,15 +4,14 @@ class Response
 {
 
     protected $_status;
-    protected $_header;
+    protected $_headers;
     protected $_body;
     protected $_length;
 
     /**
      * @var array HTTP response codes and messages
      */
-    public static $messages
-        = array(
+    public static $messages = array(
             //Informational 1xx
             100 => '100 Continue',
             101 => '101 Switching Protocols',
@@ -70,7 +69,7 @@ class Response
 //		foreach ($header as $key => $value) {
 //			$headers[$key] = $value;
 //		}
-        $this->_header = array_merge(array('Content-Type' => 'text/html', 'X-Powered-By' => 'Tikori5'), $header);
+        $this->_headers = array_merge(array('Content-Type' => 'text/html', 'X-Powered-By' => 'Tikori5'), $header);
         $this->write($body, true);
     }
 
@@ -99,9 +98,9 @@ class Response
      */
     public function header( $name, $value = null ) {
         if ( !is_null($value) ) {
-            $this->_header[$name] = $value;
+            $this->_headers[$name] = $value;
         }
-        return $this->_header[$name];
+        return $this->_headers[$name];
     }
 
     /**
@@ -166,9 +165,9 @@ class Response
     {
         if (in_array($this->_status, array(204, 304))) {
             unset($this['Content-Type'], $this['Content-Length']);
-            return array($this->_status, $this->_header, '');
+            return array($this->_status, $this->_headers, '');
         } else {
-            return array($this->_status, $this->_header, $this->_body);
+            return array($this->_status, $this->_headers, $this->_body);
         }
     }
 
@@ -180,10 +179,10 @@ class Response
         //Send headers
         if (headers_sent() === false) {
             //Send status
-            if (strpos(PHP_SAPI, 'cgi') === 0) {
+            if (strpos(php_sapi_name(), 'cgi') === 0) {
                 header(sprintf('Status: %s', Response::getMessageForCode($status)));
             } else {
-                header(sprintf('HTTP/%s %s', '1.1', Response::getMessageForCode($status)), false);
+                header(sprintf('HTTP/%s %s', '1.1', Response::getMessageForCode($status)), false, $status);
             }
 
             //Send headers
@@ -219,6 +218,8 @@ class Response
     /**
      * Get message for HTTP status code
      *
+     * @param $status
+     *
      * @return string|null
      */
     public static function getMessageForCode($status)
@@ -228,6 +229,14 @@ class Response
         } else {
             return null;
         }
+    }
+
+    public function clear() {
+        $this->_status = 200;
+        $this->_headers = array();
+        $this->_body = '';
+
+        return $this;
     }
 
     /**

@@ -71,6 +71,8 @@ class DbQuery
     }
 
     /**
+     * @param null $fields
+     *
      * @return DbQuery
      */
     public function select($fields = null)
@@ -132,7 +134,7 @@ class DbQuery
 
         if (is_array($where[0])) {
             // multiarrays
-            foreach($where as $subWhere) {
+            foreach ($where as $subWhere) {
                 $this->_where[] = $subWhere;
             }
         } else {
@@ -143,6 +145,7 @@ class DbQuery
 
     public function order($orderby)
     {
+        $this->_order = $orderby;
         return $this;
     }
 
@@ -152,6 +155,18 @@ class DbQuery
             $this->_limit = $limit;
             $this->_offset = $offset;
         }
+        return $this;
+    }
+
+    public function conditions(array $conditions)
+    {
+        foreach ($conditions as $conditionName => $condition) {
+            switch ($conditionName) {
+                case 'order':
+                    $this->order($condition);
+            }
+        }
+
         return $this;
     }
 
@@ -294,7 +309,7 @@ class DbQuery
             }
         }
 
-        // where
+        // where: not for INSERT / REPLACE
         reset($this->_from);
         if (!in_array($this->_type, array(self::Q_INSERT, self::Q_REPLACE))) {
             if (!empty($this->_where)) {
@@ -306,17 +321,22 @@ class DbQuery
                     if ($this->_type != self::Q_UPDATE) {
                         $bld
                             = '`' . $this->_fromAliases[(empty($w[3]))
-                            ? $this->_from[key($this->_from)]
-                            : $w[3]]
+                                ? $this->_from[key($this->_from)]
+                                : $w[3]]
                             . '`.';
                     }
                     $bld .= '`' . $w[0] . '` ' . $w[1] . ' ' . (is_string($w[2]) ? Core::app()->db->protect($w[2])
-                        : $this->_nullify($w[2]));
+                            : $this->_nullify($w[2]));
                     $where[] = $bld;
                 }
                 $sql[] = implode(' AND ', $where);
             }
 
+            // order
+            if (!empty($this->_order)) {
+                $sql[] = 'ORDER BY ' . $this->_order;
+            }
+            // limit
             if ($this->_limit > 0) {
                 $sql[] = 'LIMIT ' . $this->_offset . ', ' . $this->_limit;
             }

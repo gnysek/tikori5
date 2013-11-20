@@ -343,11 +343,9 @@ class Controller extends ControllerView
                     foreach ($modules as $module => $config) {
                         $module = strtolower($module);
                         if ($module == $currentModule) {
-                            $paths[]
-                                = Core::app()->appDir . '/modules/' . $module . '/views/';
+                            $paths[] = Core::app()->appDir . '/modules/' . $module . '/views/';
                             /* strtolower($this->controller) . */
-                            $paths[]
-                                = Core::app()->coreDir . '/modules/' . $module . '/views/';
+                            $paths[] = Core::app()->coreDir . '/modules/' . $module . '/views/';
                             /* strtolower($this->controller) . */
                         }
                     }
@@ -359,9 +357,11 @@ class Controller extends ControllerView
         $paths[] = Core::app()->coreDir . '/views/';
 
         if (!empty($this->area)) {
+            $addons = array();
             foreach ($paths as $entry) {
-                array_unshift($paths, $entry . $this->area . '/');
+                $addons[] = $entry . $this->area . '/';
             }
+            $paths = array_merge($addons, $paths);
         }
 
         $file = ltrim($file, '/');

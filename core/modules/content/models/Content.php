@@ -3,7 +3,7 @@
 /**
  * Description of Content
  *
- * @author gnysek
+ * @author   gnysek
  * @property int     $id
  * @property string  $name
  * @property boolean $enabled

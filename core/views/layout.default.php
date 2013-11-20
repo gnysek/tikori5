@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <title><?php echo (!empty($this->pageTitle)) ? $this->pageTitle : Core::app()->cfg('appName') ?></title>
-    <link rel="stylesheet" type="text/css" href="<?php echo Core::app()->baseUrl() ?>/media/demo.css"/>
+    <link rel="stylesheet" type="text/css" href="<?php echo Core::app()->baseUrl() ?>media/demo.css"/>
 </head>
 <body>
 <div id="layout">
