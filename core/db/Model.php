@@ -29,6 +29,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
     public $_modified = array();
     public $tableName = '';
     public $_new = false;
+    public $_eagers = array();
 
     public function __construct()
     {
@@ -43,6 +44,8 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         $this->_rules = $this->_prepareRules();
         $this->_table = $this->getTable();
         $this->_primaryKey = $this->getPK();
+
+        $info = DbQuery::sql()->getTableInfo($this->getTable());
         //$this->_new = true;
     }
 
@@ -137,14 +140,16 @@ abstract class Model implements IteratorAggregate, ArrayAccess
             //$id = DB::protect($id);
         }
 
-        $sql = DbQuery::sql()->select()->from($this->_table)->where(array($this->_primaryKey, '=', $id));
+        if (is_array($id)) {
+            $sql = DbQuery::sql()->select()->from($this->_table)->where(array($this->_primaryKey, 'IN', $id));
+        } else {
+            $sql = DbQuery::sql()->select()->from($this->_table)->where(array($this->_primaryKey, '=', $id));
+        }
         $result = $sql->execute();
 
-        if (count($result) > 1) {
+        if (!is_array($id) && count($result) > 1) {
             throw new DbError('Returned more than 1 record - PK wrongly defined?');
         }
-
-        //var_dump($result);
 
         if (count($result) == 1) {
             foreach ($this->_fields as $field) {
@@ -194,6 +199,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         if (!empty($where)) {
             $sql->where($where);
         }
+
         $sql->limit($limit, $offset);
 
         if (!empty($conditions)) {
@@ -209,24 +215,79 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 
             $return[] = $c;
         }
-        return new Collection($return);
+
+        $collection = new Collection($return);
+
+        if (!empty($this->_eagers)) {
+            foreach ($this->_eagers as $relationName) {
+                $values = array();
+                switch ($this->_relations[$relationName][0]) {
+                    case self::HAS_MANY:
+//                        var_dump($this->getPK());
+//                        var_dump($collection->getColumnValues($this->getPK()));
+                        $byField = $this->getPK();
+                        $related = $this->_getRelated($relationName, false, $collection->getColumnValues($byField));
+                        /* @var Collection $related */
+//                        var_dump(count($related));
+                        foreach ($return as $row) {
+//                            var_dump($byField . ' ' . $row->$byField . ' ' . $this->_relations[$relationName][2]);
+                            $toAssign = $related->getRowsByColumnValue($this->_relations[$relationName][2], $row->$byField);
+//                            var_dump(count($toAssign));
+                            /* @var Model $row */
+                            $row->populateRelation($relationName, $toAssign);
+                        }
+                        break;
+                    case self::BELONGS_TO:
+//                        var_dump($this->_relations[$relationName][2]);
+                        $byField = $this->_relations[$relationName][2];
+//                        var_dump($collection->getColumnValues($byField));
+                        $related = $this->_getRelated($relationName, false, $collection->getColumnValues($byField));
+                        $rel = Model::model($this->_relations[$relationName][1])->getPK();
+//                        var_dump($related);
+                        foreach ($return as $row) {
+//                            var_dump($rel . ' ' . $byField . ' ' . $row->$byField);
+                            $toAssign = $related->getRowsByColumnValue($rel, $row->$byField);
+//                            var_dump(count($toAssign));
+                            $row->populateRelation($relationName, $toAssign->getFirst());
+                        }
+//                        throw new Exception('Not yet implemented');
+                        break;
+                    default:
+                        throw new Exception('Not yet implemented');
+                        break;
+                }
+                ///var_dump($this->_getRelated($relationName, array('1')));
+            }
+        }
+
+        return $collection;
     }
 
-    public function findAll($limit = -1, $offset = 0)
+    public function findAll($limit = -1, $offset = 0, $conditions = array())
     {
-        return $this->findWhere(null, $limit, $offset);
+        return $this->findWhere(null, $limit, $offset, $conditions);
     }
 
     public function count($by = null)
     {
         $result = DbQuery::sql()->select('COUNT(*) AS tikori_total')->from($this->_table)->execute();
-        return $result[0]->tikori_total;
+        return (!empty($result[0])) ? $result[0]->tikori_total : 0;
     }
 
     // eager
     public function with($with)
     {
+        if (is_array($with)) {
+            foreach ($with as $relationName) {
+                $this->with($relationName);
+            }
+        } else {
+            if (!in_array($with, $this->_eagers) && array_key_exists($with, $this->_relations)) {
+                $this->_eagers[] = $with;
+            }
+        }
 
+        return $this;
     }
 
     /**     * */
@@ -255,7 +316,6 @@ abstract class Model implements IteratorAggregate, ArrayAccess
     {
         DbQuery::sql()->insert()->from($this->_table)->fields($this->_getModifiedFields())->execute();
         $this->_values[$this->getPK()] = Core::app()->db->lastId();
-        $this->afterSave();
 
         return true;
     }
@@ -273,7 +333,6 @@ abstract class Model implements IteratorAggregate, ArrayAccess
             ->fields($values)
             ->where(array($this->_primaryKey, '=', $this->_values[$this->_primaryKey]))
             ->execute();
-        $this->afterSave();
 
         return true;
     }
@@ -298,11 +357,15 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         return true;
     }
 
-    public function save()
+    public function save($forceToSave = false)
     {
         if ($this->beforeSave()) {
-            if (!empty($this->_modified)) {
-                return ($this->_isNewRecord) ? $this->insert() : $this->update();
+            if (!empty($this->_modified) or $forceToSave) {
+                $result = ($this->_isNewRecord) ? $this->insert() : $this->update();
+                if ($result == true) {
+                    $result = $this->afterSave();
+                }
+                return $result;
             } else {
                 return true;
             }
@@ -314,12 +377,16 @@ abstract class Model implements IteratorAggregate, ArrayAccess
     /**     * */
     public function validate()
     {
+        if ($this->hasErrors()) {
+            return false;
+        }
+
         $valid = true;
         foreach ($this->_rules as $field => $entry) {
             foreach ($entry['rules'] as $rule) {
 
                 if (!in_array($field, $this->_fields)) {
-                    $this->_errors[$field][] = 'FATAL: Unknown field: ' . $field . '.';
+                    $this->_errors[$field][] = 'FATAL: Unknown field in model rules: ' . $field . '.';
                     continue;
                 }
 
@@ -370,7 +437,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 
     public function addError($field, $error)
     {
-
+        $this->_errors[$field][] = $error;
     }
 
     public function addErrors($errors = array())
@@ -519,31 +586,51 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         }
     }
 
+    public function populateRelation($relationName, $records)
+    {
+        $this->_related[$relationName] = $records;
+    }
+
     public function getRelated($relationName)
     {
+        return $this->_getRelated($relationName);
+    }
+
+    private function _getRelated($relationName, $populate = true, $customValues = null)
+    {
+        $result = null;
         switch ($this->_relations[$relationName][0]) {
             case self::HAS_MANY:
                 $rel = self::model($this->_relations[$relationName][1]);
-//                $result = $rel->findBy($this->_relations[$relationName][2], $this->_values[$this->getPK()]);
                 $conditions = array();
                 if (array_key_exists(3, $this->_relations[$relationName])) {
                     $conditions = $this->_relations[$relationName][3];
                 }
-                $result = $rel->findWhere(array(array($this->_relations[$relationName][2], '=', $this->_values[$this->getPK()])), -1, 0, $conditions);
-                $this->_related[$relationName] = $result;
-                return $this->_related[$relationName];
+                if (empty($customValues)) {
+                    $customValues = $this->_values[$this->getPK()];
+                }
+                $result = $rel->findWhere(array(array($this->_relations[$relationName][2], 'IN', $customValues)), -1, 0, $conditions);
                 break;
             case self::BELONGS_TO:
                 $rel = self::model($this->_relations[$relationName][1]);
-                $result = $rel->find($this->_values[$this->_relations[$relationName][2]]);
-                $this->_related[$relationName] = $result;
-//				var_dump($result);
-                return $this->_related[$relationName];
+                if (empty($customValues)) {
+                    $customValues = $this->_values[$this->_relations[$relationName][2]];
+                }
+                $result = $rel->findWhere(array($rel->getPK(), 'IN', $customValues));
+                if ($populate) {
+                    $result = $result->getFirst();
+                }
                 break;
             default:
                 throw new DbError('Unknown relation type ' . $this->_relations[$relationName][0]);
         }
-        return null;
+
+        if ($populate) {
+            $this->_related[$relationName] = $result;
+            return $this->_related[$relationName];
+        } else {
+            return $result;
+        }
     }
 
     public function __toString()

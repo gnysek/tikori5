@@ -5,6 +5,7 @@ class BreadcrumbsWidget extends Widget
 
     public $links = array();
     public $homeLink = 'Home';
+    public $homeTitle = 'Home';
 
     public function run()
     {
@@ -13,13 +14,13 @@ class BreadcrumbsWidget extends Widget
         }
 
         $links = array();
-        $links[] = Html::link($this->homeLink, '/');
+        $links[] = Html::link($this->homeLink, '/', array('title' => $this->homeTitle));
 
-        foreach ($this->links as $k => $v) {
-            if (is_array($v)) {
-                $links[] = Html::link($k, $v);
+        foreach ($this->links as $text => $url) {
+            if (is_array($url)) {
+                $links[] = Html::link($text, $url, array('title' => $text));
             } else {
-                $links[] = $v;
+                $links[] = $url;
             }
         }
 

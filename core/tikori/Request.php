@@ -422,7 +422,7 @@ class Request
             $this->_baseUrl = rtrim(dirname($this->getScriptUrl()), '\\/');
         }
 
-        return $absolute ? ($this->getHostInfo() . $this->_baseUrl . '/') : $this->_baseUrl . '/';
+        return $absolute ? ($this->getHostInfo() . rtrim($this->_baseUrl, '/') . '/') : $this->_baseUrl . '/';
     }
 
     public function getCurrentUrl()

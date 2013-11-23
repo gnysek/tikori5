@@ -81,9 +81,10 @@ class Html
         return Core::app()->baseUrl() . $script . $addon . $url[0] . $path;
     }
 
-    public static function beginForm($action = '/', $method = 'post')
+    public static function beginForm($action = '/', $method = 'post', $upload = false, $class = null)
     {
-        return '<form action="' . self::url($action) . '" method="' . $method . '">';
+        return '<form' . ((!empty($class)) ? (' class="' . $class . '"') : '') . '  action="' . self::url($action) . '" method="' . $method . '"'
+        . (($upload) ? ' enctype="multipart/form-data"' : '') . '>';
     }
 
     public static function endForm()
@@ -155,12 +156,13 @@ class Html
         );
     }
 
-    public static function textFieldModel($model, $field, $options = array())
+    public static function textFieldModel($model, $field, $options = array(), $type = 'text')
     {
+        $value = ($type === 'file') ? array() : array('value' => $model->$field);
         return self::htmlTag(
-            'input', $options + array(
-                'name'  => get_class($model) . '[' . $field . ']',
-                'value' => $model->$field
+            'input', $options + $value + array(
+                'type' => $type,
+                'name' => get_class($model) . '[' . $field . ']',
             )
         );
 
@@ -229,9 +231,9 @@ class Html
         return $html;
     }
 
-    public static function submitButton($text = 'Submit')
+    public static function submitButton($text = 'Submit', $options = array())
     {
-        return self::htmlTag('input', array('type' => 'submit', 'value' => $text));
+        return self::htmlTag('input', array('type' => 'submit', 'value' => $text) + $options);
     }
 
     public static function favicon($url)

@@ -42,6 +42,11 @@ class Record implements IteratorAggregate, ArrayAccess, Countable
         return $this;
     }
 
+    public function __construct($array = array(), $lock = false)
+    {
+        $this->import($array, $lock);
+    }
+
     public function getProperties()
     {
         return $this->data;
@@ -137,4 +142,8 @@ class Record implements IteratorAggregate, ArrayAccess, Countable
         return new ArrayIterator($this->_data);
     }
 
+    public function getData()
+    {
+        return $this->_data;
+    }
 }

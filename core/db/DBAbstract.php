@@ -11,6 +11,8 @@ abstract class DbAbstract
 
     protected $_init = FALSE;
     protected $_queries = 0;
+    protected $_queryList = array();
+    protected $_tableInfos = array();
 
     /**
      * @var PDO
@@ -47,6 +49,11 @@ abstract class DbAbstract
         return $this->_queries;
     }
 
+    public function sqlQueries()
+    {
+        return $this->_queryList;
+    }
+
     public function close()
     {
         $this->_conn = NULL;
@@ -68,5 +75,19 @@ abstract class DbAbstract
     public function init()
     {
         return $this->conn();
+    }
+
+    public function getTableInfo($table)
+    {
+        if (!array_key_exists($table, $this->_tableInfos)) {
+            $infos = array();
+            $data = $this->query("SHOW COLUMNS IN `{$table}");
+            foreach ($data as $row) {
+                /* @var Record $row */
+                $infos[$row->Field] = new Record($row->getData(), true);
+            }
+            $this->_tableInfos[$table] = new Record($infos, true);
+        }
+        return $this->_tableInfos[$table];
     }
 }

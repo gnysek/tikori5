@@ -45,6 +45,7 @@ class DbMySqli extends DBAbstract
     {
         Profiler::addLog('SQL QUERY: <tt title="' . $sql . '">' . substr($sql, 0, 30) . '&hellip;</tt>');
         $this->_queries++;
+        $this->_queryList[] = $sql;
 
         if (preg_match('/^(insert|update|delete|replace)/i', $sql)) {
             $result = $this->conn()->query($sql);
@@ -93,6 +94,14 @@ class DbMySqli extends DBAbstract
 
     public function protect($string)
     {
+        if (is_array($string)) {
+            $elements = array();
+            foreach ($string as $element) {
+                $elements[] = $this->protect($element);
+            }
+            return implode(', ', $elements);
+        }
+
         if (!is_string($string)) {
             return $string;
         }

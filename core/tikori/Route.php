@@ -247,6 +247,8 @@ class Route
 
                 $route->params = $params;
 
+                Profiler::addLog('Found router with params: <code>' . var_export($params, TRUE) . '</code>');
+
                 return $route;
 //				return array(
 //					'params' => $params,

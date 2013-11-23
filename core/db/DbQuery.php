@@ -18,7 +18,7 @@ class DbQuery
     private $_fromAliases = array();
     private $_where = array();
     private $_order = array();
-    private $_limit = 0;
+    private $_limit = -1;
     private $_offset = 0;
     private $_type = 1;
     private $_locked = false;
@@ -151,7 +151,7 @@ class DbQuery
 
     public function limit($limit = -1, $offset = 0)
     {
-        if ($limit > 0) {
+        if ($limit > -1) {
             $this->_limit = $limit;
             $this->_offset = $offset;
         }
@@ -252,8 +252,7 @@ class DbQuery
         // from
         $from = array();
         foreach ($this->_from as $key => $val) {
-            $from[]
-                = '`' . $val . '` ' . (($this->_type == self::Q_SELECT) ? ' `' . $this->_fromAliases[$val] . '`' : '');
+            $from[] = '`' . $val . '` ' . (($this->_type == self::Q_SELECT) ? ' `' . $this->_fromAliases[$val] . '`' : '');
         }
         $sql[] = implode(', ', $from);
 
@@ -283,6 +282,8 @@ class DbQuery
             $val = array();
             $upd = array();
 
+            reset($this->_from);
+
             if ($this->_isAssoc($this->_fields)) {
                 foreach ($this->_fields as $fname => $fvalue) {
                     // remove those from where
@@ -290,13 +291,19 @@ class DbQuery
 //
 //                    }
                     $fld[] = '`' . $fname . '`';
-                    $val[] = is_string($fvalue) ? Core::app()->db->protect($fvalue) : $this->_nullify($fvalue);
+                    //$val[] = is_string($fvalue) ? Core::app()->db->protect($fvalue) : $this->_nullify($fvalue);
+                    $val[] = $this->_formatAgainstType($this->_from[key($this->_from)], $fname, $fvalue);
                     $upd[] = end($fld) . ' = ' . end($val);
                 }
             } else {
-                foreach ($this->_fields as $fvalue) {
-                    $val[] = is_string($fvalue) ? Core::app()->db->protect($fvalue) : $this->_nullify($fvalue);
+                $fields = array_keys((array)$this->getTableInfo($table));
+
+                foreach ($this->_fields as $key => $fvalue) {
+                    //$val[] = is_string($fvalue) ? Core::app()->db->protect($fvalue) : $this->_nullify($fvalue);
+                    $val[] = $afterCondition = $this->_formatAgainstType($this->_from[key($this->_from)], $fields[$key], $fvalue);
                 }
+
+                unset($fields);
             }
 
             if ($this->_type == self::Q_INSERT) {
@@ -325,8 +332,16 @@ class DbQuery
                                 : $w[3]]
                             . '`.';
                     }
-                    $bld .= '`' . $w[0] . '` ' . $w[1] . ' ' . (is_string($w[2]) ? Core::app()->db->protect($w[2])
-                            : $this->_nullify($w[2]));
+
+                    // TODO: better checking...
+                    //$afterCondition = ((is_string($w[2]) or is_array($w[2])) ? Core::app()->db->protect($w[2]) : $this->_nullify($w[2]));
+                    $afterCondition = $this->_formatAgainstType($this->_from[key($this->_from)], $w[0], $w[2]);
+
+                    if ($w[1] == 'IN') {
+                        $afterCondition = '(' . $afterCondition . ')';
+                    }
+
+                    $bld .= '`' . $w[0] . '` ' . $w[1] . ' ' . $afterCondition;
                     $where[] = $bld;
                 }
                 $sql[] = implode(' AND ', $where);
@@ -337,14 +352,51 @@ class DbQuery
                 $sql[] = 'ORDER BY ' . $this->_order;
             }
             // limit
-            if ($this->_limit > 0) {
-                $sql[] = 'LIMIT ' . $this->_offset . ', ' . $this->_limit;
+            if ($this->_limit > -1) {
+                $sql[] = 'LIMIT ' . $this->_limit . ', ' . $this->_offset;
             }
         }
 
         $this->_preparedSql = implode(' ', $sql) . ';';
 
         return $this->_preparedSql;
+    }
+
+    private function _formatAgainstType($table, $field, $value)
+    {
+        if (is_array($value)) {
+            $collect = array();
+            foreach ($value as $val) {
+                $collect[] = $this->_formatAgainstType($table, $field, $val);
+            }
+
+            return implode(', ', $collect);
+        }
+
+        $table = $this->getTableInfo($table);
+
+        if ($table->$field->Null == 'YES' && $value === null) {
+            return 'NULL';
+        }
+
+        if ($value === null && $table->$field->Default !== null) {
+            $value = $table->$field->Default;
+        }
+
+        if (preg_match('/int/', $table->$field->Type)) {
+            return intval($value);
+        }
+        if (preg_match('/double/', $table->$field->Type)) {
+            return doubleval($value);
+        }
+        if (preg_match('/float/', $table->$field->Type)) {
+            return doubleval($value);
+        }
+        if (preg_match('/decimal/', $table->$field->Type)) {
+            return preg_replace('[^0-9\.]', '', str_replace(',', '.', $value));
+        }
+
+        return Core::app()->db->protect($value);
     }
 
     private function _nullify($value = null)
@@ -359,6 +411,12 @@ class DbQuery
         }
 
         return $this->_preparedSql;
+    }
+
+    public function getTableInfo($table)
+    {
+        //TODO: force to not change
+        return Core::app()->db->getTableInfo($table);
     }
 
 }

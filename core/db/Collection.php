@@ -219,6 +219,15 @@ class Collection implements ArrayAccess, Iterator, Countable
         $this->_data = array();
     }
 
+    public function getFirst()
+    {
+        if (!empty($this->_data)) {
+            return $this->_data[0];
+        }
+
+        return NULL;
+    }
+
     public function toOptionArray($key, $value)
     {
         $optionArray = array();
@@ -236,5 +245,29 @@ class Collection implements ArrayAccess, Iterator, Countable
             $data[] = $record->$value;
         }
         return implode(' ', $data);
+    }
+
+    public function getColumnValues($column)
+    {
+        $values = array();
+        foreach ($this->_data as $record) {
+            if (!in_array($record[$column], $values)) {
+                $values[] = $record[$column];
+            }
+        }
+
+        return $values;
+    }
+
+    public function getRowsByColumnValue($column, $value)
+    {
+        $values = array();
+        foreach ($this->_data as $record) {
+            if (($record[$column] == $value)) {
+                $values[] = $record;
+            }
+        }
+
+        return new Collection($values);
     }
 }
