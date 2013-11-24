@@ -392,7 +392,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 
                 switch ($rule) {
                     case 'required':
-                        if (empty($this->_values[$field])) {
+                        if (empty($this->_values[$field]) && $this->_values[$field] == null) {
                             $valid = false;
                             $this->_errors[$field][] = 'Required';
                         }

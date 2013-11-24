@@ -4,18 +4,19 @@ class Html
 {
 
     public static $sidAddon = '';
+    public static $hrefActiveClass = 'active';
 
     public static function link($text, $url, $options = array())
     {
         if (trim(Core::app()->request->getRouterPath(), '/') == $url) {
             if (!empty($options['class'])) {
-                $options['class'] = 'active ' . $options['class'];
+                $options['class'] = self::$hrefActiveClass . ' ' . $options['class'];
             } else {
-                $options['class'] = 'active';
+                $options['class'] = self::$hrefActiveClass;
             }
         }
 
-        return html::htmlTag('a', $options + array('href' => self::url($url)), $text);
+        return html::htmlTag('a', $options + array('href' => self::url($url), 'title' => htmlspecialchars($text)), $text);
 //        return '<a href="' . self::url($url) . '"' . implode(' ', $opt) . '>' . $text . '</a>';
     }
 

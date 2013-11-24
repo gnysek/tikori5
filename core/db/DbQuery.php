@@ -296,7 +296,7 @@ class DbQuery
                     $upd[] = end($fld) . ' = ' . end($val);
                 }
             } else {
-                $fields = array_keys((array)$this->getTableInfo($table));
+                $fields = array_keys((array)$this->getTableInfo($this->_from[key($this->_from)]));
 
                 foreach ($this->_fields as $key => $fvalue) {
                     //$val[] = is_string($fvalue) ? Core::app()->db->protect($fvalue) : $this->_nullify($fvalue);
