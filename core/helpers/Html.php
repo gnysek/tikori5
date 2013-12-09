@@ -8,7 +8,8 @@ class Html
 
     public static function link($text, $url, $options = array())
     {
-        if (trim(Core::app()->request->getRouterPath(), '/') == $url) {
+        //TODO: when error/exception raised, request is empty ?
+        if (Core::app()->request != null && trim(Core::app()->request->getRouterPath(), '/') == $url) {
             if (!empty($options['class'])) {
                 $options['class'] = self::$hrefActiveClass . ' ' . $options['class'];
             } else {
@@ -239,6 +240,6 @@ class Html
 
     public static function favicon($url)
     {
-        return '<link href="' . Core::app()->baseUrl() . $url . '" rel="icon" type="image/x-icon" />';
+        return '<link href="' . Core::app()->baseUrl() . $url . '" rel="icon" type="image/x-icon" />' . PHP_EOL;
     }
 }

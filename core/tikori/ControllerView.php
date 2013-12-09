@@ -1,10 +1,16 @@
 <?php
 
-class ControllerView
+class ControllerView extends TView
 {
 
     protected $_widgets = array();
 
+    /**
+     * @param string $class
+     * @param array  $properties
+     * @param bool   $captureOutput
+     * @return Widget
+     */
     public function widget($class, $properties = array(), $captureOutput = false)
     {
         if ($captureOutput) {

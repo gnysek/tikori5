@@ -1,6 +1,6 @@
 <?php
 
-class TWidget
+class TWidget extends TView
 {
 
     public function run()

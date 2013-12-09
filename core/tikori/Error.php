@@ -40,6 +40,22 @@ class Error
         echo Error::display(new ErrorException($errstr, 0, $errno, $errfile, $errline), true);
     }
 
+    public static function log($data, $file = 'system.log')
+    {
+        if (!file_exists(TIKORI_ROOT . '/log')) {
+            mkdir(TIKORI_ROOT . '/log', 0777, true);
+        }
+
+        if (!file_exists(TIKORI_ROOT . '/log/' . $file)) {
+            file_put_contents(TIKORI_ROOT . '/log/' . $file, '');
+        }
+
+        $f = fopen(TIKORI_ROOT . '/log/' . $file, 'a+');
+        fwrite($f, str_repeat('-', 80) . PHP_EOL);
+        fwrite($f, date('d.m.Y H:i:s') . ': ' . PHP_EOL . var_export($data, true) . PHP_EOL);
+        fclose($f);
+    }
+
     /**
      * Displays error using error.fatal.php view
      *
@@ -52,6 +68,10 @@ class Error
         for ($i = 0, $obLevel = ob_get_level(); $i < $obLevel; ++$i) {
             ob_end_clean();
         }
+
+        self::log($exception->getMessage());
+        self::log($exception->getFile());
+        self::log($exception->getLine());
 
         $view = new Controller();
         $e = Core::app()->cfg('env');
@@ -82,7 +102,9 @@ class Error
                            ), true
         );
 
+        header('HTTP/1.1 500 '. Response::$messages['500']);
         echo $body;
+
         exit;
     }
 

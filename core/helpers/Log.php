@@ -6,7 +6,7 @@ class Log
     public static function log($data, $file = 'system.log')
     {
         if (!file_exists(TIKORI_ROOT . '/log')) {
-            mkdir(TIKORI_ROOT . '/log', true);
+            mkdir(TIKORI_ROOT . '/log', 0777, true);
         }
 
         if (!file_exists(TIKORI_ROOT . '/log/' . $file)) {
