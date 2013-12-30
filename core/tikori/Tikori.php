@@ -353,7 +353,7 @@ class Tikori
                 if ($envMode !== false) {
                     $this->mode = $envMode;
                 } else {
-                    $this->mode = ($this->cfg('mode') === null) ? Core::MODE_DEV : $this->cfg('mode');
+                    $this->mode = ($this->cfg('mode') === null) ? Core::MODE_PROD : $this->cfg('mode');
                 }
             }
 

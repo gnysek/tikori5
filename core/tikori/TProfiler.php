@@ -33,7 +33,7 @@ class TProfiler
         $logs = array();
 
         $logs[] = 'Profiler:<br/>';
-        $logs[] = '<table style="width: 98%; margin: 5px auto;">';
+        $logs[] = '<table style="width: 98%; margin: 5px auto;" class="tikori-profiler-table">';
         $logs[] = '<tr>';
         $logs[] = '<th>ID</th>';
         $logs[] = '<th>Time</th>';
