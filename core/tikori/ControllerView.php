@@ -33,6 +33,7 @@ class ControllerView extends TView
         if (!array_key_exists($class, $this->_widgets)) {
             $className = ucfirst($class) . 'Widget';
             $widget = new $className;
+            /* @var $widget Widget */
             $widget->setupProperties($properties);
             $widget->init();
             $this->_widgets[$class] = $widget;

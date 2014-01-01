@@ -6,7 +6,7 @@ class GoogleAnalyticsWidget extends Widget
 
     public function run()
     {
-        return <<<HTML
+        echo <<<HTML
 <script type="text/javascript">
 	var analyticsFileTypes = [''];
 	var analyticsEventTracking = 'enabled';

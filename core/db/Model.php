@@ -557,6 +557,10 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         }
     }
 
+    public function getData() {
+        return $this->_values;
+    }
+
     public function __set($name, $value)
     {
         $setter = 'set' . ucfirst($name);
