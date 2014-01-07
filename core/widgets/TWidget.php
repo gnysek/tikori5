@@ -5,7 +5,7 @@ class TWidget extends TView
 
     public function run()
     {
-        echo 'Undefined';
+        return NULL;
     }
 
     public function init()
