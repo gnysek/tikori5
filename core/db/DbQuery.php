@@ -18,6 +18,7 @@ class DbQuery
     private $_fromAliases = array();
     private $_where = array();
     private $_order = array();
+    private $_group = array();
     private $_limit = -1;
     private $_offset = 0;
     private $_type = 1;
@@ -146,6 +147,11 @@ class DbQuery
     public function order($orderby)
     {
         $this->_order = $orderby;
+        return $this;
+    }
+
+    public function group($groupby) {
+        $this->_group = $groupby;
         return $this;
     }
 
@@ -347,10 +353,17 @@ class DbQuery
                 $sql[] = implode(' AND ', $where);
             }
 
+            // group
+
+            if (!empty($this->_group)) {
+                $sql[] = 'GROUP BY ' . /*implode(', ', */$this->_group;//);
+            }
+
             // order
             if (!empty($this->_order)) {
-                $sql[] = 'ORDER BY ' . $this->_order;
+                $sql[] = 'ORDER BY ' . /*implode(', ', */$this->_order;//);
             }
+
             // limit
             if ($this->_limit > -1) {
                 $sql[] = 'LIMIT ' . $this->_limit . ', ' . $this->_offset;
