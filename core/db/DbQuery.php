@@ -330,6 +330,13 @@ class DbQuery
                 $where = array();
 //				var_dump($this->_where);
                 foreach ($this->_where as $w) {
+
+                    // additional fourth param to use WHEREs with () - idea removed
+                    /*if (count($w) == 4 && $w[3] === true) {
+                        $where[] = $w[0] . ' ' . $w[1] . ' ' . $w[2];
+                        continue;
+                    }*/
+
                     $bld = '';
                     if ($this->_type != self::Q_UPDATE) {
                         $bld
@@ -347,7 +354,12 @@ class DbQuery
                         $afterCondition = '(' . $afterCondition . ')';
                     }
 
-                    $bld .= '`' . $w[0] . '` ' . $w[1] . ' ' . $afterCondition;
+                    if (count($w) == 5) {
+                        $bld = sprintf($w[4], $bld . '`' . $w[0] . '` ');
+                    } else {
+                        $bld .= '`' . $w[0] . '` ';
+                    }
+                    $bld .= $w[1] . ' ' . $afterCondition;
                     $where[] = $bld;
                 }
                 $sql[] = implode(' AND ', $where);

@@ -139,7 +139,7 @@ class Controller extends ControllerView
                     foreach ($method->getParameters() as $paramObject) {
                         /* @var $paramObject ReflectionParameter */
 
-                        if ($paramObject->isOptional() === false and empty($this->params[$paramObject->name])) {
+                        if ($paramObject->isOptional() === false and !array_key_exists($paramObject->name, $this->params)) {
                             //throw new RouteNotFoundException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
                             throw new ErrorException(
                                 'Not enough arguments on method ' . $this->getActionMethodName()
@@ -148,7 +148,7 @@ class Controller extends ControllerView
                             );
                         }
 
-                        $finalParams[] = (empty($this->params[$paramObject->name])) ? NULL
+                        $finalParams[] = (!array_key_exists($paramObject->name, $this->params)) ? NULL
                             : $this->params[$paramObject->name];
                     }
                 }
