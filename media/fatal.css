@@ -36,6 +36,23 @@ h1 {
 	font-weight: bold;
 }
 
+h2 {
+	color: tomato;
+	font-weight: bold;
+	border-bottom: 1px solid tomato;
+}
+
+a:link, a:visited{
+	color: orange;
+	border-bottom: 1px dotted orange;
+	text-decoration: none;
+}
+
+a:link:hover, a:visited:hover {
+	color: darkorange;
+	border-color: darkorange;
+}
+
 er {
 	border-radius: 3px;
 	padding: 1px 7px 2px;

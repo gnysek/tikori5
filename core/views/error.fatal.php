@@ -11,7 +11,7 @@
 <body onload="prettyPrint();">
 <h1><?= Core::app()->cfg('appName'); ?> Critical Error</h1>
 
-<?php if (Core::app()->getMode() < Core::MODE_PROD): ?>
+<?php if (Core::app()->getMode() !== Core::MODE_PROD): ?>
     <p><strong>A problem has been detected and Tikori5 framework was unable to complete request:</strong></p>
 
     <p><?= $message; ?>.</p>
@@ -20,6 +20,13 @@
     <hr/>
     <code style="display: block;"><span class="str"><?= $file ?>:<?= $line ?></span></code>
     <p>Requested <span><?= $reqMethod ?></span>: <?= $reqPath ?></p>
+
+    <?php if (!empty($messages)): ?>
+        <?php foreach ($messages as $key => $text): ?>
+            <a href="#ex-<?php echo $key; ?>"><?php echo $text; ?></a><br/>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
     <?php
     foreach ($files as $entry) {
         echo $entry;

@@ -357,6 +357,8 @@ class Tikori
                 }
             }
 
+            $this->mode = intval($envMode);
+
             switch ($this->mode) {
                 case Core::MODE_DEBUG:
                 case Core::MODE_DEV:

@@ -175,7 +175,8 @@ class Controller extends ControllerView
                 Error::exch($e);
             } catch (Exception $e) {
                 //				if (($this instanceof ErrorController)==false)
-                Profiler::addLog('Exception' . $e->getMessage());
+                Profiler::addLog('Exception when performing action: ' . $e->getMessage());
+                ob_get_clean();
                 $this->unknownAction();
             }
         }

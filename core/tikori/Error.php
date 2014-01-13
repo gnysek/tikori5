@@ -62,7 +62,7 @@ class Error
      * @param Exception $exception
      * @param bool      $isErrorHandler if it's called by error handler we need to skip $excetpion->getFile to avoid duplicates on trace
      */
-    public static function display(Exception $exception, $isErrorHandler = false)
+    public static function display(Exception $exception, $isErrorHandler = false, $dontExit = false)
     {
 
         for ($i = 0, $obLevel = ob_get_level(); $i < $obLevel; ++$i) {
@@ -73,16 +73,23 @@ class Error
         self::log($exception->getFile());
         self::log($exception->getLine());
 
-        $view = new Controller();
-        $e = Core::app()->cfg('env');
-
+        $messages = array();
         $files = array();
 
-        foreach (array_reverse($exception->getTrace()) as $trace) {
-            if (isset($trace['line'], $trace['file'])) {
-                $files[] = self::getFile($trace['file'], $trace['line'], $trace);
+        $current = $exception;
+        do {
+            $messages[] = $current->getMessage();
+            $files[] = '<h2><a name="ex-' . (count($messages) - 1) . '">' . $current->getMessage() . '</h2>';
+
+            foreach (array_reverse($current->getTrace()) as $trace) {
+                if (isset($trace['line'], $trace['file'])) {
+                    $files[] = self::getFile($trace['file'], $trace['line'], $trace);
+                }
             }
-        }
+        } while ($current = $current->getPrevious());
+
+        $view = new Controller();
+        $e = Core::app()->cfg('env');
 
         // TODO: check that its needed since erh have ErrorException used
         if ($isErrorHandler === false) {
@@ -94,6 +101,7 @@ class Error
         $body = $view->renderPartial(
             'error.fatal', array(
                                 'message'   => $exception->getMessage(),
+                                'messages'  => $messages,
                                 'file'      => $exception->getFile(),
                                 'line'      => $exception->getLine(),
                                 'reqMethod' => (empty($e[Request::REQUEST_METHOD])) ? '' : $e[Request::REQUEST_METHOD],
@@ -102,10 +110,14 @@ class Error
                            ), true
         );
 
-        header('HTTP/1.1 500 '. Response::$messages['500']);
-        echo $body;
-
-        exit;
+        if ($dontExit === true) {
+            return $body;
+        } else {
+            header('HTTP/1.1 500 ' . Response::$messages['500']);
+            //var_dump($exception->getPrevious());
+            echo $body;
+            exit;
+        }
     }
 
     /**

@@ -441,7 +441,10 @@ class DbQuery
     public function getTableInfo($table)
     {
         //TODO: force to not change
-        return Core::app()->db->getTableInfo($table);
+        if (Core::app()->db) {
+            return Core::app()->db->getTableInfo($table);
+        }
+        return NULL;
     }
 
 }
