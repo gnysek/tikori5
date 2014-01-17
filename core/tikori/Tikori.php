@@ -20,27 +20,27 @@ class Tikori
     /**
      * @var Config
      */
-    private $_config = null;
+    private $_config = NULL;
     public $appDir = '';
     public $coreDir = '';
 
     /**
      * @var Request
      */
-    public $request = null;
+    public $request = NULL;
 
     /**
      * @var Response
      */
-    public $response = null;
-    public $mode = null;
+    public $response = NULL;
+    public $mode = NULL;
     public $autoloadPaths = array();
     public $namespaces = array('app', 'core');
 
     /**
      * @var Route
      */
-    public $route = null;
+    public $route = NULL;
 
     public function __construct($config = 'default')
     {
@@ -141,7 +141,7 @@ class Tikori
         Route::set('tikori-default', '(<controller>(/<action>(/<tparams>)))', array('tparams' => '[a-zA-Z0-9_/]+'))
             ->defaults(
                 array(
-                     'controller' => ($this->cfg('default') !== null) ? $this->cfg('default') : 'default',
+                     'controller' => ($this->cfg('default') !== NULL) ? $this->cfg('default') : 'default',
                      'action'     => 'index',
                 )
             );
@@ -152,10 +152,13 @@ class Tikori
         $this->response = new Response();
         Profiler::addLog('Response created');
 
+        // load languages
+        $this->loadLanguages();
+
         // process route
         $this->route = Route::process_uri($this->request->getRouterPath());
 
-        Profiler::addLog('Route processed - is ' . (($this->route == null) ? 'not found' : 'found'));
+        Profiler::addLog('Route processed - is ' . (($this->route == NULL) ? 'not found' : 'found'));
 
         Core::event(self::EVENT_BEFORE_DISPATCH);
 
@@ -176,35 +179,35 @@ class Tikori
 
     private function _runController($route)
     {
-        if (($ca = $this->_createController($route)) !== null) {
+        if (($ca = $this->_createController($route)) !== NULL) {
             list($controller, $action) = $ca;
             /* @var $route Route */
             /* @var $controller Controller */
 
 //            if ($route !== null) {
 
-                Profiler::addLog(
-                    'Dispatching: <code>' . $controller->area . '> ' . get_class($controller) . '/' . $action
-                        . '</code>'
-                );
+            Profiler::addLog(
+                'Dispatching: <code>' . $controller->area . '> ' . get_class($controller) . '/' . $action
+                . '</code>'
+            );
 
-                /* @var $controller Controller */
+            /* @var $controller Controller */
 
 //                if (empty($this->_route_regex)) {
 //                    Profiler::addLog('No route for <code>' . $this->controller . '</code>');
 //                    return $controller->unknownAction();
 //                } else {
-                try {
-                    return $controller->run($route);
-                } catch (DbError $e) {
-                    ob_get_clean();
-                    throw new Exception('DB Error: ' . $e->getMessage());
-                } catch (Exception $e) {
-                    ob_get_clean();
-                    throw new Exception(
-                        'Dispatch action: <er>' . get_class($controller) . '->' . $action . '</er> :<br/>'
-                            . $e->getMessage());
-                }
+            try {
+                return $controller->run($route);
+            } catch (DbError $e) {
+                ob_get_clean();
+                throw new Exception('DB Error: ' . $e->getMessage());
+            } catch (Exception $e) {
+                ob_get_clean();
+                throw new Exception(
+                    'Dispatch action: <er>' . get_class($controller) . '->' . $action . '</er> :<br/>'
+                    . $e->getMessage());
+            }
 //                }
 //            }
         }
@@ -219,7 +222,7 @@ class Tikori
     {
         $paths = array('/');
 
-        if ($route != null) {
+        if ($route != NULL) {
             foreach (array_keys($this->_m) as $path) {
                 $paths[$path] = '/modules/' . $path . '/';
             }
@@ -252,10 +255,10 @@ class Tikori
             }
         }
 
-        return array(new Controller(), null);
+        return array(new Controller(), NULL);
     }
 
-    public function preloadModule($module, $config = null)
+    public function preloadModule($module, $config = NULL)
     {
         foreach (array(true, false) as $includeCoreDir) {
             $this->addAutoloadPaths(
@@ -344,7 +347,7 @@ class Tikori
     public function getMode()
     {
         if ( /* $this->cfg('mode') */
-            $this->mode === null
+            $this->mode === NULL
         ) {
             if (isset($_ENV['TIKORI_MODE'])) {
                 $this->mode = $_ENV['TIKORI_MODE'];
@@ -353,7 +356,7 @@ class Tikori
                 if ($envMode !== false) {
                     $this->mode = $envMode;
                 } else {
-                    $this->mode = ($this->cfg('mode') === null) ? Core::MODE_PROD : $this->cfg('mode');
+                    $this->mode = ($this->cfg('mode') === NULL) ? Core::MODE_PROD : $this->cfg('mode');
                 }
             }
 
@@ -380,10 +383,10 @@ class Tikori
     public function defaultCfg()
     {
         $this->_config = new \Config(array(
-                                         'appname' => 'Unknown application',
-                                         //				'url' => DefC_Url::getDefValues(),
-                                         //				'db' => DefC_Db::getDefValues(),
-                                    ));
+                                          'appname' => 'Unknown application',
+                                          //				'url' => DefC_Url::getDefValues(),
+                                          //				'db' => DefC_Db::getDefValues(),
+                                     ));
     }
 
     /**
@@ -403,13 +406,13 @@ class Tikori
      *
      * @return Config|array
      */
-    public function cfg($item = null, $default = null)
+    public function cfg($item = NULL, $default = NULL)
     {
-        if ($this->_config === null) {
+        if ($this->_config === NULL) {
             $this->_config = new Config();
         }
 
-        if ($item === null) {
+        if ($item === NULL) {
             return $this->_config;
         } else {
 
@@ -422,9 +425,9 @@ class Tikori
         }
     }
 
-    public function flatcfg($item = null, $default = null)
+    public function flatcfg($item = NULL, $default = NULL)
     {
-        if ($item === null) {
+        if ($item === NULL) {
             return $this->_flatify($item, $this->_config);
         } else {
             return $this->_flatify($item, $this->_config->get($item, $default));
@@ -456,7 +459,7 @@ class Tikori
      */
     public function setModule($id, $module)
     {
-        if ($module === null) {
+        if ($module === NULL) {
             unset($this->_m[$id]);
         } else {
             $this->_m[$id] = $module;
@@ -479,7 +482,7 @@ class Tikori
     public function __get($value)
     {
         if (empty($this->_m[$value])) {
-            return null;
+            return NULL;
         } else {
             return $this->_m[$value];
         }
@@ -515,4 +518,102 @@ class Tikori
         return (!empty($this->request)) ? $this->request->getBaseUrl(true) : '/';
     }
 
+    public $languages = array();
+    public $translations = array();
+    public $defaultLanguage = 'en';
+
+    public function loadLanguages()
+    {
+        if (!$this->cfg('languages')) {
+            return;
+        }
+
+        $avaliableLanguages = $this->cfg('languages/list');
+
+        if (count($avaliableLanguages) < 1) {
+            return; //no languages?
+        }
+
+        $this->defaultLanguage = $avaliableLanguages[0];
+
+        // setup current language
+        if ($this->cfg('languages/type') == 'subdomains') {
+            $subdomains = $this->request->env['tikori.subdomains'];
+            if (count($subdomains)) {
+                $subdomain = $subdomains[0];
+                foreach ($avaliableLanguages as $lang) {
+                    if ($lang == $subdomain) {
+                        $this->defaultLanguage = $lang;
+                        break;
+                    }
+                }
+            }
+        } else {
+            //areas, todo
+        }
+
+        foreach (array('core', 'app') as $namespace) {
+
+            if ($namespace == 'core') {
+                $autodir = TIKORI_FPATH;
+            } else {
+                $autodir = rtrim(TIKORI_ROOT . DIRECTORY_SEPARATOR . $namespace, '/');
+            }
+            $files = glob($autodir . '/locale/*.php');
+
+            foreach ($files as $filename) {
+
+                $language = preg_replace('#([a-z]+)\.php#i', '$1', basename($filename));
+                if (!in_array($language, $this->languages)) {
+                    $this->languages[] = $language;
+                    $this->translations[$language] = array();
+                }
+
+                $file = fopen($filename, 'r');
+                $lang = array();
+                while ($data = fgetcsv($file, NULL, ',')) {
+                    if (count($data) == 2) {
+                        $this->translations[$language][$data[0]] = $data[1];
+                    }
+                }
+                fclose($file);
+            }
+        }
+    }
+
+    public function __() {
+        $args = func_get_args();
+        return $this->translate($args);
+    }
+
+    public function translate($args)
+    {
+        if (empty($args)) {
+            return '';
+        }
+
+        $text = $args[0];
+
+        if (in_array($this->defaultLanguage, $this->languages)) {
+            if (array_key_exists($args[0], $this->translations[$this->defaultLanguage])) {
+                $text = $this->translations[$this->defaultLanguage][$text];
+            }
+        }
+
+        $args = array_slice($args, 1);
+
+        if (count($args) > 0) {
+            foreach($args as $v) {
+                $text = str_replace('%s',$v, $text);
+            }
+        }
+
+        return $text;
+    }
+}
+
+function __()
+{
+    $args = func_get_args();
+    return Core::app()->translate($args);
 }

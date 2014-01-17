@@ -374,6 +374,16 @@ class Request
 
         $env['tikori.base_url'] = $env['tikori.url_scheme'] . '://' . $env['tikori.root_path'] . '/';
 
+        $parsedUrl = parse_url($env['tikori.base_url']);
+
+        $host = explode('.', $parsedUrl['host']);
+
+        $env['tikori.subdomains'] = array_slice($host, 0, count($host) - 2);
+
+        if (!empty($subdomains)) {
+            $env['tikori.base_url'] = str_replace(implode('.', $subdomains) . '.', '', $env['tikori.base_url']);
+        }
+
         if (!empty($_GET)) {
             foreach ($_GET as $k => $v) {
                 $this->_get[$k] = trim(preg_replace('#^[a-z0-9/_\-%]#i', '', $v));
