@@ -1,6 +1,6 @@
 <?php /* @var $model User */ ?>
 
-<h1>Edit user <?= $model->name; ?></h1>
+<h1>Edit user <?php echo $model->name; ?></h1>
 
 <div>
     <?php echo Html::beginForm(''); ?>

@@ -1,8 +1,8 @@
 <h2>Default action</h2>
 
-<?= Html::url('default'); ?><br/>
-<?= Html::url(array('default/test')); ?><br/>
-<?= Html::url(array('default/test', 'id' => '1')); ?><br/>
+<?php echo Html::url('default'); ?><br/>
+<?php echo Html::url(array('default/test')); ?><br/>
+<?php echo Html::url(array('default/test', 'id' => '1')); ?><br/>
 
 <p>Hello, world!</p>
 <p>This is default action for Tikori5 framework.</p>

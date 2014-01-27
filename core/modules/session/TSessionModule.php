@@ -130,8 +130,10 @@ class TSessionModule extends TModule
 
     public function __destruct()
     {
-        if ($this->_session->current_time > time() - 60) {
-            $this->_session->save();
+        if ($this->_session !== NULL) {
+            if ($this->_session->current_time > time() - 60) {
+                $this->_session->save();
+            }
         }
     }
 

@@ -226,8 +226,10 @@ class Core
     public static function shutdown_handler()
     {
         if ($error = error_get_last() AND in_array($error['type'], array(E_PARSE, E_ERROR, E_USER_ERROR))) {
-            ob_get_level() AND ob_clean();
-            ob_end_clean();
+            if (ob_get_level()) {
+                ob_clean();
+                ob_end_clean();
+            }
 
             Error::exch(new ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']));
 

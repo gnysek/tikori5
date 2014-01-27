@@ -4,5 +4,5 @@
     '#' . $node->content->id . ' - ' . $node->name
 ); ?>
 
-<h2><?= $node->content->id ?>. <?= $node->name ?></h2>
-<?= $node->short ?>
+<h2><?php echo $node->content->id ?>. <?php echo $node->name ?></h2>
+<?php echo $node->short ?>

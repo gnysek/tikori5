@@ -33,6 +33,11 @@ class Tikori
      * @var Response
      */
     public $response = NULL;
+
+    /**
+     * @var Lang
+     */
+    public $lang = NULL;
     public $mode = NULL;
     public $autoloadPaths = array();
     public $namespaces = array('app', 'core');
@@ -90,6 +95,7 @@ class Tikori
 
         // register error handlers
         Error::registerErrors();
+        ob_start('tikori');
         register_shutdown_function(array('Core', 'shutdown_handler'));
         Profiler::addLog('Registered errors');
 
@@ -153,7 +159,8 @@ class Tikori
         Profiler::addLog('Response created');
 
         // load languages
-        $this->loadLanguages();
+        $this->lang = new Lang();
+        $this->lang->loadLanguages();
 
         // process route
         $this->route = Route::process_uri($this->request->getRouterPath());
@@ -401,8 +408,8 @@ class Tikori
     }
 
     /**
-     * @param string $item
-     * @param mixed  $default
+     * @param string $item    Path to item, like name or name/name
+     * @param mixed  $default Return this when nothing found
      *
      * @return Config|array
      */
@@ -517,103 +524,12 @@ class Tikori
 
         return (!empty($this->request)) ? $this->request->getBaseUrl(true) : '/';
     }
-
-    public $languages = array();
-    public $translations = array();
-    public $defaultLanguage = 'en';
-
-    public function loadLanguages()
-    {
-        if (!$this->cfg('languages')) {
-            return;
-        }
-
-        $avaliableLanguages = $this->cfg('languages/list');
-
-        if (count($avaliableLanguages) < 1) {
-            return; //no languages?
-        }
-
-        $this->defaultLanguage = $avaliableLanguages[0];
-
-        // setup current language
-        if ($this->cfg('languages/type') == 'subdomains') {
-            $subdomains = $this->request->env['tikori.subdomains'];
-            if (count($subdomains)) {
-                $subdomain = $subdomains[0];
-                foreach ($avaliableLanguages as $lang) {
-                    if ($lang == $subdomain) {
-                        $this->defaultLanguage = $lang;
-                        break;
-                    }
-                }
-            }
-        } else {
-            //areas, todo
-        }
-
-        foreach (array('core', 'app') as $namespace) {
-
-            if ($namespace == 'core') {
-                $autodir = TIKORI_FPATH;
-            } else {
-                $autodir = rtrim(TIKORI_ROOT . DIRECTORY_SEPARATOR . $namespace, '/');
-            }
-            $files = glob($autodir . '/locale/*.php');
-
-            foreach ($files as $filename) {
-
-                $language = preg_replace('#([a-z]+)\.php#i', '$1', basename($filename));
-                if (!in_array($language, $this->languages)) {
-                    $this->languages[] = $language;
-                    $this->translations[$language] = array();
-                }
-
-                $file = fopen($filename, 'r');
-                $lang = array();
-                while ($data = fgetcsv($file, NULL, ',')) {
-                    if (count($data) == 2) {
-                        $this->translations[$language][$data[0]] = $data[1];
-                    }
-                }
-                fclose($file);
-            }
-        }
-    }
-
-    public function __() {
-        $args = func_get_args();
-        return $this->translate($args);
-    }
-
-    public function translate($args)
-    {
-        if (empty($args)) {
-            return '';
-        }
-
-        $text = $args[0];
-
-        if (in_array($this->defaultLanguage, $this->languages)) {
-            if (array_key_exists($args[0], $this->translations[$this->defaultLanguage])) {
-                $text = $this->translations[$this->defaultLanguage][$text];
-            }
-        }
-
-        $args = array_slice($args, 1);
-
-        if (count($args) > 0) {
-            foreach($args as $v) {
-                $text = str_replace('%s',$v, $text);
-            }
-        }
-
-        return $text;
-    }
 }
 
 function __()
 {
     $args = func_get_args();
-    return Core::app()->translate($args);
+    if (Core::app()->lang != NULL) {
+        return Core::app()->lang->translate($args);
+    }
 }

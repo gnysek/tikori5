@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <title><?php echo Core::app()->cfg('appName'); ?> 404 error</title>
-    <link rel="stylesheet" type="text/css" href="<?= Core::app()->baseUrl() ?>media/error.css"/>
+    <link rel="stylesheet" type="text/css" href="<?php echo Core::app()->baseUrl() ?>media/error.css"/>
 </head>
 <body>
 <h1><?php echo Core::app()->cfg('appName'); ?></h1>
