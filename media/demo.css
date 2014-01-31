@@ -58,6 +58,10 @@ code.tt {
 	background: none;
 }
 
+.block code {
+	display: block;
+}
+
 hr {
 	height: 0px;
 	border: none;

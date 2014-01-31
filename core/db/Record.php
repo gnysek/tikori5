@@ -49,7 +49,7 @@ class Record implements IteratorAggregate, ArrayAccess, Countable
 
     public function getProperties()
     {
-        return $this->data;
+        return $this->_data;
     }
 
     public function getFields()
@@ -82,7 +82,7 @@ class Record implements IteratorAggregate, ArrayAccess, Countable
     public function __get($offset)
     {
         if (!$this->offsetExists($offset)) {
-            return null;
+            return NULL;
         }
 
         return $this->_data[$offset];
@@ -116,7 +116,7 @@ class Record implements IteratorAggregate, ArrayAccess, Countable
 
     public function offsetGet($offset)
     {
-        $this->__get($offset);
+        return $this->__get($offset);
     }
 
     public function offsetSet($offset, $value)
@@ -127,7 +127,7 @@ class Record implements IteratorAggregate, ArrayAccess, Countable
     public function offsetUnset($offset)
     {
         if ($this->_locked) {
-            $this->__set($offset, null);
+            $this->__set($offset, NULL);
         }
         unset($this->_data[$offset]);
     }
@@ -145,5 +145,23 @@ class Record implements IteratorAggregate, ArrayAccess, Countable
     public function getData()
     {
         return $this->_data;
+    }
+
+    public function removeAssocKeys()
+    {
+        $this->_data = array_values($this->_data);
+        return $this;
+    }
+
+    public function convertAssocKeys($arrayNewAssocKeys)
+    {
+        if (count($arrayNewAssocKeys) == count($this->_data)) {
+            $copy = $this->_data;
+            $this->_data = array();
+            foreach ($arrayNewAssocKeys as $id => $newKey) {
+                $this->_data[$newKey] = $copy[$id];
+            }
+        }
+        return $this;
     }
 }

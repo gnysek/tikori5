@@ -66,10 +66,12 @@ class DbMySqli extends DBAbstract
             if ($result instanceof mysqli_result) {
                 $return = array();
                 if ($result->num_rows) {
-                    while ($row = $result->fetch_object()) {
-                        $record = new Record();
-                        $record->import($row, false);
-                        $return[] = $record;
+                    while ($row = $result->fetch_object('Record')) {
+                        /* @var $row Record */
+                        if ($assoc == false) {
+                            $row->removeAssocKeys();
+                        }
+                        $return[] = $row;
                     }
                     Profiler::addLog('Fetch finished');
                     return $return;

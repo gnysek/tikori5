@@ -159,7 +159,7 @@ class Route
         // Escape everything preg_quote would escape except for : ( ) < >
         $expression = preg_replace('#' . Route::REGEX_ESCAPE . '#', '\\\\$0', $uri);
 
-        if (strpos($expression, '(') !== FALSE) {
+        if (strpos($expression, '(') !== false) {
             // Make optional parts of the URI non-capturing and optional
             $expression = str_replace(array('(', ')'), array('(?:', ')?'), $expression);
         }
@@ -229,16 +229,19 @@ class Route
                 // if any of key/values is empty, loop will break and will skip rest of params!
                 if (!empty($params['tparams'])) {
                     $tp = explode('/', $params['tparams']);
-                    $key = null;
+                    $key = NULL;
 
                     foreach ($tp as $v) {
-                        if ($v == '') break; // if value is empty, break, even if there's already key set (value is empty for that key!)
+                        if ($v == ''
+                        ) {
+                            break;
+                        } // if value is empty, break, even if there's already key set (value is empty for that key!)
 
-                        if ($key === null) {
+                        if ($key === NULL) {
                             $key = $v; // set temporary key name
                         } else {
                             $params[$key] = $v; // if we already have key, we can set value
-                            $key = null;
+                            $key = NULL;
                         }
                     }
 
@@ -247,7 +250,7 @@ class Route
 
                 $route->params = $params;
 
-                Profiler::addLog('Found router with params: <code>' . var_export($params, TRUE) . '</code>');
+                Profiler::addLog('Found router with params: <code>' . var_export($params, true) . '</code>');
 
                 return $route;
 //				return array(
@@ -278,7 +281,7 @@ class Route
     /**
      * @var array
      */
-    protected $_defaults = array('action' => 'index', 'host' => FALSE);
+    protected $_defaults = array('action' => 'index', 'host' => false);
 
     /**
      * @var string
@@ -400,11 +403,11 @@ class Route
             $params = call_user_func($closure, $uri);
 
             if (!is_array($params)) {
-                return FALSE;
+                return false;
             }
         } else {
             if (!preg_match($this->_route_regex, $uri, $matches)) {
-                return FALSE;
+                return false;
             }
 
             $params = array();

@@ -176,7 +176,7 @@ class Core
         }
 
         if ($throw) {
-            throw new Exception("Cannot autoload class " . $class . ' [' . $search . '] ' . implode(', ', $filenames));
+            throw new Exception("Cannot autoload class " . $class . ' [' . $search . '] '/* . implode(', ', $filenames)*/);
         }
         return false;
     }
