@@ -71,7 +71,7 @@ class RadController extends Controller
 
         foreach ($rules as $ruleName => $rule) {
             foreach ($rule as $ruleValue => $ruleFields) {
-                $buildFile[] = '            array(' . implode(',', $ruleFields) . ', \'' . $ruleName . '\', \''
+                $buildFile[] = '            array(array(' . implode(', ', $ruleFields) . '), \'' . $ruleName . '\', \''
                     . $ruleValue . '\'),';
             }
         }
@@ -104,6 +104,23 @@ class RadController extends Controller
 
         $buildFile[] = '}';
 
-        $this->render('modelCreate', array('table' => $model, 'file' => implode(PHP_EOL, $buildFile)));
+        // get additional tables for relations
+        $relationsTables = Core::app()->db->query('SHOW tables', '', false);
+        $relations = array();
+        foreach ($relationsTables as $table) {
+            $relationInfo = Core::app()->db->query('SHOW columns in ' . $table[0]);
+            foreach ($relationInfo as $relationData) {
+                $relations[$table[0]][$relationData['Field']] = ($relationData['Key'] == 'PRI') ? true : false;
+            }
+        }
+
+        $this->render(
+            'modelCreate', array(
+                                'table'     => $model,
+                                'PK'        => $primaryKey,
+                                'file'      => implode(PHP_EOL, $buildFile),
+                                'relations' => $relations,
+                           )
+        );
     }
 }
