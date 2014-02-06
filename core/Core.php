@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * @const TIKORI_STARTED
+ * @const TIKORI_DEBUG
+ * @const TIKORI_FPATH
+ * @const TIKORI_ROOT
+ */
+
 defined('TIKORI_STARTED') or define('TIKORI_STARTED', microtime());
 defined('TIKORI_DEBUG') or define('TIKORI_DEBUG', false);
 defined('TIKORI_FPATH') or define('TIKORI_FPATH', dirname(__FILE__));

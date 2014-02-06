@@ -19,6 +19,9 @@ class RadController extends Controller
     {
         $result = Core::app()->db->query('SHOW columns in ' . $model);
 
+        $src = TIKORI_ROOT . '/app/models/' . ucfirst($model) . '.php';
+        $fileExists = file_exists($src);
+
         $primaryKey = '';
         foreach ($result as $v) {
             if ($v['Key'] == 'PRI') {
@@ -37,6 +40,16 @@ class RadController extends Controller
         $buildFile[] = '    {';
         $buildFile[] = '        return \'' . $model . '\';';
         $buildFile[] = '    }';*/
+        $buildFile[] = '';
+
+        $buildFile[] = '    /**';
+        $buildFile[] = '     * @param null|string $model';
+        $buildFile[] = '     * @return ' . ucfirst(strtolower($model));
+        $buildFile[] = '     */';
+        $buildFile[] = '    public static function model($model = __CLASS__)';
+        $buildFile[] = '    {';
+        $buildFile[] = '        return parent::model($model);';
+        $buildFile[] = '    }';
         $buildFile[] = '';
 
         /* getFields */
@@ -104,9 +117,10 @@ class RadController extends Controller
 
         $buildFile[] = '}';
 
-        // get additional tables for relations
+        # --- get additional tables for relations ---
         $relationsTables = Core::app()->db->query('SHOW tables', '', false);
         $relations = array();
+        $fields = array();
         foreach ($relationsTables as $table) {
             $relationInfo = Core::app()->db->query('SHOW columns in ' . $table[0]);
             foreach ($relationInfo as $relationData) {
@@ -114,12 +128,19 @@ class RadController extends Controller
             }
         }
 
+        foreach ($result as $column) {
+            $fields[] = $column['Field'];
+        }
+
         $this->render(
             'modelCreate', array(
-                                'table'     => $model,
-                                'PK'        => $primaryKey,
-                                'file'      => implode(PHP_EOL, $buildFile),
-                                'relations' => $relations,
+                                'src'        => $src,
+                                'fileExists' => $fileExists,
+                                'table'      => $model,
+                                'PK'         => $primaryKey,
+                                'file'       => implode(PHP_EOL, $buildFile),
+                                'relations'  => $relations,
+                                'fields'     => $fields,
                            )
         );
     }

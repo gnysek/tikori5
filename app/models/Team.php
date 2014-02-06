@@ -10,9 +10,9 @@ class Team extends Model
 {
 
     /**
-     * @param class $model
+     * @param null|string $model
      *
-     * @return Content
+     * @return Team
      */
     public static function model($model = __CLASS__)
     {
