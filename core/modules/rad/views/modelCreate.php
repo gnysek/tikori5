@@ -1,7 +1,7 @@
 <h1>Tikori5 Rapid Application Development</h1>
 <h2>Create new Model for <code><?php echo $table; ?></code> table</h2>
 
-<?php Html::beginForm(''); ?>
+<?php echo Html::beginForm('rad/modelCreate/model/' . $table); ?>
 
 <code><?php echo $src; ?></code>
 
@@ -37,7 +37,7 @@
 
     :
 
-    <select name="relationName" id="selectTable">
+    <select id="selectTable">
         <?php foreach ($relations as $table => $fields): ?>
             <?php foreach ($fields as $field => $isPK): ?>
                 <option value="<?php echo
@@ -57,7 +57,7 @@
 
 <input type="submit" value="<?php echo ((!$fileExists) ? __('Create') : __('Rewrite')) . ' ' . $src; ?>">
 
-<?php Html::endForm(); ?>
+<?php echo Html::endForm(); ?>
 
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script type="text/javascript">

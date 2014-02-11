@@ -27,10 +27,13 @@ class Route
     {
         Route::reset();
         // cfg route registers
-        foreach (Core::app()->cfg('routes') as $key => $route) {
-            Route::set($key, $route['expr'], (!empty($route['params'])) ? $route['params'] : array())->defaults(
-                $route['defaults']
-            );
+        $routes = Core::app()->cfg('routes');
+        if (!empty($routes)) {
+            foreach (Core::app()->cfg('routes') as $key => $route) {
+                Route::set($key, $route['expr'], (!empty($route['params'])) ? $route['params'] : array())->defaults(
+                    $route['defaults']
+                );
+            }
         }
         Profiler::addLog('Reconfigured');
     }

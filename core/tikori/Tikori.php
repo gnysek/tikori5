@@ -165,7 +165,7 @@ class Tikori
         // process route
         $this->route = Route::process_uri($this->request->getRouterPath());
 
-        Profiler::addLog('Route processed - is ' . (($this->route == NULL) ? 'not found' : 'found'));
+        Profiler::addLog('Route processed and is ' . (($this->route == NULL) ? 'not found' : 'found'));
 
         Core::event(self::EVENT_BEFORE_DISPATCH);
 
@@ -242,9 +242,9 @@ class Tikori
 
 //        var_dump($areaName);
 
-            foreach (array('app', 'core') as $module => $source) {
+            foreach (array('app' => TIKORI_ROOT, 'core' => TIKORI_FPATH) as $module => $source) {
                 foreach ($paths as $path) {
-                    $file = $source . $path . 'controllers/' . $areaName . $className . '.php';
+                    $file = $source . '/' . $path . 'controllers/' . $areaName . $className . '.php';
                     if (file_exists($file)) {
                         try {
                             include_once $file;
@@ -389,7 +389,7 @@ class Tikori
 
     public function defaultCfg()
     {
-        $this->_config = new \Config(array(
+        $this->_config = new CConfig(array(
                                           'appname' => 'Unknown application',
                                           //				'url' => DefC_Url::getDefValues(),
                                           //				'db' => DefC_Db::getDefValues(),
@@ -416,7 +416,7 @@ class Tikori
     public function cfg($item = NULL, $default = NULL)
     {
         if ($this->_config === NULL) {
-            $this->_config = new Config();
+            $this->_config = new CConfig();
         }
 
         if ($item === NULL) {

@@ -115,7 +115,30 @@ class RadController extends Controller
         $buildFile[] = '    }';
         $buildFile[] = '';
 
+        /* additional relations */
+        if ($this->request->isPost()) {
+            if ($this->request->getPost('addRelations') == 1) {
+                $relations = array();
+                foreach ($this->request->getPost('relation') as $relation) {
+                    $relations[] = $relation;
+                }
+
+                if (count($relations)) {
+                    $buildFile[] = '    public function relations()';
+                    $buildFile[] = '    {';
+                    $buildFile[] = '        return array(';
+                    foreach ($relations as $relation) {
+                        $buildFile[] = '            ' . $relation;
+                    }
+                    $buildFile[] = '        );';
+                    $buildFile[] = '    }';
+                    $buildFile[] = '';
+                }
+            }
+        }
+
         $buildFile[] = '}';
+        $buildFile[] = '';
 
         # --- get additional tables for relations ---
         $relationsTables = Core::app()->db->query('SHOW tables', '', false);
@@ -132,16 +155,25 @@ class RadController extends Controller
             $fields[] = $column['Field'];
         }
 
-        $this->render(
-            'modelCreate', array(
-                                'src'        => $src,
-                                'fileExists' => $fileExists,
-                                'table'      => $model,
-                                'PK'         => $primaryKey,
-                                'file'       => implode(PHP_EOL, $buildFile),
-                                'relations'  => $relations,
-                                'fields'     => $fields,
-                           )
-        );
+        if ($this->request->isPost()) {
+            $dir = dirname($src);
+            if (!file_exists($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            file_put_contents($src, implode(PHP_EOL, $buildFile));
+            $this->redirect('rad/model');
+        } else {
+            $this->render(
+                'modelCreate', array(
+                                    'src'        => $src,
+                                    'fileExists' => $fileExists,
+                                    'table'      => $model,
+                                    'PK'         => $primaryKey,
+                                    'file'       => implode(PHP_EOL, $buildFile),
+                                    'relations'  => $relations,
+                                    'fields'     => $fields,
+                               )
+            );
+        }
     }
 }

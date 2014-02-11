@@ -3,7 +3,9 @@
 <head>
     <meta charset="utf-8"/>
     <title><?php echo Core::app()->cfg('appName'); ?></title>
-    <link rel="stylesheet" type="text/css" href="<?php echo Core::app()->baseUrl() ?>media/exception.css"/>
+    <style type="text/css">
+        <?php include('core.exception.css'); ?>
+    </style>
     <link rel="stylesheet" type="text/css" href="<?php echo Core::app()->baseUrl() ?>media/prettify.css"/>
     <script type="text/javascript" src="<?php echo Core::app()->baseUrl() ?>media/jquery-1.8.2.min.js"></script>
     <script type="text/javascript" src="<?php echo Core::app()->baseUrl() ?>media/prettify.js"></script>
