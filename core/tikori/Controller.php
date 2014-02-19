@@ -23,12 +23,14 @@ class Controller extends ControllerView
 
     public function __construct($area = NULL)
     {
-        Profiler::addLog('&bull; New controller <code> ' . get_called_class() . '</code> Created');
+        Profiler::addLog('&bull; New controller <code>' . get_called_class() . '</code> Created');
         $this->area = $area;
         $this->pageTitle = Core::app()->cfg('appName');
         $this->afterConstruct();
         // if HMVC will come some day, this need to be changed
         $this->request = Core::app()->request;
+
+        parent::__construct();
     }
 
     public function afterConstruct()

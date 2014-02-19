@@ -3,6 +3,18 @@
 class TView
 {
 
+    private $_jsFiles = array();
+    private $_cssFiles = array();
+
+    public function __construct()
+    {
+        // check that there are any defined layout media files
+
+        if ($files = Core::app()->cfg('layout/css')) {
+            $this->_cssFiles = $files;
+        }
+    }
+
     public function render($file = NULL, $data = NULL, $return = false)
     {
         //TODO: no error when file not found?
@@ -110,5 +122,19 @@ class TView
         }
 
         return false;
+    }
+
+    public function pageTitle() {
+        return (!empty($this->pageTitle)) ? $this->pageTitle : Core::app()->cfg('appName');
+    }
+
+    public function getCssForHead($prefix = '')
+    {
+        $return = array();
+        foreach ($this->_cssFiles as $cssSrc) {
+            $return[] = '<link rel="stylesheet" href="' . $cssSrc . '">';
+        }
+
+        return implode(PHP_EOL . $prefix, $return);
     }
 }
