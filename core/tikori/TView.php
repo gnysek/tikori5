@@ -13,6 +13,10 @@ class TView
         if ($files = Core::app()->cfg('layout/css')) {
             $this->_cssFiles = $files;
         }
+
+        if ($files = Core::app()->cfg('layout/js')) {
+            $this->_jsFiles = $files;
+        }
     }
 
     public function render($file = NULL, $data = NULL, $return = false)
@@ -133,6 +137,15 @@ class TView
         $return = array();
         foreach ($this->_cssFiles as $cssSrc) {
             $return[] = '<link rel="stylesheet" href="' . $cssSrc . '">';
+        }
+
+        return implode(PHP_EOL . $prefix, $return);
+    }
+
+    public function getJsForHead($prefix = '') {
+        $return = array();
+        foreach ($this->_jsFiles as $jsSrc) {
+            $return[] = '<script type="text/javascript" src="' . $jsSrc . '">';
         }
 
         return implode(PHP_EOL . $prefix, $return);

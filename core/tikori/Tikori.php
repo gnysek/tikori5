@@ -230,7 +230,7 @@ class Tikori
         $paths = array('/');
 
         if ($route != NULL) {
-            foreach (array_keys($this->_m) as $path) {
+            foreach (array_keys($this->_loadedModules) as $path) {
                 $paths[$path] = '/modules/' . $path . '/';
             }
             $classToCreate = $className = ucfirst($route->controller) . 'Controller';
@@ -267,18 +267,20 @@ class Tikori
 
     public function preloadModule($module, $config = NULL)
     {
-        foreach (array(true, false) as $includeCoreDir) {
-            $this->addAutoloadPaths(
-                array(
-                     'modules/' . $module,
-                     'modules/' . $module . '/config',
-                     'modules/' . $module . '/controllers',
-                     'modules/' . $module . '/models',
-                     'modules/' . $module . '/views',
-                     'modules/' . $module . '/widgets',
-                ), $includeCoreDir
-            );
-        }
+//        foreach (array(true, false) as $includeCoreDir) {
+//            $this->addAutoloadPaths(
+//                array(
+//                     'modules/' . $module,
+//                     'modules/' . $module . '/config',
+//                     'modules/' . $module . '/controllers',
+//                     'modules/' . $module . '/models',
+//                     'modules/' . $module . '/views',
+//                     'modules/' . $module . '/widgets',
+//                ), $includeCoreDir
+//            );
+//        }
+
+        $this->registerAutoloadPaths($module);
 
         $moduleClass = ucfirst($module) . 'Module';
         if (Core::autoload($moduleClass, true)) {
@@ -290,22 +292,30 @@ class Tikori
     /**
      * Registers autoload paths for class searching
      */
-    public function registerAutoloadPaths()
+    public function registerAutoloadPaths($module = '')
     {
+        if (!empty($module)) {
+            $module = 'modules/' . trim(strtolower($module),'/') . '/';
+        }
+
         // core directory - can be shared on server :) false then true
-        foreach (array(true, false) as $i) {
+        foreach (array(true, false) as $includeCoreDir) {
             $this->addAutoloadPaths(
                 array(
-                     '',
-                     'controllers',
-                     'models',
-                     //				'modules',
-                     'db',
-                     'helpers',
-                     'widgets',
-                     'tikori',
-                ), $i
+                     $module . '',
+                     $module . 'config',
+                     $module . 'controllers',
+                     $module . 'models',
+                     $module . 'helpers',
+                     $module . 'views',
+                     $module . 'widgets',
+                ), $includeCoreDir
             );
+        }
+
+        if (empty($module)) {
+            $this->addAutoloadPaths(array('tikori'), true);
+            $this->addAutoloadPaths(array('db'), true);
         }
 
 //		var_dump($this->autoloadPaths);
@@ -456,7 +466,7 @@ class Tikori
         return $flat;
     }
 
-    private $_m = array();
+    private $_loadedModules = array();
 
     /**
      * Sets or unsets module
@@ -467,9 +477,9 @@ class Tikori
     public function setModule($id, $module)
     {
         if ($module === NULL) {
-            unset($this->_m[$id]);
+            unset($this->_loadedModules[$id]);
         } else {
-            $this->_m[$id] = $module;
+            $this->_loadedModules[$id] = $module;
             if (!$module->isInitialized()) {
                 $module->init();
             }
@@ -488,11 +498,20 @@ class Tikori
 
     public function __get($value)
     {
-        if (empty($this->_m[$value])) {
+        if (empty($this->_loadedModules[$value])) {
             return NULL;
         } else {
-            return $this->_m[$value];
+            return $this->_loadedModules[$value];
         }
+    }
+
+    public function module($moduleName)
+    {
+        $module = $this->__get($moduleName);
+        if ($module === NULL) {
+            $module = setModule(strtolower($moduleName), new $moduleName . 'Module');
+        }
+        return $this->__get($moduleName);
     }
 
 //	/**

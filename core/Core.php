@@ -130,6 +130,18 @@ class Core
         return $default;
     }
 
+    private $_modules = array();
+
+    public static function autoloadByDir($dir = NULL, $class)
+    {
+        $dirs = array();
+        if ($dir == NULL) {
+            $dirs = Core::app()->autoloadPaths;
+        } else {
+
+        }
+    }
+
     /**
      * Autoloader method
      *
@@ -172,8 +184,7 @@ class Core
                 if (class_exists('Profiler')) {
                     Profiler::addLog(
                         '<div style="padding-left: 20px;"><i>Loading <code>' . $namespace . '\\' . $class
-                        . '</code> from <tt>' . $filename
-                        . '<tt></i></div>'
+                        . '</code> from <kbd>' . $filename . '<kbd></i></div>'
                     );
                 }
                 require $filename;
@@ -183,7 +194,8 @@ class Core
         }
 
         if ($throw) {
-            throw new Exception("Cannot autoload class " . $class . ' [' . $search . '] '/* . implode(', ', $filenames)*/);
+            throw new Exception("Cannot autoload class " . $class . ' [' . $search
+            . '] ' /* . implode(', ', $filenames)*/);
         }
         return false;
     }
