@@ -4,3 +4,11 @@ blockquote {
 	background: url('bulb.png') no-repeat 10px center #eee;
 	padding-left: 50px;
 }
+
+.doc-empty {
+	text-decoration: line-through;
+}
+
+.doc-not-empty {
+	text-decoration: none !important;
+}

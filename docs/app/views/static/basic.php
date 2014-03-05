@@ -3,7 +3,7 @@ $this->breadcrumbs = array(
     'Installation',
 );
 ?>
-
+<a name="top"></a>
     <h4>Basic configuration</h4>
 
     <p>Following variables may be added to configuration files in JSON format:<br/>
@@ -66,7 +66,7 @@ function display($config, $level = 0)
     echo '<ul>';
     foreach ($config as $configName => $configData) {
         if ($level == 0) {
-            echo '<li style="list-style-type: none; margin-left: -25px;"><strong>' . ucfirst($configName) . '</strong>  <a href="#"><kbd>&uarr;</kbd></a></li>';
+            echo '<li style="list-style-type: none; margin-left: -25px;"><strong>' . ucfirst($configName) . '</strong></li>';
         }
         echo '<li>';
         if ($level == 0) {
@@ -87,6 +87,9 @@ function display($config, $level = 0)
             if (!empty($configData['sub'])) {
                 display($configData['sub'], $level + 1);
             }
+        }
+        if ($level == 0) {
+            echo '<li style="text-align: right; list-style-type: none;"><a href="#top"><tt>Top &uarr;</tt></a></li>';
         }
         echo '</li>';
     }
