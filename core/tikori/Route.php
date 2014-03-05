@@ -212,8 +212,8 @@ class Route
         }
 
         Profiler::addLog(
-            'Processing URI <tt>/' . $uri . '</tt> against ' . count($routes) . ' routes' . (empty($area)
-                ? '' : ' using route <tt>' . $area . '</tt>')
+            'Processing URI <kbd>/' . $uri . '</kbd> against ' . count($routes) . ' routes' . (empty($area)
+                ? '' : ' using route <kbd>' . $area . '</kbd>')
         );
 
         /* @var $route Route */

@@ -68,7 +68,7 @@ class Controller extends ControllerView
     public function runAction($controller = NULL, $action = NULL)
     {
         Profiler::addLog(
-            '-> Running Action: <tt>' . $this->getControllerClassName($controller) . '/' . $action . '</tt>'
+            '-> Running Action: <kbd>' . $this->getControllerClassName($controller) . '/' . $action . '</kbd>'
         );
         if (get_called_class() == $controller) {
             $this->run(Core::app()->route, $action);
@@ -125,8 +125,8 @@ class Controller extends ControllerView
             $this->unknownAction();
         } else {
             Profiler::addLog(
-                'Calling controller: <tt>' . $this->getControllerClassName() . '::' . $this->getActionMethodName()
-                . '</tt>'
+                'Calling controller: <kbd>' . $this->getControllerClassName() . '::' . $this->getActionMethodName()
+                . '</kbd>'
             );
 
             // check params

@@ -45,11 +45,12 @@ class DbPDO extends DBAbstract
      * @param string $skip  Not used for now
      * @param bool   $assoc Assoc or not?
      *
+     * @throws DbError
      * @return Collection
      */
     public function query($sql, $skip = '', $assoc = TRUE)
     {
-        Profiler::addLog('SQL QUERY: <tt title="' . $sql . '">' . substr($sql, 0, 30) . '&hellip;</tt>');
+        Profiler::addLog('SQL QUERY: <kbd title="' . $sql . '">' . substr($sql, 0, 30) . '&hellip;</kbd>');
 
         $this->_queries++;
 

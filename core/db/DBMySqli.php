@@ -43,7 +43,7 @@ class DbMySqli extends DBAbstract
 
     public function query($sql, $skip = '', $assoc = TRUE)
     {
-        Profiler::addLog('SQL QUERY: <tt title="' . $sql . '">' . substr($sql, 0, 30) . '&hellip;</tt>');
+        Profiler::addLog('SQL QUERY: <kbd title="' . $sql . '">' . substr($sql, 0, 30) . '&hellip;</kbd>');
         $this->_queries++;
         $this->_queryList[] = $sql;
 

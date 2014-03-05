@@ -58,7 +58,7 @@ class TView
         if ($_returnNC) {
             ob_start();
             ob_implicit_flush(false);
-            Profiler::addLog('Rendering <tt>' . str_replace(Core::app()->appDir, '', $_fileNC) . '</tt>');
+            Profiler::addLog('Rendering <kbd>' . str_replace(Core::app()->appDir, '', $_fileNC) . '</kbd>');
             require($_fileNC);
             return ob_get_clean();
         } else {

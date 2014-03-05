@@ -29,7 +29,7 @@ Route::set('default', '(&lt;controller&gt;(/&lt;action&gt;(/&lt;id&gt;)))')
 <p>The uri is a string that represents the format of urls that should be matched.
     The tokens surrounded with <code>&lt;&gt;</code> are keys and anything surrounded with <code>()</code> are optional
     parts of the uri.
-    In Tikori routes, any character is allowed and treated literally aside from <tt>()&lt;&gt;</tt>.
+    In Tikori routes, any character is allowed and treated literally aside from <kbd>()&lt;&gt;</kbd>.
     The <code>/</code> has no meaning besides being a character that must match in the uri.
     Usually the <code>/</code> is used as a static seperator but as long as the regex makes sense, there are no
     restrictions to how you can format your routes.</p>
@@ -40,7 +40,7 @@ Route::set('default', '(&lt;controller&gt;(/&lt;action&gt;(/&lt;id&gt;)))')
 <pre>
 array('action' => '(add|edit|update|delete)')
 </pre>
-If you want that (last) param will include any character until end of URI, even /, then you can use <tt>.*</tt> regex.
+If you want that (last) param will include any character until end of URI, even /, then you can use <kbd>.*</kbd> regex.
 <pre class="prettyprint lang-php">
 Route::set('default', '(&lt;controller&gt;(/&lt;something&gt;))',
 	array('something' => '.*'))
@@ -50,7 +50,7 @@ Route::set('default', '(&lt;controller&gt;(/&lt;something&gt;))',
 ));
 </pre>
 Now if you provide path like: <code>http://myapp.com/path/to/here/and/there</code>, route will match
-controller <tt>path</tt>, action <tt>index</tt>, and param something will be <tt>to/here/and/there</tt>.
+controller <kbd>path</kbd>, action <kbd>index</kbd>, and param something will be <kbd>to/here/and/there</kbd>.
 </p>
 
 <h5>Defaults</h5>

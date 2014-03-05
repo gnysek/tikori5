@@ -244,7 +244,8 @@ class Tikori
 
             foreach (array('app' => TIKORI_ROOT, 'core' => TIKORI_FPATH) as $module => $source) {
                 foreach ($paths as $path) {
-                    $file = $source . '/' . $module . '/' . $path . 'controllers/' . $areaName . $className . '.php';
+                    //TODO: better list of folders created by module initializer
+                    $file = $source . ($module == 'core' ? '' : '/' . $module) . $path . 'controllers/' . $areaName . $className . '.php';
                     if (file_exists($file)) {
                         try {
                             include_once $file;

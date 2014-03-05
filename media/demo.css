@@ -40,16 +40,22 @@ body, pre, code, tt {
 	line-height: 22px;
 }
 
-pre, code, tt {
+pre, code, tt, kbd {
 	font-family: 'Consolas', monospace;
+}
+
+pre, code, kbd {
 	color: brown;
+}
+
+pre, code, blockquote, kbd {
+	padding: 1px 4px;
+	border-radius: 3px;
+	background-color: #eee;
 }
 
 pre, code, blockquote {
 	border: 1px solid #bbb;
-	padding: 1px 4px;
-	border-radius: 3px;
-	background-color: #eee;
 }
 
 code.tt {

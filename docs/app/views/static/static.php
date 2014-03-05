@@ -1,9 +1,9 @@
 <h4>3. Static application</h4>
 
 <p>
-    If your application is configured as static, you can place content in <tt>*.php</tt> files under
-    <code>views/static</code> and they will be accesed by <tt>static/path/to/file</tt> param in URL by <code>StaticController</code>.
-    This documentation uses <tt>static</tt> mode to display it's content.
+    If your application is configured as static, you can place content in <kbd>*.php</kbd> files under
+    <code>views/static</code> and they will be accesed by <kbd>static/path/to/file</kbd> param in URL by <code>StaticController</code>.
+    This documentation uses <kbd>static</kbd> mode to display it's content.
 </p>
 
 <blockquote>When using static app, you cannot use anything from modules folder, and modules configuration will be

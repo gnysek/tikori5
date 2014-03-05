@@ -35,7 +35,7 @@ class TObserver
             $methodName = lcfirst($methodName) . self::EVENT_SUFFIX;
 
             Profiler::addLog(
-                'Firing event <code>' . $eventName . '</code> <tt>' . $methodName . '</tt> with ' . count(
+                'Firing event <code>' . $eventName . '</code> <kbd>' . $methodName . '</kbd> with ' . count(
                     $this->_observers[$eventName]
                 ) . ' observer(s)'
             );
