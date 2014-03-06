@@ -23,6 +23,20 @@ abstract class DbAbstract
 
     abstract public function query($sql, $skip = '', $assoc = TRUE);
 
+    /**
+     * @param        $sql
+     * @param string $skip
+     * @param bool   $assoc
+     * @return Result|bool|array
+     */
+    public function queryOne($sql, $skip = '', $assoc = TRUE) {
+        $result = $this->query($sql, $skip, $assoc);
+        if (count($result)) {
+            return $result[0];
+        }
+        return false;
+    }
+
     abstract public function update($sql);
 
     abstract public function lastId();

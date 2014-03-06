@@ -25,6 +25,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
     protected $_scopes = array();
     protected $_relations = array();
     protected $_isNewRecord = true;
+    // TODO: allow to have more than one error per attribute
     protected $_errors = array();
     public $_modified = array();
     public $tableName = '';
