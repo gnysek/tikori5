@@ -8,8 +8,27 @@ class Html
 
     public static function link($text, $url, $options = array())
     {
+        $current = Core::app()->request != NULL ? trim(Core::app()->request->getRouterPath(), '/') : '';
+        $inCurrentLink = ($current == $url);
+
+        if (!empty($options['_activeByPath'])) {
+            if ($inCurrentLink == false) {
+                if (!is_array($options['_activeByPath'])) {
+                    $options['_activeByPath'] = array($options['_activeByPath']);
+                }
+
+                foreach ($options['_activeByPath'] as $pattern) {
+                    if (preg_match($pattern, $current)) {
+                        $inCurrentLink = true;
+                    }
+                }
+
+            }
+            unset($options['_activeByPath']);
+        }
+
         //TODO: when error/exception raised, request is empty ?
-        if (Core::app()->request != null && trim(Core::app()->request->getRouterPath(), '/') == $url) {
+        if ($inCurrentLink) {
             if (!empty($options['class'])) {
                 $options['class'] = self::$hrefActiveClass . ' ' . $options['class'];
             } else {
@@ -43,7 +62,7 @@ class Html
         $path = '';
 
         if (Core::app()->route) {
-            if (Core::app()->route->area != null) {
+            if (Core::app()->route->area != NULL) {
                 if (!preg_match('#^//#', $url[0])) {
                     $url[0] = Core::app()->route->area . '/' . $url[0];
                 }
@@ -83,7 +102,7 @@ class Html
         return Core::app()->baseUrl() . $script . $addon . $url[0] . $path;
     }
 
-    public static function beginForm($action = '/', $method = 'post', $upload = false, $class = null)
+    public static function beginForm($action = '/', $method = 'post', $upload = false, $class = NULL)
     {
         return '<form' . ((!empty($class)) ? (' class="' . $class . '"') : '') . '  action="' . self::url($action) . '" method="' . $method . '"'
         . (($upload) ? ' enctype="multipart/form-data"' : '') . '>';
@@ -99,13 +118,13 @@ class Html
         return '';
     }
 
-    public static function htmlTag($tag, $options = array(), $innerHtml = null)
+    public static function htmlTag($tag, $options = array(), $innerHtml = NULL)
     {
-        if ($options === false or $options === null) {
+        if ($options === false or $options === NULL) {
             $options = array();
         }
 
-        return ($innerHtml === null)
+        return ($innerHtml === NULL)
             ? self::htmlOpenTag($tag, $options, true)
             : (self::htmlOpenTag($tag, $options, false) . $innerHtml . self::htmlCloseTag($tag));
     }
@@ -115,6 +134,9 @@ class Html
         $html = '<' . $tag;
 
         foreach ($options as $k => $v) {
+            if (strncmp($k, '_', 1) === 0) {
+                continue;
+            }
             $html .= ' ' . htmlspecialchars($k) . '="' . htmlspecialchars($v) . '"';
         }
 
@@ -147,7 +169,7 @@ class Html
         return '';
     }
 
-    public static function labelModel($model, $field, $text = null)
+    public static function labelModel($model, $field, $text = NULL)
     {
         return self::htmlTag(
             'label', array(
@@ -180,7 +202,7 @@ class Html
         );
     }
 
-    public static function radioFieldModel($model, $field, $values = array(), $divider = null)
+    public static function radioFieldModel($model, $field, $values = array(), $divider = NULL)
     {
         $html = '';
         $i = 0;
