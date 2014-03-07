@@ -92,7 +92,7 @@ class Lang
 
         if (count($args) > 0) {
             foreach ($args as $v) {
-                $text = str_replace('%s', $v, $text);
+                $text = preg_replace('/%s/', $v, $text, 1);
             }
         }
 

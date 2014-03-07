@@ -122,11 +122,14 @@ class Controller extends ControllerView
 
         if (!method_exists($this, $this->getActionMethodName())) {
             Profiler::addLog('No method found for <code>' . $this->getActionMethodName() . '</code>');
-            $this->unknownAction();
+            if (method_exists($this, 'defaultAction')) {
+                $this->defaultAction();
+            } else {
+                $this->unknownAction();
+            }
         } else {
             Profiler::addLog(
-                'Calling controller: <kbd>' . $this->getControllerClassName() . '::' . $this->getActionMethodName()
-                . '</kbd>'
+                'Calling controller: <kbd>' . $this->getControllerClassName() . '::' . $this->getActionMethodName() . '</kbd>'
             );
 
             // check params
@@ -273,7 +276,6 @@ class Controller extends ControllerView
     //	public function defaultAction() {
     //		throw new RouteNotFoundException('Unknown action');
     //	}
-
 
 
 }
