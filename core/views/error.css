@@ -1,0 +1,33 @@
+body {
+	max-width: 600px;
+	margin: 25px auto;
+}
+
+body, pre {
+	font-family: 'Consolas', monospace;
+	font-size: 15px;
+	line-height: 20px;
+}
+
+h1 {
+	border-bottom: 1px solid #222;
+	padding-bottom: 4px;
+	display: inline-block;
+	margin: 2px 0 5px 0;
+}
+
+.debug-pre {
+	overflow-x: scroll;
+	font-size: 12px;
+	line-height: 15px;
+	background-color: #222;
+	color: khaki;
+	padding: 5px;
+	border-radius: 3px;
+}
+
+.footer {
+	text-align: center;
+	font-size: 11px;
+	color: #666;
+}

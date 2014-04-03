@@ -108,6 +108,21 @@ class Tikori
         // config
         $this->reconfigure($config);
 
+        if (file_exists('.maintenance')) {
+            // load languages
+            $this->request = new Request();
+
+            $this->lang = new Lang();
+            $this->lang->loadLanguages();
+
+            $this->response = new Response();
+            $this->response->status(503);
+            $view = new TView();
+            $view->renderPartial('error.503', array(), false);
+            $this->response->send();
+            exit;
+        }
+
         // enable cache, we need that for config
         $this->setModule('cache', new Cache());
         $regenerateAutloads = false;
@@ -296,7 +311,7 @@ class Tikori
     public function registerAutoloadPaths($module = '')
     {
         if (!empty($module)) {
-            $module = 'modules/' . trim(strtolower($module),'/') . '/';
+            $module = 'modules/' . trim(strtolower($module), '/') . '/';
         }
 
         // core directory - can be shared on server :) false then true
