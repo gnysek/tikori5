@@ -32,11 +32,23 @@ class Lang
         // setup current language
         if (Core::app()->cfg('languages/type') == 'subdomains') {
             $subdomains = Core::app()->request->env['tikori.subdomains'];
-            if (count($subdomains)) {
-                $subdomain = $subdomains[0];
-                foreach ($avaliableLanguages as $lang) {
-                    if ($lang == $subdomain) {
-                        $this->currentLanguage = $lang;
+            $subdomainLanguageLinks = Core::app()->cfg('languages/subdomains');
+            if (count($subdomains) && count($subdomainLanguageLinks)) {
+                $currentSubdomain = $subdomains[0]; //take lowest subdomain, for example ab from ab.bc.de.ef.com
+                foreach ($subdomainLanguageLinks as $language => $subdomainNeeded) {
+                    if ($currentSubdomain == $subdomainNeeded && in_array($language, $avaliableLanguages)) {
+                        $this->currentLanguage = $language;
+                        break;
+                    }
+                }
+            }
+        } elseif (Core::app()->cfg('languages/type') == 'domains') {
+            $domains = Core::app()->cfg('languages/domains');
+            if (count($domains)) {
+                $currentDomain = Core::app()->request->env['SERVER_NAME'];
+                foreach ($domains as $language => $domain) {
+                    if ($currentDomain == $domain && in_array($language, $avaliableLanguages)) {
+                        $this->currentLanguage = $language;
                         break;
                     }
                 }
