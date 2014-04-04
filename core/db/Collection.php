@@ -14,7 +14,7 @@ class Collection implements ArrayAccess, Iterator, Countable
     /**
      * Collection data.
      *
-     * @var array
+     * @var array|Model[]
      */
     private $_data;
 
@@ -37,7 +37,7 @@ class Collection implements ArrayAccess, Iterator, Countable
      */
     public function __get($key)
     {
-        return isset($this->_data[$key]) ? $this->_data[$key] : null;
+        return isset($this->_data[$key]) ? $this->_data[$key] : NULL;
     }
 
     /**
@@ -82,7 +82,7 @@ class Collection implements ArrayAccess, Iterator, Countable
      */
     public function offsetGet($offset)
     {
-        return isset($this->_data[$offset]) ? $this->_data[$offset] : null;
+        return isset($this->_data[$offset]) ? $this->_data[$offset] : NULL;
     }
 
     /**
@@ -168,7 +168,7 @@ class Collection implements ArrayAccess, Iterator, Countable
     public function valid()
     {
         $key = key($this->_data);
-        return ($key !== NULL && $key !== FALSE);
+        return ($key !== NULL && $key !== false);
     }
 
     /**
@@ -269,5 +269,26 @@ class Collection implements ArrayAccess, Iterator, Countable
         }
 
         return new Collection($values);
+    }
+
+    public function delete()
+    {
+        foreach ($this->_data as $key => $row) {
+            if (is_a($row, 'Model')) {
+                $row->delete();
+            }
+            unset($this->_data[$key]);
+        }
+        return $this;
+    }
+
+    public function save()
+    {
+        foreach ($this->_data as $row) {
+            if (is_a($row, 'Model')) {
+                $row->save();
+            }
+        }
+        return $this;
     }
 }

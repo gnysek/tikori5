@@ -40,6 +40,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
      * @var bool Should created_at and updated_at fields be updated automatically?
      */
     public $timestamps = true;
+    public $massProtected = array(); // which attrs can be saved using mass
 
     public function __construct()
     {
