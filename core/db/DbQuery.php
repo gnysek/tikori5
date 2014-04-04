@@ -53,7 +53,6 @@ class DbQuery
 
     /**
      * @param $from
-     *
      * @return DbQuery
      */
     public function from($from)
@@ -61,6 +60,18 @@ class DbQuery
         $this->_from = (is_array($from)) ? $from : array($this->alias => $from);
         $this->_resetAliases($this->_isAssoc($this->_from));
         return $this;
+    }
+
+    /**
+     * Same as from() but this will force type to Q_INSERT
+     * @see from
+     * @param $into
+     * @return DbQuery
+     */
+    public function into($into)
+    {
+        $this->_type = self::Q_INSERT;
+        return $this->from($into);
     }
 
     private function _resetAliases($assoc = false)
@@ -76,7 +87,7 @@ class DbQuery
      *
      * @return DbQuery
      */
-    public function select($fields = null)
+    public function select($fields = NULL)
     {
         if (!empty($fields)) {
             $this->fields($fields);
@@ -150,7 +161,8 @@ class DbQuery
         return $this;
     }
 
-    public function group($groupby) {
+    public function group($groupby)
+    {
         $this->_group = $groupby;
         return $this;
     }
@@ -368,12 +380,14 @@ class DbQuery
             // group
 
             if (!empty($this->_group)) {
-                $sql[] = 'GROUP BY ' . /*implode(', ', */$this->_group;//);
+                $sql[] = 'GROUP BY ' . /*implode(', ', */
+                    $this->_group; //);
             }
 
             // order
             if (!empty($this->_order)) {
-                $sql[] = 'ORDER BY ' . /*implode(', ', */$this->_order;//);
+                $sql[] = 'ORDER BY ' . /*implode(', ', */
+                    $this->_order; //);
             }
 
             // limit
@@ -400,11 +414,11 @@ class DbQuery
 
         $table = $this->getTableInfo($table);
 
-        if ($table->$field->Null == 'YES' && $value === null) {
+        if ($table->$field->Null == 'YES' && $value === NULL) {
             return 'NULL';
         }
 
-        if ($value === null && $table->$field->Default !== null) {
+        if ($value === NULL && $table->$field->Default !== NULL) {
             $value = $table->$field->Default;
         }
 
@@ -424,9 +438,9 @@ class DbQuery
         return Core::app()->db->protect($value);
     }
 
-    private function _nullify($value = null)
+    private function _nullify($value = NULL)
     {
-        return ($value === null) ? 'NULL' : $value;
+        return ($value === NULL) ? 'NULL' : $value;
     }
 
     public function __toString()

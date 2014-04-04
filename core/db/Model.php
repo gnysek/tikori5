@@ -20,17 +20,26 @@ abstract class Model implements IteratorAggregate, ArrayAccess
     protected $_fields = array();
     protected $_values = array();
     protected $_rules = array();
-    protected $_related = null;
+    protected $_related = NULL;
     protected $_primaryKey = 'id';
     protected $_scopes = array();
     protected $_relations = array();
     protected $_isNewRecord = true;
+    /**
+     * @var array List of attributes that should be hidden when displaying (e.g. password)
+     */
+    protected $_hidden = array(); //TODO make it working
+    protected $_appends = array(); //TODO list of all getters that should be automatically added as fake attrs
     // TODO: allow to have more than one error per attribute
     protected $_errors = array();
     public $_modified = array();
     public $tableName = '';
-    public $_new = false;
+    //public $_new = false;
     public $_eagers = array();
+    /**
+     * @var bool Should created_at and updated_at fields be updated automatically?
+     */
+    public $timestamps = true;
 
     public function __construct()
     {
@@ -39,7 +48,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         $this->_fields = $this->getFields();
         if (!empty($this->_fields)) {
             foreach ($this->_fields as $v) {
-                $this->_values[$v] = null;
+                $this->_values[$v] = NULL;
             }
         }
         $this->_rules = $this->_prepareRules();
@@ -68,9 +77,9 @@ abstract class Model implements IteratorAggregate, ArrayAccess
      *
      * @return Model
      */
-    public static function model($model = null)
+    public static function model($model = NULL)
     {
-        if ($model == null) {
+        if ($model == NULL) {
             $model = get_called_class();
         }
         return new $model();
@@ -160,7 +169,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
             }
             $this->_isNewRecord = false;
         } else {
-            return null;
+            return NULL;
         }
         return $this;
     }
@@ -194,7 +203,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 //		return $this;
     }
 
-    public function findWhere($where = null, $limit = -1, $offset = 0, $conditions = array())
+    public function findWhere($where = NULL, $limit = -1, $offset = 0, $conditions = array())
     {
         $sql = DbQuery::sql()->select()->from($this->_table);
         if (!empty($where)) {
@@ -266,10 +275,10 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 
     public function findAll($limit = -1, $offset = 0, $conditions = array())
     {
-        return $this->findWhere(null, $limit, $offset, $conditions);
+        return $this->findWhere(NULL, $limit, $offset, $conditions);
     }
 
-    public function count($by = null)
+    public function count($by = NULL)
     {
         $result = DbQuery::sql()->select('COUNT(*) AS tikori_total')->from($this->_table)->execute();
         return (!empty($result[0])) ? $result[0]->tikori_total : 0;
@@ -291,13 +300,23 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         return $this;
     }
 
-    /**     * */
+    /**
+     * Delete that record from database
+     * @return null
+     */
     public function delete()
     {
+        DbQuery::sql()
+            ->delete()
+            ->from($this->_table)
+            ->where(array($this->_primaryKey, '=', $this->_values[$this->_primaryKey]))
+            ->execute();
 
+        return true; //TODO: change code that no more operations will be possible on that model
     }
 
-    public function deleteAll()
+    // those below should be done on collection maybe
+    /*public function deleteAll()
     {
 
     }
@@ -310,19 +329,30 @@ abstract class Model implements IteratorAggregate, ArrayAccess
     public function deleteBy($key, $value)
     {
 
-    }
+    }*/
 
-    /**     * */
-    public function insert()
+    /**
+     * Inserts current model values to database as new row
+     * @return bool
+     */
+    protected function _insert()
     {
-        DbQuery::sql()->insert()->from($this->_table)->fields($this->_getModifiedFields())->execute();
+        DbQuery::sql()
+            ->insert()
+            ->into($this->_table)
+            ->fields($this->_getModifiedFields())
+            ->execute();
         $this->_values[$this->getPK()] = Core::app()->db->lastId();
 
         return true;
     }
 
+    /**
+     * Updates current model values in database under same primary key
+     * @return bool
+     */
     // TODO: check that where() automatically will be always good - it should be...
-    public function update()
+    protected function _update()
     {
         $values = $this->_getModifiedFields();
         if (array_key_exists($this->_primaryKey, $values)) {
@@ -348,6 +378,26 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         return $modified;
     }
 
+    public function beforeCreate()
+    {
+        return true;
+    }
+
+    public function afterCreate()
+    {
+        return true;
+    }
+
+    public function beforeUpdate()
+    {
+        return true;
+    }
+
+    public function afterUpdate()
+    {
+        return true;
+    }
+
     public function beforeSave()
     {
         return true;
@@ -358,14 +408,45 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         return true;
     }
 
+    protected function _getDateFormat()
+    {
+        return time();
+        //return date('Y-m-d H:i:s', time());
+    }
+
     public function save($forceToSave = false)
     {
-        if ($this->beforeSave()) {
+        if ($this->timestamps) {
+            if ($this->_isNewRecord && in_array('created_at', $this->_fields)) {
+                $this->created_at = $this->_getDateFormat();
+            }
+
+            if (in_array('updated_at', $this->_fields)) {
+                $this->updated_at = $this->_getDateFormat();
+            }
+        }
+
+        Core::event(strtolower(get_called_class()) . '_before_save', $this);
+
+        $result = $this->_isNewRecord ? $this->beforeCreate() : $this->beforeUpdate();
+
+        if ($result && $this->beforeSave()) {
             if (!empty($this->_modified) or $forceToSave) {
-                $result = ($this->_isNewRecord) ? $this->insert() : $this->update();
+                $result = ($this->_isNewRecord) ? $this->_insert() : $this->_update();
                 if ($result == true) {
                     $result = $this->afterSave();
                 }
+
+                if ($result == true) {
+                    $result = $this->_isNewRecord ? $this->afterCreate() : $this->afterUpdate();
+                }
+
+                if ($this->_isNewRecord && $result == true) {
+                    $this->_isNewRecord = false;
+                }
+
+                Core::event(strtolower(get_called_class()) . '_after_save', $this);
+
                 return $result;
             } else {
                 return true;
@@ -393,7 +474,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 
                 switch ($rule) {
                     case 'required':
-                        if (empty($this->_values[$field]) && $this->_values[$field] == null) {
+                        if (empty($this->_values[$field]) && $this->_values[$field] == NULL) {
                             $valid = false;
                             $this->_errors[$field][] = 'Required';
                         }
@@ -414,7 +495,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
                         break;
                     case 'null':
                         if (empty($this->_values[$field])) {
-                            $this->_values[$field] = null;
+                            $this->_values[$field] = NULL;
                         }
                         break;
                     default:
@@ -551,14 +632,15 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 //                        if (Core::app()->mode != Core::MODE_PROD) {
 //                            return '<span style="color: red;">' . $value . ' IS UNDEFINED!</span>';
 //                        }
-                        return null;
+                        return NULL;
                     }
                 }
             }
         }
     }
 
-    public function getData() {
+    public function getData()
+    {
         return $this->_values;
     }
 
@@ -601,9 +683,9 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         return $this->_getRelated($relationName);
     }
 
-    private function _getRelated($relationName, $populate = true, $customValues = null)
+    private function _getRelated($relationName, $populate = true, $customValues = NULL)
     {
-        $result = null;
+        $result = NULL;
         switch ($this->_relations[$relationName][0]) {
             case self::HAS_MANY:
                 $rel = self::model($this->_relations[$relationName][1]);
