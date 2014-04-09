@@ -101,9 +101,13 @@ h3 {
 	line-height: 21px;
 	cursor: default;
 	background-color: #222;
-	overflow-x: auto;
+	/*overflow-x: auto;*/
 	border-radius: 3px;
 	display: block;
+}
+
+ol li:hover {
+	background-color: #333 !important;
 }
 
 .num {
@@ -132,7 +136,8 @@ h3 {
 	background-color: #2a2a2a;
 }
 
-.err, .highlight:hover, er {
+.err, .highlight:hover {
+	display: block;
 	background-color: #391414;
 }
 
@@ -140,14 +145,14 @@ h3 {
 	background-color: #492424;
 }
 
-.err .num {
+/*.err .num {
 	background-color: darkorange;
 	color: white
 }
 
 .err:hover .num {
 	background-color: goldenrod;
-}
+}*/
 
 .highlight {
 	display: block;

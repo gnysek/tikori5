@@ -7,6 +7,7 @@ class Lang
     public $translations = array();
     public $defaultLanguage = 'en';
     public $currentLanguage = 'en';
+    public $usingLanguages = false;
 
     public function __()
     {
@@ -27,6 +28,7 @@ class Lang
             return; //no languages?
         }
 
+        $this->usingLanguages = true;
         $this->defaultLanguage = $this->currentLanguage = $avaliableLanguages[0];
 
         // setup current language

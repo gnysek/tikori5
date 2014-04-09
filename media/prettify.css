@@ -14,7 +14,7 @@ pre .atv, code .atv { color: #65B042; } /* html/xml attribute value - green */
 pre .dec, code .dec { color: #3387CC; } /* decimal - blue */
 
 pre.prettyprint, code.prettyprint {
-/*        background-color: #000;
+		/*background-color: #000;
         -moz-border-radius: 8px;
         -webkit-border-radius: 8px;
         -o-border-radius: 8px;
@@ -23,19 +23,22 @@ pre.prettyprint, code.prettyprint {
         border-radius: 8px;*/
 }
 
-pre.prettyprint {
-/*        width: 95%;
+pre.prettyprint, code.prettyprint {
+		/*width: 95%;
         margin: 1em auto;
-        padding: 1em;
-        white-space: pre-wrap;*/
+        padding: 1em;*/
+        white-space: nowrap;
 }
 
+ol {
+	overflow: auto;
+}
 
 /* Specify class=linenums on a pre to get line numbering */
 ol.linenums { margin-top: 0; margin-bottom: 0; color: #AEAEAE; } /* IE indents via margin-left */
-li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8 { list-style-type: none }
+li.L0,li.L1,li.L2,li.L3,li.L4,li.L5,li.L6,li.L7,li.L8 { /*list-style-type: none*/ }
 /* Alternate shading for lines */
-li.L1,li.L3,li.L5,li.L7,li.L9 { }
+li.L1,li.L3,li.L5,li.L7,li.L9 { background-color: #252525; }
 
 @media print {
   pre .str, code .str { color: #060; }

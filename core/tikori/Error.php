@@ -62,6 +62,7 @@ class Error
      * @param Exception $exception
      * @param bool      $isErrorHandler if it's called by error handler we need to skip $excetpion->getFile to avoid duplicates on trace
      * @param bool      $dontExit
+     *
      * @return string
      */
     public static function display(Exception $exception, $isErrorHandler = false, $dontExit = false)
@@ -132,7 +133,7 @@ class Error
                                    'file'      => $exception->getFile(),
                                    'line'      => $exception->getLine(),
                                    'reqMethod' => (empty($e[Request::REQUEST_METHOD])) ? ''
-                                       : $e[Request::REQUEST_METHOD],
+                                           : $e[Request::REQUEST_METHOD],
                                    'reqPath'   => (empty($e[Request::PATH_INFO])) ? '' : $e[Request::PATH_INFO],
                                    #'files'     => $files,
                                    'view'      => $view,
@@ -174,7 +175,7 @@ class Error
                 uniqid();
 
             $html[] = '<p class="pink">' . $dispName . ':' . $line . '</p>' . PHP_EOL;
-            $html[] = '<p><code class="prettyprint lang-php highlight">'; #onclick="$(\'#' . $index . '\').toggle();"
+            $html[] = '<p><code class="prettyprint lang-php highlight linenums:5">'; #onclick="$(\'#' . $index . '\').toggle();"
             $html[] = '<span class="num nocode">' . sprintf('%04d', $line) . '.</span>';
             $html[] = ltrim(substr($file[$line - 1], 0, 85)) . '<br/>';
             $html[] = '<span class="num nocode">   &raquo;</span>';
@@ -208,22 +209,24 @@ class Error
             }
             $html[] = '</code></p>';
 
-            $html[] = PHP_EOL . '<div id="' . $index . '"><code class="prettyprint lang-php">';
+            $html[] = PHP_EOL . '<div id="' . $index . '"><code class="prettyprint lang-php linenums:' . max(1, $line - 10) . '">';
             $code = array();
             $checkedAgainstComment = false;
             for ($i = max(0, $line - 11); $i < min(count($file), $line + 10); $i++) {
 //					if (!preg_match('/[a-z\/]/i', $file[$i]))
 //						continue;
 
-                $code[] = '<span class="line">';
+                //$code[] = '<span class="line">';
                 if ($i == $line - 1) {
                     $code[] = '<span class="err">';
 //				} else if ($i != $line) {
 //					$code[] = PHP_EOL;
                 }
-                $code[] = '<span class="num nocode">' . sprintf('%04d', $i + 1) . '.</span>';
+                //$code[] = '<span class="num nocode">' . sprintf('%04d', $i + 1) . '.</span>';
 
+                $file[$i] = str_replace('    ', "\t", $file[$i]);
                 $file[$i] = htmlspecialchars(str_replace(array("\n", "\r", "\r\n"), '', $file[$i]));
+                $file[$i] = str_replace("\t", str_repeat('&nbsp;', 4), $file[$i]);
 
                 if ($checkedAgainstComment === false) {
                     if (preg_match('/^(\s+)\* /i', $file[$i])) {
@@ -231,11 +234,14 @@ class Error
                     }
                     $checkedAgainstComment = true;
                 }
-                $code[] = htmlspecialchars(str_replace(array("\n", "\r", "\r\n"), '', $file[$i]));
+                //$file[$i] = (str_replace(array("\n", "\r", "\r\n"), '', $file[$i]));
+
+                $code[] = $file[$i];
                 if ($i == $line - 1) {
                     $code[] = '</span>';
                 }
-                $code[] = '</span>';
+                //$code[] = '</span>';
+                $code[] = '<br/>';
             }
             $html[] = implode('', $code);
             $html[] = '</code></div>';

@@ -437,7 +437,7 @@ class Tikori
      * @param string $item    Path to item, like name or name/name
      * @param mixed  $default Return this when nothing found
      *
-     * @return Config|array
+     * @return TConfig|array
      */
     public function cfg($item = NULL, $default = NULL)
     {
