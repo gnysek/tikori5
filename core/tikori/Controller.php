@@ -167,9 +167,12 @@ class Controller extends ControllerView
             try {
                 ob_start();
                 // buffer
-                $this->beforeAction();
-                call_user_func_array(array($this, $this->getActionMethodName()), $finalParams);
-                $this->afterAction();
+                if ($this->beforeAction()) {
+                    call_user_func_array(array($this, $this->getActionMethodName()), $finalParams);
+                    $this->afterAction();
+                } else {
+                    $this->httpStatusAction(404);
+                }
                 // end buffer
                 $response = ob_get_clean();
 

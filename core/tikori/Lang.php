@@ -47,7 +47,7 @@ class Lang
         } elseif (Core::app()->cfg('languages/type') == 'domains') {
             $domains = Core::app()->cfg('languages/domains');
             if (count($domains)) {
-                $currentDomain = Core::app()->request->env['SERVER_NAME'];
+                $currentDomain = Core::app()->request->env['tikori.domain'];
                 foreach ($domains as $language => $domain) {
                     if ($currentDomain == $domain && in_array($language, $avaliableLanguages)) {
                         $this->currentLanguage = $language;

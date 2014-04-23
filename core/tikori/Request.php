@@ -378,6 +378,7 @@ class Request
 
         $host = explode('.', $parsedUrl['host']);
 
+        $env['tikori.domain'] = $host[count($host)-2] . '.' . $host[count($host)-1];
         $env['tikori.subdomains'] = array_slice($host, 0, count($host) - 2);
 
         if (!empty($subdomains)) {
