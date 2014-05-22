@@ -616,7 +616,6 @@ abstract class Model implements IteratorAggregate, ArrayAccess
           var_dump($value);
           var_dump($this->_relations);
           } */
-        $getter = 'get' . ucfirst($value);
         if (isset($this->_values[$value])) {
             return $this->_values[$value];
         } else {
@@ -627,17 +626,19 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 //			var_dump('relation ' . __CLASS__);
                     return $this->getRelated($value);
                 } else {
+                    $getter = 'get' . ucfirst($value);
                     if (method_exists($this, $getter)) {
                         return $this->$getter();
-                    } else {
+                    }/* else {
 //                        if (Core::app()->mode != Core::MODE_PROD) {
 //                            return '<span style="color: red;">' . $value . ' IS UNDEFINED!</span>';
 //                        }
                         return NULL;
-                    }
+                    }*/
                 }
             }
         }
+        return NULL;
     }
 
     public function getData()
@@ -781,7 +782,12 @@ abstract class Model implements IteratorAggregate, ArrayAccess
      */
     public function offsetExists($offset)
     {
-        return property_exists($this, $offset);
+        return array_key_exists($offset, $this->_values);//property_exists($this, $offset);
+    }
+
+    public function __isset($offset)
+    {
+        return $this->offsetExists($offset);
     }
 
     /**
@@ -794,7 +800,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
      */
     public function offsetGet($offset)
     {
-        return $this->$offset;
+        return $this->offsetExists($offset) ? $this->_values[$offset] : null;
     }
 
     /**

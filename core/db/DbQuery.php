@@ -53,6 +53,7 @@ class DbQuery
 
     /**
      * @param $from
+     *
      * @return DbQuery
      */
     public function from($from)
@@ -64,8 +65,11 @@ class DbQuery
 
     /**
      * Same as from() but this will force type to Q_INSERT
+     *
      * @see from
+     *
      * @param $into
+     *
      * @return DbQuery
      */
     public function into($into)
@@ -412,26 +416,30 @@ class DbQuery
             return implode(', ', $collect);
         }
 
-        $table = $this->getTableInfo($table);
+        $tableInfo = $this->getTableInfo($table);
 
-        if ($table->$field->Null == 'YES' && $value === NULL) {
+        if (!$tableInfo->offsetExists($field)) {
+            throw new DbError('Table ' . $table . ' don\'t have field ' . $field . '. Only ' . implode(', ', $tableInfo->getFields()));
+        }
+
+        if ($tableInfo->$field->Null == 'YES' && $value === NULL) {
             return 'NULL';
         }
 
-        if ($value === NULL && $table->$field->Default !== NULL) {
-            $value = $table->$field->Default;
+        if ($value === NULL && $tableInfo->$field->Default !== NULL) {
+            $value = $tableInfo->$field->Default;
         }
 
-        if (preg_match('/int/', $table->$field->Type)) {
+        if (preg_match('/int/', $tableInfo->$field->Type)) {
             return intval($value);
         }
-        if (preg_match('/double/', $table->$field->Type)) {
+        if (preg_match('/double/', $tableInfo->$field->Type)) {
             return doubleval($value);
         }
-        if (preg_match('/float/', $table->$field->Type)) {
+        if (preg_match('/float/', $tableInfo->$field->Type)) {
             return doubleval($value);
         }
-        if (preg_match('/decimal/', $table->$field->Type)) {
+        if (preg_match('/decimal/', $tableInfo->$field->Type)) {
             return preg_replace('[^0-9\.]', '', str_replace(',', '.', $value));
         }
 
@@ -452,6 +460,11 @@ class DbQuery
         return $this->_preparedSql;
     }
 
+    /**
+     * @param $table
+     *
+     * @return Record|null
+     */
     public function getTableInfo($table)
     {
         //TODO: force to not change

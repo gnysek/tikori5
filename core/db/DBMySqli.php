@@ -36,7 +36,9 @@ class DbMySqli extends DBAbstract
             throw new DbError('Nie wybrać tabeli: ' . $this->conn()->error);
         }
 
-        $this->conn()->set_charset('utf8');
+        if (!$this->conn()->set_charset('utf8')) {
+            throw new DbError('Cannot set encoding to UTF-8');
+        }
 
         Profiler::addLog(__CLASS__ . ' connected');
     }

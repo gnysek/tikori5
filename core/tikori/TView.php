@@ -23,13 +23,17 @@ class TView
     {
         //TODO: no error when file not found?
 
-        if (!empty($file) && $this->viewExists($file)) {
-            $out = $this->renderPartial($file, $data);
-        } else {
-            $out = (string)$data;
-        }
+        try {
+            if (!empty($file) && $this->viewExists($file)) {
+                $out = $this->renderPartial($file, $data);
+            } else {
+                $out = (string)$data;
+            }
 
-        $out = $this->renderPartial($this->layout, array('content' => $out));
+            $out = $this->renderPartial($this->layout, array('content' => $out));
+        } catch (Exception $e) {
+            throw new Exception('Rendering view error: ' . $e->getMessage());
+        }
 
         if ($return) {
             return $out;
@@ -145,7 +149,7 @@ class TView
     public function getJsForHead($prefix = '') {
         $return = array();
         foreach ($this->_jsFiles as $jsSrc) {
-            $return[] = '<script type="text/javascript" src="' . $jsSrc . '">';
+            $return[] = '<script type="text/javascript" src="' . $jsSrc . '"></script>';
         }
 
         return implode(PHP_EOL . $prefix, $return);

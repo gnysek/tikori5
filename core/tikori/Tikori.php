@@ -319,11 +319,11 @@ class Tikori
             $this->addAutoloadPaths(
                 array(
                      $module . '',
-                     $module . 'config',
+                     #$module . 'config',
                      $module . 'controllers',
                      $module . 'models',
                      $module . 'helpers',
-                     $module . 'views',
+                     #$module . 'views',
                      $module . 'widgets',
                 ), $includeCoreDir
             );

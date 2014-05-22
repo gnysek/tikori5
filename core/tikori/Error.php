@@ -177,7 +177,7 @@ class Error
             $html[] = '<p class="pink">' . $dispName . ':' . $line . '</p>' . PHP_EOL;
             $html[] = '<p><code class="prettyprint lang-php highlight linenums:5">'; #onclick="$(\'#' . $index . '\').toggle();"
             $html[] = '<span class="num nocode">' . sprintf('%04d', $line) . '.</span>';
-            $html[] = ltrim(substr($file[$line - 1], 0, 85)) . '<br/>';
+            $html[] = ltrim(substr($file[min(count($file), $line) - 1], 0, 85)) . '<br/>';
             $html[] = '<span class="num nocode">   &raquo;</span>';
             if (!empty($trace['class'])) {
                 $html[] = $trace['class'];

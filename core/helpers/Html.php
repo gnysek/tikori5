@@ -8,6 +8,27 @@ class Html
 
     public static function link($text, $url, $options = array())
     {
+        self::_linkCheckActiveClass($options, $url);
+        return html::htmlTag('a', $options + array('href' => self::url($url), 'title' => htmlspecialchars($text)), $text);
+//        return '<a href="' . self::url($url) . '"' . implode(' ', $opt) . '>' . $text . '</a>';
+    }
+
+    public static function linkTagWrapped($wrap = 'li', $text, $url, $wrapOptions = array(), $options = array())
+    {
+        $fakeOptions = (!empty($options['_activeByPath'])) ? array('_activeByPath' => $options['_activeByPath']) : array();
+        self::_linkCheckActiveClass($fakeOptions, $url);
+
+        if (!empty($options['_activeByPath'])) {
+            unset($options['_activeByPath']);
+        }
+
+        $html = self::link($text, $url, $options);
+
+        return self::htmlOpenTag($wrap, $fakeOptions + $wrapOptions) . $html . self::htmlCloseTag('li');
+    }
+
+    protected static function _linkCheckActiveClass(& $options, $url)
+    {
         $current = Core::app()->request != NULL ? trim(Core::app()->request->getRouterPath(), '/') : '';
         $inCurrentLink = ($current == $url);
 
@@ -35,9 +56,7 @@ class Html
                 $options['class'] = self::$hrefActiveClass;
             }
         }
-
-        return html::htmlTag('a', $options + array('href' => self::url($url), 'title' => htmlspecialchars($text)), $text);
-//        return '<a href="' . self::url($url) . '"' . implode(' ', $opt) . '>' . $text . '</a>';
+        return $options;
     }
 
     public static function url($url = array())
@@ -104,7 +123,7 @@ class Html
 
     public static function beginForm($action = '/', $method = 'post', $upload = false, $class = NULL)
     {
-        return '<form' . ((!empty($class)) ? (' class="' . $class . '"') : '') . '  action="' . self::url($action) . '" method="' . $method . '"'
+        return '<form' . ((!empty($class)) ? (' class="' . $class . '"') : '') . ' action="' . self::url($action) . '" method="' . $method . '"'
         . (($upload) ? ' enctype="multipart/form-data"' : '') . '>';
     }
 
