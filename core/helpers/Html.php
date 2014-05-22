@@ -188,6 +188,16 @@ class Html
         return '';
     }
 
+    public static function errorsInModel($model)
+    {
+        $errors = $model->getErrors();
+        if (!empty($errors)) {
+            return self::htmlTag('div', array('style' => 'color: red; font-size: 10px;'), implode('<br/>', $errors));
+        }
+
+        return '';
+    }
+
     public static function labelModel($model, $field, $text = NULL)
     {
         return self::htmlTag(
