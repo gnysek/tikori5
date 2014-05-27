@@ -271,6 +271,17 @@ class Collection implements ArrayAccess, Iterator, Countable
         return new Collection($values);
     }
 
+    public function countRowsByColumnValue($column, $value) {
+        $total = 0;
+        foreach ($this->_data as $record) {
+            if (($record[$column] == $value)) {
+                $total++;
+            }
+        }
+
+        return $total;
+    }
+
     public function delete()
     {
         foreach ($this->_data as $key => $row) {

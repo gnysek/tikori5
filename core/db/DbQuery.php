@@ -182,10 +182,14 @@ class DbQuery
 
     public function conditions(array $conditions)
     {
-        foreach ($conditions as $conditionName => $condition) {
+        foreach ($conditions as $conditionName => $conditionValue) {
             switch ($conditionName) {
                 case 'order':
-                    $this->order($condition);
+                    $this->order($conditionValue);
+                    break;
+                case 'where':
+                    $this->where($conditionValue);
+                    break;
             }
         }
 

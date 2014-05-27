@@ -32,6 +32,12 @@ class RadController extends Controller
         }
 
         $buildFile = array('<?php');
+        $buildFile[] = '/** Class ' . ucfirst(strtolower($model));
+        $buildFile[] = ' *';
+        foreach ($result as $v) {
+            $buildFile[] = ' * @property ' . (preg_match('/int/', $v['Type']) ? 'int' : 'string') . ' $' . $v['Field'];
+        }
+        $buildFile[] = ' */';
         $buildFile[] = 'class ' . ucfirst(strtolower($model)) . ' extends Model {';
         $buildFile[] = '';
         $buildFile[] = '    protected $_primaryKey = \'' . $primaryKey . '\';';
@@ -44,7 +50,7 @@ class RadController extends Controller
 
         $buildFile[] = '    /**';
         $buildFile[] = '     * @param null|string $model';
-        $buildFile[] = '     * @return ' . ucfirst(strtolower($model));
+        $buildFile[] = '     * @return ' . ucfirst(strtolower($model)) . '|Model';
         $buildFile[] = '     */';
         $buildFile[] = '    public static function model($model = __CLASS__)';
         $buildFile[] = '    {';

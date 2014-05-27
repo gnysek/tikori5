@@ -285,6 +285,20 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         return (!empty($result[0])) ? $result[0]->tikori_total : 0;
     }
 
+    /**
+     * @param $by
+     * @param $conditions
+     *
+     * @return int
+     */
+    public function countWhere($by = null, $conditions)
+    {
+        $sql = DbQuery::sql()->select('COUNT(*) AS tikori_total')->from($this->_table);
+        $sql->conditions($conditions);
+        $result = $sql->execute();
+        return (!empty($result[0])) ? $result[0]->tikori_total : 0;
+    }
+
     // eager
     public function with($with)
     {
@@ -303,6 +317,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 
     /**
      * Delete that record from database
+     *
      * @return null
      */
     public function delete()
@@ -334,6 +349,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 
     /**
      * Inserts current model values to database as new row
+     *
      * @return bool
      */
     protected function _insert()
@@ -350,6 +366,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 
     /**
      * Updates current model values in database under same primary key
+     *
      * @return bool
      */
     // TODO: check that where() automatically will be always good - it should be...
@@ -464,6 +481,8 @@ abstract class Model implements IteratorAggregate, ArrayAccess
             return false;
         }
 
+        $this->_filter();
+
         $valid = true;
         foreach ($this->_rules as $field => $entry) {
             foreach ($entry['rules'] as $rule) {
@@ -506,6 +525,44 @@ abstract class Model implements IteratorAggregate, ArrayAccess
             }
         }
         return $valid;
+    }
+
+    public function filters()
+    {
+        return array();
+    }
+
+    public function _filter()
+    {
+        foreach ($this->filters() as $filters) {
+            if (count($filters) !== 2) {
+                throw new Exception('Error in filter for ' . __CLASS__);
+            }
+            var_dump($filters);
+            list($rows, $filter) = $filters;
+            if (!is_array($rows)) {
+                $rows = array($rows);
+            }
+
+            foreach ($rows as $field) {
+                switch ($filter) {
+                    case 'trim':
+                        if (!empty($this->_values[$field])) {
+                            $try = trim($this->_values[$field]);
+                            if ($try !== $this->_values[$field]) {
+                                if (!in_array($field, $this->_modified) && $try != $this->_values[$field]) {
+                                    $this->_modified[] = $field;
+                                }
+                                $this->_values[$field] = $try;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        }
     }
 
     public function getErrors()
@@ -616,8 +673,12 @@ abstract class Model implements IteratorAggregate, ArrayAccess
           var_dump($value);
           var_dump($this->_relations);
           } */
-        if (isset($this->_values[$value])) {
-            return $this->_values[$value];
+        if (in_array($value, $this->_fields)) {
+            if (array_key_exists($value, $this->_values)) {
+                return $this->_values[$value];
+            } else {
+                return null;
+            }
         } else {
             if (isset($this->_related[$value])) {
                 return $this->_related[$value];
@@ -629,12 +690,13 @@ abstract class Model implements IteratorAggregate, ArrayAccess
                     $getter = 'get' . ucfirst($value);
                     if (method_exists($this, $getter)) {
                         return $this->$getter();
-                    }/* else {
-//                        if (Core::app()->mode != Core::MODE_PROD) {
-//                            return '<span style="color: red;">' . $value . ' IS UNDEFINED!</span>';
-//                        }
-                        return NULL;
-                    }*/
+                    }
+                    /* else {
+                    //                        if (Core::app()->mode != Core::MODE_PROD) {
+                    //                            return '<span style="color: red;">' . $value . ' IS UNDEFINED!</span>';
+                    //                        }
+                                            return NULL;
+                                        }*/
                 }
             }
         }
@@ -782,7 +844,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
      */
     public function offsetExists($offset)
     {
-        return array_key_exists($offset, $this->_values);//property_exists($this, $offset);
+        return array_key_exists($offset, $this->_values); //property_exists($this, $offset);
     }
 
     public function __isset($offset)

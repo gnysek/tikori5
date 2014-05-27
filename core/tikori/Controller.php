@@ -38,6 +38,11 @@ class Controller extends ControllerView
         return true;
     }
 
+    public function __get($name)
+    {
+        return null;
+    }
+
     /*public function run($actionID) {
         if (($action = $this->createAction($actionID)) !== null) {
 //            if ($this->beforeAction()) {
