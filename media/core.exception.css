@@ -1,5 +1,3 @@
-@import "reset.css";
-
 * {
 	box-sizing: border-box;
 }
@@ -17,7 +15,7 @@ body {
 }
 
 code, pre, tt {
-	font-family: 'Consolas', monospace;
+	font-family: Consolas, "Courier New", monospace;
 }
 
 #main {
@@ -56,6 +54,7 @@ code, pre, tt {
 
 h1 {
 	font-size: 25px;
+	line-height: 28px;
 	color: dodgerblue;
 	font-weight: bold;
 }
@@ -63,10 +62,12 @@ h1 {
 h2 {
 	font-size: 20px;
 	color: dodgerblue;
+	display: inline-block;
 }
 
 h3 {
-	font-weight: bold
+	font-weight: bold;
+	display: inline-block;
 }
 
 .box {
@@ -88,6 +89,7 @@ h3 {
 	-webkit-hyphens: auto;
 	-moz-hyphens: auto;
 	hyphens: auto;
+	display: block;
 }
 
 /** OLD ONE **/
@@ -163,4 +165,9 @@ ol li:hover {
 
 .highlight .num {
 	background-color: transparent;
+}
+
+p.pink {
+	color: lightpink;
+	font-family: Consolas, "Courier New", monospace;
 }
