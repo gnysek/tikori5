@@ -17,12 +17,18 @@ class DbMySqli extends DBAbstract
             throw new DbError('MySqli disabled');
         }
 
-        $this->_conn = new mysqli(
-            Core::app()->cfg('db/dbhost'),
-            Core::app()->cfg('db/dbuser'),
-            Core::app()->cfg('db/dbpass'),
-            Core::app()->cfg('db/dbname')
-        );
+        mysqli_report(MYSQLI_REPORT_STRICT);
+
+        try {
+            $this->_conn = new mysqli(
+                Core::app()->cfg('db/dbhost'),
+                Core::app()->cfg('db/dbuser'),
+                Core::app()->cfg('db/dbpass'),
+                Core::app()->cfg('db/dbname')
+            );
+        } catch (mysqli_sql_exception $e) {
+            throw new DbError('Can\'t connect to database: ' . mysqli_connect_error());
+        }
 
         if (mysqli_connect_error()) {
             throw new DbError('Can\'t connect to database: ' . mysqli_connect_error());
