@@ -16,7 +16,8 @@
         <div id="left">
             <?php foreach ($errors as $eid => $errorData): ?>
                 <div id="error_<?php echo $eid; ?>" class="box">
-                    <h1><strong><?php echo '[' . ($eid + 1) . '] ' . $errorData['message']; ?></strong></h1>
+                    <p>Looks that there is a problem here:</p>
+                    <h1><strong><?php if (count($errors) > 1): echo ($eid + 1) . '/' . count($errors); endif; ?><?php echo $errorData['message']; ?></strong></h1>
                     <code class="box-wrap"><?php echo $errorData['file']; ?>:<?php echo $errorData['line']; ?></code>
                 </div>
                 <?php foreach ($errorData['files'] as $fid => $fileData): ?>
