@@ -538,7 +538,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
             if (count($filters) !== 2) {
                 throw new Exception('Error in filter for ' . __CLASS__);
             }
-            var_dump($filters);
+            //var_dump($filters);
             list($rows, $filter) = $filters;
             if (!is_array($rows)) {
                 $rows = array($rows);
@@ -572,7 +572,8 @@ abstract class Model implements IteratorAggregate, ArrayAccess
             $resultErrors[] = $this->getAttributeLabel($field) . ': ' . implode('<br/>', $errors);
         }
 
-        return implode('<hr/>', $resultErrors);
+        return $resultErrors;
+        //return implode('<hr/>', $resultErrors);
     }
 
     public function addError($field, $error)

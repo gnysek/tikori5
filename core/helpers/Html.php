@@ -188,6 +188,10 @@ class Html
         return '';
     }
 
+    /**
+     * @param $model Model
+     * @return string
+     */
     public static function errorsInModel($model)
     {
         $errors = $model->getErrors();

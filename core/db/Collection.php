@@ -271,7 +271,28 @@ class Collection implements ArrayAccess, Iterator, Countable
         return new Collection($values);
     }
 
-    public function countRowsByColumnValue($column, $value) {
+    /**
+     * Gets value for field $relationField from related record $relationName, by this collection $column and $value
+     * like for item with category_id == 8: $model->category->name == $this->getRelatedValueByColumnValue('category_id', 8, 'category', 'name');
+     * @param $column
+     * @param $value
+     * @param $relationName
+     * @param $relationField
+     * @return Collection|mixed|null
+     */
+    public function getRelatedValueByColumnValue($column, $value, $relationName, $relationField)
+    {
+        foreach ($this->_data as $record) {
+            if (($record[$column] == $value)) {
+                return $record->$relationName->$relationField;
+            }
+        }
+
+        return NULL;
+    }
+
+    public function countRowsByColumnValue($column, $value)
+    {
         $total = 0;
         foreach ($this->_data as $record) {
             if (($record[$column] == $value)) {
