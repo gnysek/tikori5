@@ -400,7 +400,7 @@ class DbQuery
 
             // limit
             if ($this->_limit > -1) {
-                $sql[] = 'LIMIT ' . $this->_limit . ', ' . $this->_offset;
+                $sql[] = 'LIMIT ' . $this->_offset . ', ' . $this->_limit;
             }
         }
 
