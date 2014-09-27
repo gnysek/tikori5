@@ -14,16 +14,31 @@ class BreadcrumbsWidget extends Widget
         }
 
         $links = array();
-        $links[] = Html::link($this->homeLink, '/', array('title' => $this->homeTitle));
+        $links[] = $this->__createLink($this->homeLink, '/', $this->homeTitle);
 
         foreach ($this->links as $text => $url) {
             if (is_array($url)) {
-                $links[] = Html::link($text, $url, array('title' => $text));
+                $links[] = $this->__createLink($text, $url, $text);
             } else {
-                $links[] = $url;
+                $links[] = $this->__createNolink($url);
             }
         }
 
+        $this->__toHtml($links);
+    }
+
+    protected function __createLink($text, $url, $title)
+    {
+        return Html::link($text, $url, array('title' => $title));
+    }
+
+    protected function __createNolink($text)
+    {
+        return $text;
+    }
+
+    protected function __toHtml($links)
+    {
         echo '<div class="breadcrumbs">' . implode(' &raquo; ', $links) . '</div>';
     }
 
