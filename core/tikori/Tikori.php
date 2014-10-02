@@ -91,6 +91,10 @@ class Tikori
         // register autoloads
         $this->registerAutoloadPaths();
 
+        if (function_exists('xdebug_get_code_coverage')) {
+            Profiler::addLog('XDEBUG IS ENABLED! It may slow down request');
+        }
+
         Profiler::addLog('Registered autoload');
 
         // register error handlers
@@ -124,7 +128,7 @@ class Tikori
         }
 
         // enable cache, we need that for config
-        $this->setModule('cache', new Cache());
+        $this->setComponent('cache', new Cache());
         $regenerateAutloads = false;
         if ($this->cache->findCache('config-sum')) {
 
@@ -149,7 +153,7 @@ class Tikori
             } else {
                 $db = new DbPDO();
             }
-            $this->setModule('db', $db);
+            $this->setComponent('db', $db);
         }
 
         // default routes
@@ -301,7 +305,7 @@ class Tikori
         $moduleClass = ucfirst($module) . 'Module';
         if (Core::autoload($moduleClass, true)) {
             $class = new $moduleClass;
-            $this->setModule($module, $class);
+            $this->setComponent($module, $class);
         }
     }
 
@@ -485,12 +489,12 @@ class Tikori
     private $_loadedModules = array();
 
     /**
-     * Sets or unsets module
+     * Sets or unsets component
      *
      * @param string       $id Identifier of component
      * @param TModule|null $module
      */
-    public function setModule($id, $module)
+    public function setComponent($id, $module)
     {
         if ($module === NULL) {
             unset($this->_loadedModules[$id]);
@@ -503,12 +507,12 @@ class Tikori
     }
 
     /**
-     * @param array $modules
+     * @param array $components
      */
-    public function setModules(array $modules)
+    public function setComponents(array $components)
     {
-        foreach ($modules as $id => $module) {
-            $this->setModule($id, $module);
+        foreach ($components as $id => $component) {
+            $this->setComponent($id, $component);
         }
     }
 
@@ -521,13 +525,13 @@ class Tikori
         }
     }
 
-    public function module($moduleName)
+    public function component($componentName)
     {
-        $module = $this->__get($moduleName);
+        $module = $this->__get($componentName);
         if ($module === NULL) {
-            $module = setModule(strtolower($moduleName), new $moduleName . 'Module');
+            return $this->setComponent(strtolower($componentName), new $componentName . 'Module');
         }
-        return $this->__get($moduleName);
+        return $this->__get($componentName);
     }
 
 //	/**

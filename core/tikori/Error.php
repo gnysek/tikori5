@@ -7,6 +7,7 @@
  */
 class Error
 {
+    public static $renderStarted = false;
 
     /* register all handlers */
     public static function registerErrors()
@@ -28,11 +29,11 @@ class Error
     /**
      * Handler for set_error_handler
      *
-     * @param int    $errno
+     * @param int $errno
      * @param string $errstr
      * @param string $errfile
-     * @param int    $errline
-     * @param mixed  $errcontext
+     * @param int $errline
+     * @param mixed $errcontext
      */
     public static function errh($errno, $errstr, $errfile, $errline, $errcontext)
     {
@@ -60,8 +61,8 @@ class Error
      * Displays error using error.fatal.php view
      *
      * @param Exception $exception
-     * @param bool      $isErrorHandler if it's called by error handler we need to skip $excetpion->getFile to avoid duplicates on trace
-     * @param bool      $dontExit
+     * @param bool $isErrorHandler if it's called by error handler we need to skip $excetpion->getFile to avoid duplicates on trace
+     * @param bool $dontExit
      *
      * @return string
      */
@@ -107,10 +108,10 @@ class Error
 
             $errors[] = array(
                 'message' => $current->getMessage(),
-                'id'      => (count($errors)),
-                'files'   => $files,
-                'file'    => str_replace(TIKORI_ROOT, '...', $exception->getFile()),
-                'line'    => $exception->getLine(),
+                'id' => (count($errors)),
+                'files' => $files,
+                'file' => str_replace(TIKORI_ROOT, '...', $exception->getFile()),
+                'line' => $exception->getLine(),
             );
 
         } while ($current = $current->getPrevious());
@@ -125,20 +126,28 @@ class Error
             );
         }
 
-        $body = $view->renderPartial(
-            'core.exception', array(
-                                   'message'   => $exception->getMessage(),
-                                   'errors'    => array_reverse($errors),
-                                   #'messages'  => $messages,
-                                   'file'      => $exception->getFile(),
-                                   'line'      => $exception->getLine(),
-                                   'reqMethod' => (empty($e[Request::REQUEST_METHOD])) ? ''
-                                           : $e[Request::REQUEST_METHOD],
-                                   'reqPath'   => (empty($e[Request::PATH_INFO])) ? '' : $e[Request::PATH_INFO],
-                                   #'files'     => $files,
-                                   'view'      => $view,
-                              ), true
-        );
+        if (self::$renderStarted == false) {
+            self::$renderStarted = true;
+            $body = $view->renderPartial(
+                'core.exception', array(
+                    'message' => $exception->getMessage(),
+                    'errors' => array_reverse($errors),
+                    #'messages'  => $messages,
+                    'file' => $exception->getFile(),
+                    'line' => $exception->getLine(),
+                    'reqMethod' => (empty($e[Request::REQUEST_METHOD])) ? ''
+                            : $e[Request::REQUEST_METHOD],
+                    'reqPath' => (empty($e[Request::PATH_INFO])) ? '' : $e[Request::PATH_INFO],
+                    #'files'     => $files,
+                    'view' => $view,
+                ), true
+            );
+        } else {
+            $body = '<p>There was an error and probably it occurs also when rendering error page:</p>';
+            $body .= ' <b>' . $exception->getMessage() . '</b>';
+            $body .= ' in <code>' . $exception->getFile() . '</code>';
+            $body .= ' on line ' . $exception->getLine();
+        }
 
         if ($dontExit === true) {
             return $body;
@@ -156,8 +165,8 @@ class Error
      * Prints error code from file
      *
      * @param string $filename
-     * @param int    $line
-     * @param array  $trace
+     * @param int $line
+     * @param array $trace
      *
      * @return string HTML with code
      */

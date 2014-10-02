@@ -96,8 +96,8 @@ class Core
     /**
      * Registers values under given name
      *
-     * @param string  $name      Name of registry
-     * @param mixed   $value     Value
+     * @param string $name Name of registry
+     * @param mixed $value Value
      * @param boolean $overwrite Overwrite when exists or not?
      *
      * @return boolean Whether succeded or not
@@ -114,8 +114,8 @@ class Core
     /**
      * Gets value from registry
      *
-     * @param string $name    If null, will return everything, else will return value under key or $default
-     * @param mixed  $default Returns when $name don't exists in registry
+     * @param string $name If null, will return everything, else will return value under key or $default
+     * @param mixed $default Returns when $name don't exists in registry
      *
      * @return mixed Return all data when $name is null, registry value if found, or $default when not found
      */
@@ -146,7 +146,7 @@ class Core
      * Autoloader method
      *
      * @param string $class Class name
-     * @param bool   $throw Should it throw or not
+     * @param bool $throw Should it throw or not
      *
      * @return boolean
      * @throws Exception
@@ -173,7 +173,7 @@ class Core
             $search = ucfirst($class);
         }
 
-        $search = '/' . $search . '.php';
+        $search = DIRECTORY_SEPARATOR . $search . '.php';
 
         $filenames = array();
 
@@ -195,7 +195,7 @@ class Core
 
         if ($throw) {
             throw new Exception("Cannot autoload class " . $class . ' [' . $search
-            . '] ' /* . implode(', ', $filenames)*/);
+                . '] ' /* . implode(', ', $filenames)*/);
         }
         return false;
     }
@@ -203,7 +203,7 @@ class Core
     /**
      * Gets time from app start to now
      *
-     * @var int     $decimalPart        how many digists in decimal part you want
+     * @var int $decimalPart how many digists in decimal part you want
      * @var boolean $returnLessWhenZero should it return &lt; 0.0001 when time == 0
      * @return string
      */
@@ -256,10 +256,14 @@ class Core
         }
     }
 
-    private static $_tiCoreClasses
-        = array(
-            'Tikori' => 'tikori/Tikori.php',
-        );
+    public static function component($componentName)
+    {
+        return Core::app()->component($componentName);
+    }
+
+    private static $_tiCoreClasses = array(
+        'Tikori' => 'tikori/Tikori.php',
+    );
 
 }
 

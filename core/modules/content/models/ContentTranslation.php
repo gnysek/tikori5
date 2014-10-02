@@ -49,7 +49,6 @@ class ContentTranslation extends Model
     public function getFields()
     {
         return array(
-            'content', //TODO: sure?
             'id',
             'page_id',
             'language_id',
@@ -102,5 +101,3 @@ class ContentTranslation extends Model
     }
 
 }
-
-?>
