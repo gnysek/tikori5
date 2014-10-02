@@ -20,6 +20,9 @@ class TSessionModule extends TModule
     const SKEY_COOKIE = 2;
     const SKEY_OTHER = 3;
 
+    const TIME_REFRESH = 60;
+    const TIME_OLD = 3600;
+
     protected $_id = self::U_ANONIM;
     protected $_name = self::DEFAULT_NAME;
     protected $_ip = '0.0.0.0';
@@ -131,8 +134,11 @@ class TSessionModule extends TModule
     public function __destruct()
     {
         if ($this->_session !== NULL) {
-            if ($this->_session->current_time > time() - 60) {
+            if ($this->_session->current_time < $this->_time - self::TIME_REFRESH) {
                 $this->_session->save();
+
+                $oldSessions = Session::model()->findWhere(array('current_time', '<=', $this->_time - self::TIME_OLD), 10, 0);
+                $oldSessions->delete();
             }
         }
     }

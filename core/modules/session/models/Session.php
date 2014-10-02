@@ -23,7 +23,7 @@ class Session extends Model
     /**
      * @param string|null $model
      *
-     * @return Session
+     * @return Session|Model
      */
     public static function model($model = null)
     {

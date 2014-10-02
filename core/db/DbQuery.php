@@ -278,7 +278,7 @@ class DbQuery
         // from
         $from = array();
         foreach ($this->_from as $key => $val) {
-            $from[] = '`' . $val . '` ' . (($this->_type == self::Q_SELECT) ? ' `' . $this->_fromAliases[$val] . '`' : '');
+            $from[] = '`' . $val . '` ' . ((in_array($this->_type,array(self::Q_SELECT, self::Q_REPLACE))) ? ' `' . $this->_fromAliases[$val] . '`' : '');
         }
         $sql[] = implode(', ', $from);
 
@@ -358,7 +358,7 @@ class DbQuery
                     }*/
 
                     $bld = '';
-                    if ($this->_type != self::Q_UPDATE) {
+                    if (!in_array($this->_type, array(self::Q_UPDATE, self::Q_DELETE))) {
                         $bld
                             = '`' . $this->_fromAliases[(empty($w[3]))
                                 ? $this->_from[key($this->_from)]
