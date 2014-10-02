@@ -63,10 +63,10 @@ class Tikori
     public function registerCoreModules()
     {
         $modules = array(
-            'errorHandler'  => array('class' => 'Error'),
-            'session'       => array('class' => 'TSession'),
-            'user'          => array('class' => 'TUser'),
-            'cache'         => array('class' => 'TCache'),
+            'errorHandler' => array('class' => 'Error'),
+            'session' => array('class' => 'TSession'),
+            'user' => array('class' => 'TUser'),
+            'cache' => array('class' => 'TCache'),
             'widgetFactory' => array('class' => 'TWidgetFactory'),
         );
         //TODO: enable
@@ -166,8 +166,8 @@ class Tikori
         Route::set('tikori-default', '(<controller>(/<action>(/<tparams>)))', array('tparams' => '[a-zA-Z0-9_/]+'))
             ->defaults(
                 array(
-                     'controller' => ($this->cfg('default') !== NULL) ? $this->cfg('default') : 'default',
-                     'action'     => 'index',
+                    'controller' => ($this->cfg('default') !== NULL) ? $this->cfg('default') : 'default',
+                    'action' => 'index',
                 )
             );
 
@@ -236,6 +236,8 @@ class Tikori
             }
 //                }
 //            }
+        } else {
+            throw new Exception('xxx');
         }
     }
 
@@ -267,8 +269,13 @@ class Tikori
                     $file = $source . ($module == 'core' ? '' : '/' . $module) . $path . 'controllers/' . $areaName . $className . '.php';
                     if (file_exists($file)) {
                         try {
+                            // TODO: autload should be used here I think...
                             include_once $file;
-                            $class = new $classToCreate($route->area);
+                            if (class_exists($classToCreate, false)) {
+                                $class = new $classToCreate($route->area);
+                            } else {
+                                throw new Exception('Class not found');
+                            }
                             $class->module = $module;
 //                        $route->dispatch($class);
                             return (array($class, $route->action));
@@ -322,13 +329,13 @@ class Tikori
         foreach (array(true, false) as $includeCoreDir) {
             $this->addAutoloadPaths(
                 array(
-                     $module . '',
-                     #$module . 'config',
-                     $module . 'controllers',
-                     $module . 'models',
-                     $module . 'helpers',
-                     #$module . 'views',
-                     $module . 'widgets',
+                    $module . '',
+                    #$module . 'config',
+                    $module . 'controllers',
+                    $module . 'models',
+                    $module . 'helpers',
+                    #$module . 'views',
+                    $module . 'widgets',
                 ), $includeCoreDir
             );
         }
@@ -348,7 +355,7 @@ class Tikori
      *
      * @param string|array $paths Paths to add as array values
      *
-     * @param bool         $core  Is it core path or not ?
+     * @param bool $core Is it core path or not ?
      *
      * @return null
      */
@@ -420,10 +427,10 @@ class Tikori
     public function defaultCfg()
     {
         $this->_config = new CConfig(array(
-                                          'appname' => 'Unknown application',
-                                          //				'url' => DefC_Url::getDefValues(),
-                                          //				'db' => DefC_Db::getDefValues(),
-                                     ));
+            'appname' => 'Unknown application',
+            //				'url' => DefC_Url::getDefValues(),
+            //				'db' => DefC_Db::getDefValues(),
+        ));
     }
 
     /**
@@ -438,8 +445,8 @@ class Tikori
     }
 
     /**
-     * @param string $item    Path to item, like name or name/name
-     * @param mixed  $default Return this when nothing found
+     * @param string $item Path to item, like name or name/name
+     * @param mixed $default Return this when nothing found
      *
      * @return TConfig|array
      */
@@ -491,7 +498,7 @@ class Tikori
     /**
      * Sets or unsets component
      *
-     * @param string       $id Identifier of component
+     * @param string $id Identifier of component
      * @param TModule|null $module
      */
     public function setComponent($id, $module)

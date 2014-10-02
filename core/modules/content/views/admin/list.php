@@ -1,3 +1,4 @@
+<?php /* @var $this Controller */ ?>
 <?php $this->breadcrumbs = array(
     'Admin'   => array('/'),
     'Content' => array('content'),
