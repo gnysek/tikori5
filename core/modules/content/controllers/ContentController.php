@@ -9,9 +9,13 @@ class ContentController extends ContentAuth
 
     public function nodeAction($id)
     {
-        $result = ContentTranslation::model()->findBy('page_id', $id, true);
+        $result = ContentTranslation::model()->with('content')->findBy('page_id', $id, true);
 
-        $this->render('node', array('node' => $result));
+        if ($result) {
+            $this->render('node', array('node' => $result));
+        } else {
+            $this->forward404();
+        }
     }
 
     /**
@@ -43,7 +47,7 @@ class ContentController extends ContentAuth
 
     public function indexAction()
     {
-        $content = Content::model()->findWhere(array(array('parent', 'IS', null), array('type', '=', 1)), 10);
+        $content = Content::model()->findWhere(array(array('parent', 'IS', null), array('type', '=', 0)), 10);
         $result = ContentTranslation::model()->findAll(10);
 
         $this->render('list', array('collection' => $result, 'content' => $content));

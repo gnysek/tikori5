@@ -48,8 +48,11 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         $this->_relations = $this->relations();
         $this->_fields = $this->getFields();
         if (!empty($this->_fields)) {
-            foreach ($this->_fields as $v) {
-                $this->_values[$v] = NULL;
+            foreach ($this->_fields as $fieldName) {
+                if (array_key_exists($fieldName, $this->_relations)) {
+                    throw new DbError('Model ' . get_class($this) . ' have field named same as relation: ' . $fieldName);
+                }
+                $this->_values[$fieldName] = NULL;
             }
         }
         $this->_rules = $this->_prepareRules();
@@ -182,25 +185,27 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 
     public function findBy($key, $value, $onlyFirst = false)
     {
+        $results = $this->findWhere(array($key, '=', $value));
+        return ($onlyFirst && count($results) >= 1) ? $results[0] : $results;
         // it's now made in DbQuery
 //        if (!is_numeric($value)) {
 //            $value = Core::app()->db->protect($value);
 //        }
-        $sql = DbQuery::sql()->select()->from($this->_table)->where(array($key, '=', $value));
-        $result = $sql->execute();
-        $return = array();
-        foreach ($result as $row) {
-            /* @var $row Result */
-            $c = self::model(get_called_class());
-            $c->setValues($row->getIterator()->getArrayCopy());
-
-            if ($onlyFirst) {
-                return $c;
-            }
-
-            $return[] = $c;
-        }
-        return $return;
+//        $sql = DbQuery::sql()->select()->from($this->_table)->where(array($key, '=', $value));
+//        $result = $sql->execute();
+//        $return = array();
+//        foreach ($result as $row) {
+//            /* @var $row Result */
+//            $c = self::model(get_called_class());
+//            $c->setValues($row->getIterator()->getArrayCopy());
+//
+//            if ($onlyFirst) {
+//                return $c;
+//            }
+//
+//            $return[] = $c;
+//        }
+//        return $return;
 //		return $this;
     }
 
@@ -307,8 +312,12 @@ abstract class Model implements IteratorAggregate, ArrayAccess
                 $this->with($relationName);
             }
         } else {
-            if (!in_array($with, $this->_eagers) && array_key_exists($with, $this->_relations)) {
-                $this->_eagers[] = $with;
+            if (!in_array($with, $this->_eagers)) {
+                if (array_key_exists($with, $this->_relations)) {
+                    $this->_eagers[] = $with;
+                } else {
+                    throw new Exception("Relation $with not found in model " . get_class($this));
+                }
             }
         }
 
@@ -661,7 +670,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
      * HAS_MANY: e.g. a team has many members;
      * MANY_MANY: e.g. a member has many skills and a skill belongs to a member.
      *
-     * @return type
+     * @return array
      */
     public function relations()
     {
@@ -670,10 +679,6 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 
     public function __get($value)
     {
-        /* if (__CLASS__ == 'Member') {
-          var_dump($value);
-          var_dump($this->_relations);
-          } */
         if (in_array($value, $this->_fields)) {
             if (array_key_exists($value, $this->_values)) {
                 return $this->_values[$value];
@@ -804,7 +809,10 @@ abstract class Model implements IteratorAggregate, ArrayAccess
                     break;
                 case self::BELONGS_TO:
                     if (!empty($this->_related[$relationName])) {
-                        $head .= '<th rowspan="2" style="vertical-align: middle;">belongs to ' . $relation[1] . '</th>';
+                        $head .= '<th rowspan="2" style="vertical-align: middle;">';
+                        $head .= 'belongs to model <kbd>' . $relation[1] . '</kbd>';
+                        $head .= '<br/>relation name is <kbd>'. $relationName . '<kbd>';
+                        $head .= '</th>';
                         $headerCount++;
 
                         foreach ($this->_related[$relationName]->getFields() as $v) {

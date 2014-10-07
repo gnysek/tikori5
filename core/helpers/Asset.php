@@ -1,40 +1,50 @@
 <?php
 
+/**
+ * Class Asset
+ * Returns links to css/js files according to path (local/outside)
+ */
 class Asset
 {
+    protected static $_cssPlaceholder = '<link rel="stylesheet" type="text/css" href="%s"/>';
+    protected static $_cssPlaceholderContent = '<style type="text/css">%s</style>';
+    protected static $_jsPlaceholder = '<script type="text/javascript" src="%s"></script>';
+    protected static $_jsPlaceholderContent = '<script type="text/javascript">%s</script>';
 
-    public static $cssPlaceholder = '<link rel="stylesheet" type="text/css" href="%s"/>';
-    public static $jsPlaceholder = '<script type="text/javascript" src="%s"></script>';
+    const TYPE_CSS = 1;
+    const TYPE_JS = 2;
 
+    /**
+     * @param $relativeFilePath
+     * @return string
+     */
     public static function cssAsset($relativeFilePath)
     {
-        $relativeFilePath = trim($relativeFilePath, '/');
-
-        if (stripos('http://', $relativeFilePath) === 0) {
-            return sprintf(self::cssPlaceholder, $relativeFilePath);
-        }
-
-        if (file_exists(TIKORI_ROOT . '/' . $relativeFilePath)) {
-            return sprintf(self::cssPlaceholder, Core::app()->baseUrl() . $relativeFilePath);
-        } else if (file_exists(TIKORI_FPATH . '/../' . $relativeFilePath)) {
-            return
-                '<style type="text/css">' . file_get_contents(TIKORI_FPATH . '/../' . $relativeFilePath) . '</style>';
-        }
+        return self::_returnAsset($relativeFilePath, self::TYPE_CSS);
     }
 
+    /**
+     * @param $relativeFilePath
+     * @return string
+     */
     public static function jsAsset($relativeFilePath)
+    {
+        return self::_returnAsset($relativeFilePath, self::TYPE_JS);
+    }
+
+    protected static function _returnAsset($relativeFilePath, $type)
     {
         $relativeFilePath = trim($relativeFilePath, '/');
 
         if (stripos('http://', $relativeFilePath) === 0) {
-            return sprintf(self::$jsPlaceholder, $relativeFilePath);
+            return sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholder : self::$_jsPlaceholder, $relativeFilePath);
         }
 
         if (file_exists(TIKORI_ROOT . '/' . $relativeFilePath)) {
-            return sprintf(self::$jsPlaceholder, Core::app()->baseUrl() . $relativeFilePath);
+            return sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholder : self::$_jsPlaceholder, Core::app()->baseUrl() . $relativeFilePath);
         } else if (file_exists(TIKORI_FPATH . '/../' . $relativeFilePath)) {
-            return '<script type="text/javascript">' . file_get_contents(TIKORI_FPATH . '/../' . $relativeFilePath)
-            . '</script>';
+            $filename = TIKORI_FPATH . '/../' . $relativeFilePath;
+            return (file_exists($filename)) ? sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholderContent : self::$_jsPlaceholderContent, file_get_contents($filename)) : '';
         }
     }
 }

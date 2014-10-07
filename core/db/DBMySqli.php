@@ -51,13 +51,16 @@ class DbMySqli extends DBAbstract
 
     public function query($sql, $skip = '', $assoc = TRUE)
     {
-        Profiler::addLog('SQL QUERY: <kbd title="' . $sql . '">' . substr($sql, 0, 30) . '&hellip;</kbd>');
+        Profiler::addLog('SQL QUERY: <kbd title="' . $sql . '">' . $sql . '</kbd>', Profiler::LEVEL_SQL);
         $this->_queries++;
         $this->_queryList[] = $sql;
 
         if (preg_match('/^(insert|update|delete|replace|alter)/i', $sql)) {
             $result = $this->conn()->query($sql);
             Profiler::addLog('Exec finished');
+            if ($result === false) {
+                throw new DbError($sql . '<br/>' . $this->conn()->error);
+            }
             return true;
         } else {
             $result = mysqli_query($this->conn(), $sql);

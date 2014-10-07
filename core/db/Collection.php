@@ -306,6 +306,7 @@ class Collection implements ArrayAccess, Iterator, Countable
     public function delete()
     {
         foreach ($this->_data as $key => $row) {
+            // TODO mass deletion
             if (is_a($row, 'Model')) {
                 $row->delete();
             }
