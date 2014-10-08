@@ -123,6 +123,15 @@ class Html
         return Core::app()->baseUrl() . $script . $addon . $url[0] . $path;
     }
 
+    public static function shortenUrl($url)
+    {
+        $sliced = trim(preg_replace('/(http(s)*\:\/\/(www\.)*)/i', '', $url), '/');
+        if (strlen($sliced) > 30 and substr_count($sliced, '/') > 2) {
+            $sliced = preg_replace('/^(.*?)\.([a-z\.]{0,6})\/(.*?)(.{0,20})$/i', '$1.$2/&hellip;$4', $sliced);
+        }
+        return $sliced;
+    }
+
     public static function beginForm($action = '/', $method = 'post', $upload = false, $class = NULL)
     {
         return '<form' . ((!empty($class)) ? (' class="' . $class . '"') : '') . ' action="' . self::url($action) . '" method="' . $method . '"'
@@ -227,10 +236,10 @@ class Html
 
     }
 
-    public static function textareaFieldModel($model, $field)
+    public static function textareaFieldModel($model, $field, $options = array())
     {
         return self::htmlTag(
-            'textarea', array(
+            'textarea', $options + array(
                              'name' => get_class($model) . '[' . $field . ']',
                         ),
             $model->$field . ''
