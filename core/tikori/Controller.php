@@ -158,7 +158,8 @@ class Controller extends ControllerView
                             );
                         }
 
-                        $finalParams[] = (!array_key_exists($paramObject->name, $this->params)) ? NULL
+                        $finalParams[] = (!array_key_exists($paramObject->name, $this->params))
+                            ? $paramObject->getDefaultValue()
                             : $this->params[$paramObject->name];
                     }
                 }

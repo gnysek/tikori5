@@ -107,7 +107,9 @@ class Html
                     }
                 } else {
                     foreach (array_slice($url, 1) as $key => $entry) {
-                        $path .= '/' . $key . '/' . $entry;
+                        if ($entry !== null) {
+                            $path .= '/' . $key . '/' . $entry;
+                        }
                     }
                 }
             }
