@@ -6,6 +6,7 @@ class BreadcrumbsWidget extends Widget
     public $links = array();
     public $homeLink = 'Home';
     public $homeTitle = 'Home';
+    public $divider = ' &raquo; ';
 
     public function run()
     {
@@ -39,7 +40,7 @@ class BreadcrumbsWidget extends Widget
 
     protected function __toHtml($links)
     {
-        echo '<div class="breadcrumbs">' . implode(' &raquo; ', $links) . '</div>';
+        echo '<div class="breadcrumbs">' . implode($this->divider, $links) . '</div>';
     }
 
 }
