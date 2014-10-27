@@ -35,7 +35,10 @@ class Asset
     protected static function _returnAsset($relativeFilePath, $type)
     {
         $filepath = trim($relativeFilePath, '/');
-        $relativeFilePath = substr($relativeFilePath, 0, strpos($relativeFilePath, '?'));
+        if (strpos($relativeFilePath, '?') > 0) {
+            $relativeFilePath = substr($relativeFilePath, 0, strpos($relativeFilePath, '?'));
+        }
+        $filename = TIKORI_FPATH . '/../' . $relativeFilePath;
 
         if (stripos('http://', $relativeFilePath) === 0) {
             return sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholder : self::$_jsPlaceholder, $filepath);
@@ -43,8 +46,7 @@ class Asset
 
         if (file_exists(TIKORI_ROOT . '/' . $relativeFilePath)) {
             return sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholder : self::$_jsPlaceholder, Core::app()->baseUrl() . $filepath);
-        } else if (file_exists(TIKORI_FPATH . '/../' . $relativeFilePath)) {
-            $filename = TIKORI_FPATH . '/../' . $relativeFilePath;
+        } else if (file_exists($filename)) {
             return (file_exists($filename)) ? sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholderContent : self::$_jsPlaceholderContent, file_get_contents($filename)) : '';
         }
     }

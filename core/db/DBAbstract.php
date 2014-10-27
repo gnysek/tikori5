@@ -104,4 +104,12 @@ abstract class DbAbstract
         }
         return $this->_tableInfos[$table];
     }
+
+    public function hasTableColumn($table, $column) {
+        $data = $this->getTableInfo($table);
+        if ($data->offsetExists($column)) {
+            return true;
+        }
+        return false;
+    }
 }
