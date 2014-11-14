@@ -263,6 +263,16 @@ class DbQuery
                     foreach ($this->_from as $val) {
                         $fields[] = '`' . $this->_fromAliases[$val] . '`.*';
                     }
+
+                    if (!empty($this->_joinTables)) {
+                        foreach ($this->_joinTables as $k => $table) {
+                            $_fields = $this->getTableInfo($table)->getFields();
+                            foreach ($_fields as $_field) {
+                                $fields[] = '`t' . ($k + 1) . '`.`' . $_field . '` AS `r' . ($k + 1) . '_' . $_field . '`';
+                            }
+                        }
+                    }
+
                     $sql[] = implode(', ', $fields);
                 } else {
                     $fields = array();
@@ -292,7 +302,7 @@ class DbQuery
             if (!empty($this->_joinTables)) {
                 foreach ($this->_joinTables as $k => $table) {
                     $sql[] = "\n" . $this->_joinType;
-                    $sql[] = '`' . $table . '`.`' . $this->alias . ($k + 1) . '`';
+                    $sql[] = '`' . $table . '` `' . $this->alias . ($k + 1) . '`';
                     $sql[] = 'ON';
                     $sql[] = '`' . $this->alias . ($k + 1) . '`.`' . $this->_joinOn[$table][0] . '`';
                     $sql[] = $this->_joinOn[$table][1];

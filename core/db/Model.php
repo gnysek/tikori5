@@ -222,12 +222,53 @@ abstract class Model implements IteratorAggregate, ArrayAccess
             $sql->conditions($conditions);
         }
 
+        if (!empty($this->_eagers)) {
+            foreach ($this->_eagers as $relationName) {
+                switch ($this->_relations[$relationName][0]) {
+                    case self::BELONGS_TO:
+
+                        $model = Model::model($this->_relations[$relationName][1]);
+                        /* @var $model Model */
+                        $sql->joinOn($model->getTable(), array($model->getPK(), '=', $this->_relations[$relationName][2]));
+
+                        break;
+                    default:
+                        //throw new DbError('Eager join for this type of relation is not yet implemented!');
+                        break;
+                }
+            }
+        }
+
         $result = $sql->execute();
         $return = array();
+        $relationCacheByPk = array();
         foreach ($result as $row) {
             /* @var $row Result */
             $c = self::model(get_called_class());
-            $c->setValues($row->getIterator()->getArrayCopy());
+            //$c->setValues($row->getIterator()->getArrayCopy());
+            $values = $row->getIterator()->getArrayCopy();
+            $c->setAttributes($values);
+
+            if (!empty($this->_eagers)) {
+                foreach ($this->_eagers as $k => $relationName) {
+                    switch ($this->_relations[$relationName][0]) {
+                        case self::BELONGS_TO:
+                            if (!array_key_exists($values[ $this->_relations[$relationName][2] ], $relationCacheByPk)) {
+                                $r = Model::model($this->_relations[$relationName][1]);
+                                $rvalues = array();
+                                foreach ($r->getFields() as $relationfield) {
+                                    $relationfieldName = 'r' . ($k + 1) . '_' . $relationfield;
+                                    $rvalues[$relationfield] = $values[$relationfieldName];
+                                }
+                                $r->setAttributes($rvalues);
+                                $relationCacheByPk[$values[ $this->_relations[$relationName][2] ]] = $r;
+                            }
+
+                            $c->populateRelation($relationName, $relationCacheByPk[$values[ $this->_relations[$relationName][2] ]]);
+                            break;
+                    }
+                }
+            }
 
             $return[] = $c;
         }
@@ -253,7 +294,8 @@ abstract class Model implements IteratorAggregate, ArrayAccess
                             $row->populateRelation($relationName, $toAssign);
                         }
                         break;
-                    case self::BELONGS_TO:
+                    case self::BELONGS_TO: break;
+                    /*case self::BELONGS_TO:
 //                        var_dump($this->_relations[$relationName][2]);
                         $byField = $this->_relations[$relationName][2];
 //                        var_dump($collection->getColumnValues($byField));
@@ -267,7 +309,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
                             $row->populateRelation($relationName, $toAssign->getFirst());
                         }
 //                        throw new Exception('Not yet implemented');
-                        break;
+                        break;*/
                     default:
                         throw new Exception('Not yet implemented');
                         break;

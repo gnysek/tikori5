@@ -188,6 +188,9 @@ class Controller extends ControllerView
                 //TODO: shouldn't be like that...
                 Error::exch($e);
             } catch (Exception $e) {
+                if (Core::app()->getMode() !== Core::MODE_PROD) {
+                    Error::exch($e);
+                }
                 //				if (($this instanceof ErrorController)==false)
                 Profiler::addLog('Exception when performing action: ' . $e->getMessage());
                 ob_get_clean();
