@@ -301,8 +301,11 @@ class DbQuery
         if ($this->_type == self::Q_SELECT) {
             if (!empty($this->_joinTables)) {
                 foreach ($this->_joinTables as $k => $table) {
+
+                    $this->_fromAliases[$table] = $this->alias . (count($this->_fromAliases));
+
                     $sql[] = "\n" . $this->_joinType;
-                    $sql[] = '`' . $table . '` `' . $this->alias . ($k + 1) . '`';
+                    $sql[] = '`' . $table . '` `' . $this->_fromAliases[$table] . '`';
                     $sql[] = 'ON';
                     $sql[] = '`' . $this->alias . ($k + 1) . '`.`' . $this->_joinOn[$table][0] . '`';
                     $sql[] = $this->_joinOn[$table][1];
@@ -367,18 +370,16 @@ class DbQuery
                         continue;
                     }*/
 
+                    $_fromTable = (!empty($w[3])) ? $w[3] : $this->_from[key($this->_from)];
+
                     $bld = '';
                     if (!in_array($this->_type, array(self::Q_UPDATE, self::Q_DELETE))) {
-                        $bld
-                            = '`' . $this->_fromAliases[(empty($w[3]))
-                                ? $this->_from[key($this->_from)]
-                                : $w[3]]
-                            . '`.';
+                        $bld = '`' . $this->_fromAliases[$_fromTable] . '`.';
                     }
 
                     // TODO: better checking...
                     //$afterCondition = ((is_string($w[2]) or is_array($w[2])) ? Core::app()->db->protect($w[2]) : $this->_nullify($w[2]));
-                    $afterCondition = $this->_formatAgainstType($this->_from[key($this->_from)], $w[0], $w[2]);
+                    $afterCondition = $this->_formatAgainstType($_fromTable, $w[0], $w[2]);
 
                     if ($w[1] == 'IN') {
                         $afterCondition = '(' . $afterCondition . ')';
