@@ -280,7 +280,7 @@ class Controller extends ControllerView
 
     public function redirect($where = '/')
     {
-        $where = HTML::url($where);
+        $where = Html::url($where);
         //TODO: what if before redirect text was send?
         Core::app()->response->header('Location', $where);
     }
