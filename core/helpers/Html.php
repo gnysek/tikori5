@@ -282,6 +282,25 @@ class Html
         return $html;
     }
 
+    public static function checkboxFieldModel($model, $field, $value = '1')
+    {
+        $html = '';
+        $opt = array(
+            'type'  => 'checkbox',
+            'name'  => get_class($model) . '[' . $field . ']',
+            'id'    => get_class($model) . '_' . $field,
+            'value' => $value,
+        );
+
+        if ($model->$field == $value) {
+            $opt['checked'] = 'checked';
+        }
+
+        $html .= self::htmlTag('input', $opt);
+
+        return $html;
+    }
+
     public static function selectOptionModel($model, $field, $values = array(), $options = array())
     {
         $html = '';

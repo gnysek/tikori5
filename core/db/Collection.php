@@ -247,7 +247,12 @@ class Collection implements ArrayAccess, Iterator, Countable
         return implode(' ', $data);
     }
 
-    public function getColumnValues($column)
+	/**
+	 * @param $column
+	 *
+	 * @return array
+	 */
+	public function getColumnValues($column)
     {
         $values = array();
         foreach ($this->_data as $record) {

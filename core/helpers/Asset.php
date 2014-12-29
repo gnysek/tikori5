@@ -20,7 +20,7 @@ class Asset
      */
     public static function cssAsset($relativeFilePath)
     {
-        return self::_returnAsset($relativeFilePath, self::TYPE_CSS);
+        return self::_returnAsset($relativeFilePath, self::TYPE_CSS) . PHP_EOL;
     }
 
     /**
@@ -29,7 +29,7 @@ class Asset
      */
     public static function jsAsset($relativeFilePath)
     {
-        return self::_returnAsset($relativeFilePath, self::TYPE_JS);
+        return self::_returnAsset($relativeFilePath, self::TYPE_JS) . PHP_EOL;
     }
 
     protected static function _returnAsset($relativeFilePath, $type)

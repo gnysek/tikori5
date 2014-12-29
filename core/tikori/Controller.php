@@ -61,9 +61,9 @@ class Controller extends ControllerView
 
     public function runActionNew($action)
     {
-        if ($this->beforeAction()) {
+        if ($this->_actionBefore()) {
             if ($action->runWithParams()) {
-                $this->afterAction();
+                $this->_afterAction();
             } else {
                 $this->invalidActionParams();
             }
@@ -173,9 +173,9 @@ class Controller extends ControllerView
             try {
                 ob_start();
                 // buffer
-                if ($this->beforeAction()) {
+                if ($this->_actionBefore()) {
                     call_user_func_array(array($this, $this->getActionMethodName()), $finalParams);
-                    $this->afterAction();
+                    $this->_afterAction();
                 } else {
                     $this->httpStatusAction(404);
                 }
@@ -229,12 +229,12 @@ class Controller extends ControllerView
         return strtolower($action) . $suffix;
     }
 
-    public function beforeAction()
+    protected function _actionBefore()
     {
         return true;
     }
 
-    public function afterAction()
+    protected function _afterAction()
     {
         return true;
     }

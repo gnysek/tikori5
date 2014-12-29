@@ -112,4 +112,26 @@ abstract class DbAbstract
         }
         return false;
     }
+
+    public function getTableColumnType($table, $column){
+        //TODO: duplicates with \DbQuery::_formatAgainstType()
+        $data = $this->getTableInfo($table);
+
+        if (!$data->offsetExists($column)) {
+            return false;
+        }
+
+        return $data->$column->Type;
+    }
+
+    public function getTableColumnDefaultValue($table, $column){
+        //TODO: duplicates with \DbQuery::_formatAgainstType()
+        $data = $this->getTableInfo($table);
+
+        if (!$data->offsetExists($column)) {
+            return false;
+        }
+
+        return $data->$column->Default;
+    }
 }

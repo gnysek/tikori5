@@ -5,7 +5,7 @@
  *
  * @author user
  */
-class Cookie
+class Cookie extends TModule
 {
 
     /**

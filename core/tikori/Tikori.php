@@ -11,6 +11,7 @@
  * @property SessionModule|Session         $session        Cache module
  * @property array                         $autoloadPaths  Array of autoload paths
  * @property Observer                      observer
+ * @property Cookie                        cookie
  */
 class Tikori
 {
@@ -173,6 +174,7 @@ class Tikori
 
         // request
         $this->request = new Request();
+        $this->setComponent('cookie', new Cookie());
         Profiler::addLog('Request created');
         $this->response = new Response();
         Profiler::addLog('Response created');

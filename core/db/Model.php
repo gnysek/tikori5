@@ -52,7 +52,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
                 if (array_key_exists($fieldName, $this->_relations)) {
                     throw new DbError('Model ' . get_class($this) . ' have field named same as relation: ' . $fieldName);
                 }
-                $this->_values[$fieldName] = NULL;
+                $this->_values[$fieldName] = ($fieldName == $this->getPk()) ? NULL : Core::app()->db->getTableColumnDefaultValue($this->getTable(), $fieldName);
             }
         }
         $this->_rules = $this->_prepareRules();
@@ -232,6 +232,11 @@ abstract class Model implements IteratorAggregate, ArrayAccess
                         $sql->joinOn($model->getTable(), array($model->getPK(), '=', $this->_relations[$relationName][2]));
 
                         break;
+					/*case self::HAS_MANY:
+
+						$model = Model::model($this->_relations[$relationName][1]);
+						$sql->joinOn($model->getTable(), array($this->_relations[$relationName][2], '=', $this->getPK()));
+					*/
                     default:
                         //throw new DbError('Eager join for this type of relation is not yet implemented!');
                         break;
@@ -795,7 +800,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         return $this->_getRelated($relationName);
     }
 
-    private function _getRelated($relationName, $populate = true, $customValues = NULL)
+    protected function _getRelated($relationName, $populate = true, $customValues = NULL)
     {
         $result = NULL;
         switch ($this->_relations[$relationName][0]) {
