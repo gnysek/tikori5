@@ -7,6 +7,11 @@
  */
 class Cookie extends TModule
 {
+    const TIME_HOUR = 3600;
+    const TIME_DAY = 86400;
+    const TIME_WEEK = 25200;
+    const TIME_MONTH = 2592000;
+    const TIME_YEAR = 31536000;
 
     /**
      * @var string  Sól do zabezpieczania ciastek przed hackowaniem
