@@ -186,7 +186,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
     public function findBy($key, $value, $onlyFirst = false)
     {
         $results = $this->findWhere(array($key, '=', $value));
-        return ($onlyFirst && count($results) >= 1) ? $results[0] : $results;
+        return ($onlyFirst && count($results) >= 1) ? $results[0] : null;
         // it's now made in DbQuery
 //        if (!is_numeric($value)) {
 //            $value = Core::app()->db->protect($value);

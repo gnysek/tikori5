@@ -128,8 +128,10 @@ class Error
 
         if (self::$renderStarted == false) {
             self::$renderStarted = true;
+
             $body = $view->renderPartial(
-                'core.exception', array(
+                (Core::app()->getMode() == Core::MODE_PROD) ? 'error.fatal' : 'core.exception',
+                array(
                     'message' => $exception->getMessage(),
                     'errors' => array_reverse($errors),
                     #'messages'  => $messages,
@@ -143,10 +145,14 @@ class Error
                 ), true
             );
         } else {
-            $body = '<p>There was an error and probably it occurs also when rendering error page:</p>';
-            $body .= ' <b>' . $exception->getMessage() . '</b>';
-            $body .= ' in <code>' . $exception->getFile() . '</code>';
-            $body .= ' on line ' . $exception->getLine();
+            if (Core::app()->getMode() == Core::MODE_PROD) {
+                $body = '<p>There was fatal error during rendering page, sorry.</p>';
+            } else {
+                $body = '<p>There was an error and probably it occurs also when rendering error page:</p>';
+                $body .= ' <b>' . $exception->getMessage() . '</b>';
+                $body .= ' in <code>' . $exception->getFile() . '</code>';
+                $body .= ' on line ' . $exception->getLine();
+            }
         }
 
         if ($dontExit === true) {
