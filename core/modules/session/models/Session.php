@@ -30,21 +30,6 @@ class Session extends Model
         return parent::model($model);
     }
 
-    public function getFields()
-    {
-        return array(
-            'sid',
-            'user_id',
-            'logged_in',
-            'start_time',
-            'current_time',
-            'ip',
-            'page',
-            'browser',
-            'data',
-        );
-    }
-
     public function beforeSave()
     {
         $this->current_time = time();

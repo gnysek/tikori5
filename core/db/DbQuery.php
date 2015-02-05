@@ -266,7 +266,7 @@ class DbQuery
 
                     if (!empty($this->_joinTables)) {
                         foreach ($this->_joinTables as $k => $table) {
-                            $_fields = $this->getTableInfo($table)->getFields();
+                            $_fields = Core::app()->db->getTableInfo($table)->getColumnNames();
                             foreach ($_fields as $_field) {
                                 $fields[] = '`t' . ($k + 1) . '`.`' . $_field . '` AS `r' . ($k + 1) . '_' . $_field . '`';
                             }
@@ -335,7 +335,7 @@ class DbQuery
                     $upd[] = end($fld) . ' = ' . end($val);
                 }
             } else {
-                $fields = array_keys((array)$this->getTableInfo($this->_from[key($this->_from)]));
+                $fields = Core::app()->db->getTableInfo($this->_from[key($this->_from)])->getColumnNames();
 
                 foreach ($this->_fields as $key => $fvalue) {
                     //$val[] = is_string($fvalue) ? Core::app()->db->protect($fvalue) : $this->_nullify($fvalue);
@@ -431,30 +431,32 @@ class DbQuery
             return implode(', ', $collect);
         }
 
-        $tableInfo = $this->getTableInfo($table);
-
-        if (!$tableInfo->offsetExists($field)) {
-            throw new DbError('Table ' . $table . ' don\'t have field ' . $field . '. Only ' . implode(', ', $tableInfo->getFields()));
+        // Todo: if you change Core to something else, there will be blank page... instead of error
+        if ($tableInfo = Core::app()->db->getTableInfo($table)) {
+            if (!($columnInfo = $tableInfo->getColumn($field))) {
+                throw new DbError('Table ' . $table . ' don\'t have field ' . $field . '. Only ' . implode(', ', $tableInfo->getColumnNames()));
+            }
         }
 
-        if ($tableInfo->$field->Null == 'YES' && $value === NULL) {
+        if ($columnInfo->allowNull && $value === NULL) {
             return 'NULL';
         }
 
-        if ($value === NULL && $tableInfo->$field->Default !== NULL) {
-            $value = $tableInfo->$field->Default;
+        if ($value === NULL && $columnInfo->defaultValue !== NULL) {
+            $value = $columnInfo->defaultValue;
         }
 
-        if (preg_match('/int/', $tableInfo->$field->Type)) {
+        // TODO - shouldn't that validation be done on Schema side (typecast) ?
+        if (preg_match('/int/', $columnInfo->type)) {
             return intval($value);
         }
-        if (preg_match('/double/', $tableInfo->$field->Type)) {
+        if (preg_match('/double/', $columnInfo->type)) {
             return doubleval($value);
         }
-        if (preg_match('/float/', $tableInfo->$field->Type)) {
+        if (preg_match('/float/', $columnInfo->type)) {
             return doubleval($value);
         }
-        if (preg_match('/decimal/', $tableInfo->$field->Type)) {
+        if (preg_match('/decimal/', $columnInfo->type)) {
             return preg_replace('[^0-9\.]', '', str_replace(',', '.', $value));
         }
 
@@ -473,20 +475,6 @@ class DbQuery
         }
 
         return $this->_preparedSql;
-    }
-
-    /**
-     * @param $table
-     *
-     * @return Record|null
-     */
-    public function getTableInfo($table)
-    {
-        //TODO: force to not change
-        if (Core::app()->db) {
-            return Core::app()->db->getTableInfo($table);
-        }
-        return NULL;
     }
 
 }

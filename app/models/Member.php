@@ -12,13 +12,6 @@
 class Member extends Model
 {
 
-    //put your code here
-
-    public function getFields()
-    {
-        return array('id', 'name', 'team');
-    }
-
     public function relations()
     {
         return array(

@@ -40,8 +40,7 @@ class TDbTableSchema
             if ($column = $this->getColumn($key)) {
                 $column->isPrimaryKey = false;
             } else {
-                throw new Exception('Column ' . $key . ' cannot be primary, because there is no column like this in '
-                . $this->name);
+                throw new Exception('Column ' . $key . ' cannot be primary, because there is no column like this in ' . $this->name);
             }
         }
     }

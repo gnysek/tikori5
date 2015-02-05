@@ -27,14 +27,6 @@ class Language extends Model
         );
     }
 
-    public function getFields()
-    {
-        return array(
-            'language_id',
-            'language_code'
-        );
-    }
-
     public function rules()
     {
         return array(

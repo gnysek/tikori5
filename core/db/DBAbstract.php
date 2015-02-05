@@ -12,7 +12,8 @@ abstract class DbAbstract
     protected $_init = FALSE;
     protected $_queries = 0;
     protected $_queryList = array();
-    protected $_tableInfos = array();
+	/** @var TDbSchema */
+	protected $_schema = null;
 
     /**
      * @var PDO
@@ -88,50 +89,42 @@ abstract class DbAbstract
 
     public function init()
     {
+		$this->_schema = new TDbSchema();
         return $this->conn();
     }
 
+    /**
+     * @param $table
+     * @return TDbTableSchema
+     */
     public function getTableInfo($table)
     {
-        if (!array_key_exists($table, $this->_tableInfos)) {
-            $infos = array();
-            $data = $this->query("SHOW COLUMNS IN `{$table}");
-            foreach ($data as $row) {
-                /* @var Record $row */
-                $infos[$row->Field] = new Record($row->getData(), true);
-            }
-            $this->_tableInfos[$table] = new Record($infos, true);
-        }
-        return $this->_tableInfos[$table];
+        return $this->getSchema()->getTableSchema($table);
+    }
+
+    public function getSchema() {
+        return $this->_schema;
     }
 
     public function hasTableColumn($table, $column) {
-        $data = $this->getTableInfo($table);
-        if ($data->offsetExists($column)) {
-            return true;
-        }
-        return false;
+        return $this->getTableInfo($table)->getColumn($column) ? true : false;
     }
 
     public function getTableColumnType($table, $column){
         //TODO: duplicates with \DbQuery::_formatAgainstType()
-        $data = $this->getTableInfo($table);
-
-        if (!$data->offsetExists($column)) {
-            return false;
+        if ($table = $this->getTableInfo($table)->getColumn($column)) {
+            /* @var $table TDbColumnSchema */
+            return $table->type;
         }
-
-        return $data->$column->Type;
+        return false;
     }
 
     public function getTableColumnDefaultValue($table, $column){
         //TODO: duplicates with \DbQuery::_formatAgainstType()
-        $data = $this->getTableInfo($table);
-
-        if (!$data->offsetExists($column)) {
-            return false;
+        if ($table = $this->getTableInfo($table)->getColumn($column)) {
+            /* @var $table TDbColumnSchema */
+            return $table->defaultValue;
         }
-
-        return $data->$column->Default;
+        return null;
     }
 }

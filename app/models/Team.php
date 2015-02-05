@@ -26,13 +26,6 @@ class Team extends Model
         );
     }
 
-    public function getFields()
-    {
-        return array(
-            'team_id', 'team_name'
-        );
-    }
-
     public function getTable()
     {
         return 'test_team';

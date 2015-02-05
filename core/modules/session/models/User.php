@@ -60,37 +60,6 @@ class User extends Model
         return parent::model($model);
     }
 
-    public function getFields()
-    {
-        return array(
-            'id',
-            'name',
-            'password',
-            'loginkey',
-            'email',
-            'sex',
-            'regdate',
-            'birthday',
-            'from',
-            'www',
-            'messenger',
-            'signature',
-            'avatar',
-            'settings',
-            'points',
-            'notifications_new',
-            'notifications_count',
-            'pm_count',
-            'post_count',
-            'last_visit_time',
-            'last_update_time',
-            'warns',
-            'ban',
-            'bantime',
-            'admin',
-        );
-    }
-
     public function beforeSave()
     {
         $this->last_update_time = time();

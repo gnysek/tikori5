@@ -46,10 +46,13 @@ class TProfiler
         $logs[] = '</tr>';
 
         $styles = array(
-            self::LEVEL_SQL => ' style="background-color: darkcyan;"'
+            self::LEVEL_SQL => ' style="background-color: darkcyan; color: white;"',
+            self::LEVEL_DEBUG => ' style="background-color: black; color: white;"',
         );
+
         $types = array(
-            self::LEVEL_SQL => 'SQL'
+            self::LEVEL_SQL => 'SQL',
+            self::LEVEL_DEBUG => 'DBG',
         );
 
         if (count(self::$_log)) {
@@ -67,7 +70,7 @@ class TProfiler
                 $logs[] = '<tr>';
                 $logs[] = '<td>' . $id . '</td>';
                 $logs[] = '<td' . $style . '>' . $type . '</td>';
-                $logs[] = '<td>' . $log[1] . '</td>';
+                $logs[] = '<td' . $style . '>' . $log[1] . '</td>';
                 $logs[] = '<td>+' . $log[3] . 's.</td>';
                 $logs[] = '<td>=' . $log[2] . 's.</td>';
                 $logs[]

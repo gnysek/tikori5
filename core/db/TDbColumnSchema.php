@@ -33,4 +33,33 @@ class TDbColumnSchema
     public $autoIncrement = false;
     public $unsigned = false;
     public $comment;
+
+    /**
+     * Converts the input value according to [[phpType]] after retrieval from the database.
+     * If the value is null or an [[Expression]], it will not be converted.
+     * @param mixed $value input value
+     * @return mixed converted value
+     */
+    public function typecast($value)
+    {
+        if ($value === '' && $this->type !== TDbSchema::TYPE_TEXT && $this->type !== TDbSchema::TYPE_STRING && $this->type !== TDbSchema::TYPE_BINARY) {
+            return null;
+        }
+        if ($value === null || gettype($value) === $this->phpType) {
+            return $value;
+        }
+        switch ($this->phpType) {
+            case 'resource':
+            case 'string':
+                return is_resource($value) ? $value : (string)$value;
+            case 'integer':
+                return (int)$value;
+            case 'boolean':
+                return (bool)$value;
+            case 'double':
+                return (double)$value;
+        }
+
+        return $value;
+    }
 }

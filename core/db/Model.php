@@ -59,7 +59,6 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         $this->_table = $this->getTable();
         $this->_primaryKey = $this->getPK();
 
-        $info = DbQuery::sql()->getTableInfo($this->getTable());
         //$this->_new = true;
     }
 
@@ -666,7 +665,14 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 
     }
 
-    public abstract function getFields();
+    /**
+     * Returns list of fields in this table
+     * Can be overriden to skip using/validating some fields in model
+     * @return array
+     */
+    public function getFields() {
+        return Core::app()->db->getSchema()->getTableSchema($this->getTable())->getColumnNames();
+    }
 
     public function attributeLabels()
     {

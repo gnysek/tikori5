@@ -43,22 +43,6 @@ class Content extends Model
         );
     }
 
-    public function getFields()
-    {
-        return array(
-            'id',
-            'name',
-            'enabled',
-            'path',
-            'parent',
-            'type',
-            'created',
-            'updated',
-            'comments',
-            'author',
-        );
-    }
-
     public function rules()
     {
         return array(

@@ -57,6 +57,11 @@ class TDbSchema
      */
     private $_tables = array();
 
+    /**
+     * @param $name
+     * @param bool $refresh
+     * @return null|TDbTableSchema
+     */
     public function getTableSchema($name, $refresh = false)
     {
         //TODO: refresh should also refresh cache, not only reload
@@ -67,8 +72,14 @@ class TDbSchema
         return $this->_tables[$name] = $this->loadTableSchema($name);
     }
 
+    /**
+     * @param $name
+     * @return null|TDbTableSchema
+     */
     public function loadTableSchema($name)
     {
+        Profiler::addLog('GETTING TABLE INFO v2 ' . $name, 1);
+
         $table = new TDbTableSchema();
         $this->_resolveTableNames($table, $name);
 
@@ -229,6 +240,33 @@ class TDbSchema
     }
 
     /**
+     * Extracts the PHP type from abstract DB type.
+     * @param TDbColumnSchema $column the column schema information
+     * @return string PHP type name
+     */
+    protected function getColumnPhpType($column)
+    {
+        static $typeMap = array( // abstract type => php type
+            'smallint' => 'integer',
+            'integer' => 'integer',
+            'bigint' => 'integer',
+            'boolean' => 'boolean',
+            'float' => 'double',
+        );
+        if (isset($typeMap[$column->type])) {
+            if ($column->type === 'bigint') {
+                return PHP_INT_SIZE == 8 ? 'integer' : 'string';
+            } elseif ($column->type === 'integer') {
+                return PHP_INT_SIZE == 4 ? 'string' : 'integer';
+            } else {
+                return $typeMap[$column->type];
+            }
+        } else {
+            return 'string';
+        }
+    }
+
+    /**
      * @param $table TDbTableSchema
      */
     private function findConstraints($table)
@@ -248,9 +286,10 @@ class TDbSchema
         }
     }
 
-    /**
-     * @param $table TDbTableSchema
-     */
+	/**
+	 * @param $table TDbTableSchema
+	 * @return string
+	 */
     private function getCreateTableSql($table)
     {
         $sql = 'SHOW CREATE TABLE ' . $this->quoteSimpleTableName($table->dbName);
