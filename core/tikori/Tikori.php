@@ -140,21 +140,21 @@ class Tikori
 
         $this->observer = new Observer();
 
+		if ($this->cfg('db/type') != "") {
+			if ($this->cfg('db/type') == 'mysqli') {
+				$db = new DbMySqli();
+			} else {
+				$db = new DbPDO();
+			}
+			$this->setComponent('db', $db);
+		}
+
         // configure modules
         $modules = $this->cfg('modules');
         if (!empty($modules)) {
             foreach ($this->cfg('modules') as $module => $config) {
                 $this->preloadModule($module, $config);
             }
-        }
-
-        if ($this->cfg('db/type') != "") {
-            if ($this->cfg('db/type') == 'mysqli') {
-                $db = new DbMySqli();
-            } else {
-                $db = new DbPDO();
-            }
-            $this->setComponent('db', $db);
         }
 
         // default routes
