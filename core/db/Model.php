@@ -425,27 +425,40 @@ abstract class Model implements IteratorAggregate, ArrayAccess
      * @return bool
      */
     // TODO: check that where() automatically will be always good - it should be...
-    protected function _update()
+    protected function _update($force = false)
     {
-        $values = $this->_getModifiedFields();
+        $values = $this->_getModifiedFields($force);
         if (array_key_exists($this->_primaryKey, $values)) {
             unset($values[$this->_primaryKey]);
         }
-        DbQuery::sql()
-            ->update()
-            ->from($this->_table)
-            ->fields($values)
-            ->where(array($this->_primaryKey, '=', $this->_values[$this->_primaryKey]))
-            ->execute();
+
+        if (!empty($values)) {
+
+            DbQuery::sql()
+                ->update()
+                ->from($this->_table)
+                ->fields($values)
+                ->where(array($this->_primaryKey, '=', $this->_values[$this->_primaryKey]))
+                ->execute();
+
+        }
 
         return true;
     }
 
-    protected function _getModifiedFields()
+    protected function _getModifiedFields($force = false)
     {
         $modified = array();
-        foreach ($this->_modified as $v) {
-            $modified[$v] = $this->_values[$v];
+        if ($force) {
+            foreach ($this->_fields as $field) {
+                if ($field != $this->_primaryKey) {
+                    $modified[$field] = $this->_values[$field];
+                }
+            }
+        } else {
+            foreach ($this->_modified as $v) {
+                $modified[$v] = $this->_values[$v];
+            }
         }
 
         return $modified;
@@ -505,7 +518,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 
         if ($result && $this->beforeSave()) {
             if (!empty($this->_modified) or $forceToSave) {
-                $result = ($this->_isNewRecord) ? $this->_insert() : $this->_update();
+                $result = ($this->_isNewRecord) ? $this->_insert() : $this->_update($forceToSave);
                 if ($result == true) {
                     $result = $this->afterSave();
                 }
