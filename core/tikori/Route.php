@@ -212,8 +212,7 @@ class Route
         }
 
         Profiler::addLog(
-            'Processing URI <kbd>/' . $uri . '</kbd> against ' . count($routes) . ' routes' . (empty($area)
-                ? '' : ' using route <kbd>' . $area . '</kbd>')
+            'Processing URI <kbd>/' . $uri . '</kbd> against ' . count($routes) . ' routes' . (empty($area) ? '' : ' using route <kbd>' . $area . '</kbd>')
         );
 
         /* @var $route Route */
@@ -235,8 +234,7 @@ class Route
                     $key = NULL;
 
                     foreach ($tp as $v) {
-                        if ($v == ''
-                        ) {
+                        if ($v == '') {
                             break;
                         } // if value is empty, break, even if there's already key set (value is empty for that key!)
 

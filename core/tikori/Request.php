@@ -515,7 +515,7 @@ class Request
                                     '\\', '/', str_replace($_SERVER['DOCUMENT_ROOT'], '', $_SERVER['SCRIPT_FILENAME'])
                                 );
                             } else {
-                                throw new Exception('TRequest is unable to determine the entry script URL.');
+                                throw new Exception(__CLASS__ . ' is unable to determine the entry script URL.');
                             }
                         }
                     }

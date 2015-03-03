@@ -250,7 +250,7 @@ class Tikori
      */
     private function _createController($route)
     {
-        $paths = array('/');
+        $paths = array('_default' => '/');
 
         if ($route != NULL) {
             foreach (array_keys($this->_loadedModules) as $path) {
@@ -263,28 +263,36 @@ class Tikori
                 $classToCreate = ucfirst($route->area) . '_' . $className;
             }
 
+            $areas = array($areaName);
+            if (Core::app()->lang->usingLanguages) {
+                array_unshift($areas, $areaName . '_' . Core::app()->lang->currentLanguage  . '/');
+            }
+
 //        var_dump($areaName);
 
             foreach (array('app' => TIKORI_ROOT, 'core' => TIKORI_FPATH) as $module => $source) {
                 foreach ($paths as $path) {
                     //TODO: better list of folders created by module initializer
-                    $file = $source . ($module == 'core' ? '' : '/' . $module) . $path . 'controllers/' . $areaName . $className . '.php';
-                    if (file_exists($file)) {
-                        try {
-                            // TODO: autload should be used here I think...
-                            include_once $file;
-                            if (class_exists($classToCreate, false)) {
-                                $class = new $classToCreate($route->area);
-                            } else {
-                                throw new Exception('Class not found');
+                    foreach($areas as $area) {
+                        $file = $source . ($module == 'core' ? '' : '/' . $module) . $path . 'controllers/' . $area . $className . '.php';
+                        Profiler::addLog($file, Profiler::LEVEL_SQL);
+                        if (file_exists($file)) {
+                            try {
+                                // TODO: autload should be used here I think...
+                                include_once $file;
+                                if (class_exists($classToCreate, false)) {
+                                    $class = new $classToCreate($route->area);
+                                } else {
+                                    throw new Exception('Class not found');
+                                }
+                                $class->module = $module;
+    //                        $route->dispatch($class);
+                                return (array($class, $route->action));
+                            } catch (Exception $e) {
+    //                        var_dump($e);
+                                //$class = new Controller($route);
+                                //$class->forward404($route->area);
                             }
-                            $class->module = $module;
-//                        $route->dispatch($class);
-                            return (array($class, $route->action));
-                        } catch (Exception $e) {
-//                        var_dump($e);
-                            //$class = new Controller($route);
-                            //$class->forward404($route->area);
                         }
                     }
                 }
