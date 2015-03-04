@@ -296,11 +296,33 @@ class Collection implements ArrayAccess, Iterator, Countable
         return NULL;
     }
 
+    public function getWhereNotEmpty($column) {
+        $values = array();
+        foreach ($this->_data as $record) {
+            if (!empty($record[$column])) {
+                $values[] = $record;
+            }
+        }
+
+        return new Collection($values);
+    }
+
     public function countRowsByColumnValue($column, $value)
     {
         $total = 0;
         foreach ($this->_data as $record) {
             if (($record[$column] == $value)) {
+                $total++;
+            }
+        }
+
+        return $total;
+    }
+
+    public function countRowsWhereNotEmpty($column) {
+        $total = 0;
+        foreach ($this->_data as $record) {
+            if (!empty($record[$column])) {
                 $total++;
             }
         }
