@@ -215,8 +215,7 @@ class Tikori
 //            if ($route !== null) {
 
             Profiler::addLog(
-                'Dispatching: <code>' . $controller->area . '> ' . get_class($controller) . '/' . $action
-                . '</code>'
+                'Dispatching: <code>' . $controller->area . '> ' . get_class($controller) . '/' . $action. '</code>'
             );
 
             /* @var $controller Controller */
@@ -233,13 +232,12 @@ class Tikori
             } catch (Exception $e) {
                 ob_get_clean();
                 throw new Exception(
-                    'Dispatch action: <er>' . get_class($controller) . '->' . $action . '</er> :<br/>'
-                    . $e->getMessage());
+                    'Dispatch action: <er>' . get_class($controller) . '->' . $action . '</er> :<br/>'. $e->getMessage());
             }
 //                }
 //            }
         } else {
-            throw new Exception('xxx');
+            throw new Exception('not a controller');
         }
     }
 
@@ -275,7 +273,8 @@ class Tikori
                     //TODO: better list of folders created by module initializer
                     foreach($areas as $area) {
                         $file = $source . ($module == 'core' ? '' : '/' . $module) . $path . 'controllers/' . $area . $className . '.php';
-                        Profiler::addLog($file, Profiler::LEVEL_SQL);
+                        Profiler::addLog($file . ' <kbd>' . __FILE__ . ':' . __LINE__.'</kbd>', Profiler::LEVEL_DEBUG);
+                        Profiler::addLog((int) file_exists($file), Profiler::LEVEL_IMPORTANT);
                         if (file_exists($file)) {
                             try {
                                 // TODO: autload should be used here I think...
@@ -290,8 +289,10 @@ class Tikori
                                 return (array($class, $route->action));
                             } catch (Exception $e) {
     //                        var_dump($e);
-                                //$class = new Controller($route);
-                                //$class->forward404($route->area);
+                                Profiler::addLog($e->getMessage(), Profiler::LEVEL_IMPORTANT);
+                                #$class = new Controller($route->area);
+                                #$class->httpStatusAction(500);
+                                return array(new Controller(), 'httpStatusAction');
                             }
                         }
                     }
@@ -341,6 +342,7 @@ class Tikori
                 array(
                     $module . '',
                     #$module . 'config',
+                    $module . 'common',
                     $module . 'controllers',
                     $module . 'models',
                     $module . 'helpers',

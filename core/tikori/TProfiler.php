@@ -48,6 +48,7 @@ class TProfiler
         $styles = array(
             self::LEVEL_SQL => ' style="background-color: darkcyan; color: white;"',
             self::LEVEL_DEBUG => ' style="background-color: black; color: white;"',
+            self::LEVEL_IMPORTANT => ' style="background-color: orange;"',
         );
 
         $types = array(

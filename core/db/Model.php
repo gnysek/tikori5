@@ -4,7 +4,7 @@
  * Class Model
  *
  * @property string $tableName  Table Name
- * @property $this  $attributes Attribute values
+ * @property array  $attributes Attribute values
  */
 abstract class Model implements IteratorAggregate, ArrayAccess
 {
@@ -42,7 +42,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
     public $timestamps = true;
     public $massProtected = array(); // which attrs can be saved using mass
 
-    public function __construct()
+    public function __construct($attributes = array())
     {
         $this->_scopes = $this->scopes();
         $this->_relations = $this->relations();
@@ -59,6 +59,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         $this->_table = $this->getTable();
         $this->_primaryKey = $this->getPK();
 
+        $this->_populate($attributes);
         //$this->_new = true;
     }
 
@@ -68,6 +69,10 @@ abstract class Model implements IteratorAggregate, ArrayAccess
             return strtolower(get_called_class());
         }
         return $this->_table;
+    }
+
+    public static function getTableName($modelName) {
+        return strtolower($modelName);
     }
 
     public function getPK()
@@ -248,23 +253,28 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         $relationCacheByPk = array();
         foreach ($result as $row) {
             /* @var $row Result */
-            $c = self::model(get_called_class());
-            //$c->setValues($row->getIterator()->getArrayCopy());
+            //$c = self::model();
+            $mainClassName = get_called_class();
+//            $c->setValues($row->getIterator()->getArrayCopy());
             $values = $row->getIterator()->getArrayCopy();
-            $c->setAttributes($values);
+            $c = new $mainClassName($values);
+//            $c->setAttributes($values);
 
             if (!empty($this->_eagers)) {
                 foreach ($this->_eagers as $k => $relationName) {
                     switch ($this->_relations[$relationName][0]) {
                         case self::BELONGS_TO:
                             if (!array_key_exists($values[ $this->_relations[$relationName][2] ], $relationCacheByPk)) {
-                                $r = Model::model($this->_relations[$relationName][1]);
+//                                $r = Model::model($this->_relations[$relationName][1]);
                                 $rvalues = array();
-                                foreach ($r->getFields() as $relationfield) {
+                                $fields = Core::app()->db->getSchema()->getTableSchema( self::getTableName($this->_relations[$relationName][1]) )->getColumnNames();
+                                foreach ($fields as $relationfield) {
                                     $relationfieldName = 'r' . ($k + 1) . '_' . $relationfield;
                                     $rvalues[$relationfield] = $values[$relationfieldName];
                                 }
-                                $r->setAttributes($rvalues);
+                                $relatedClassName = $this->_relations[$relationName][1];
+                                $r = new $relatedClassName($rvalues);
+//                                $r->setAttributes($rvalues);
                                 $relationCacheByPk[$values[ $this->_relations[$relationName][2] ]] = $r;
                             }
 
@@ -796,16 +806,39 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         }
     }
 
-    public function setAttributes($value)
+    public function setAttributes($values)
     {
-        if (is_array($value)) {
-            foreach ($value as $k => $v) {
+        if (is_array($values)) {
+
+            // TODO: default value setting by column type
+
+            $keys = array_merge(array_keys($this->_rules), array_keys($values));
+
+            foreach($keys as $field) {
+                if (isset($values[$field])) {
+                    $this->__set($field, $values[$field]);
+                } else {
+                    $this->__set($field, Core::app()->db->getTableColumnDefaultValue($this->getTable(), $field));
+                }
+            }
+
+            /*foreach ($value as $k => $v) {
+                if (in_array($k, $this->_fields)) {
+                    $this->__set($k, $v);
+                }
+            }*/
+        } else {
+            //TODO: throw error or no?
+        }
+    }
+
+    protected function _populate($attributes = array()) {
+        if (is_array($attributes)) {
+            foreach ($attributes as $k => $v) {
                 if (in_array($k, $this->_fields)) {
                     $this->__set($k, $v);
                 }
             }
-        } else {
-            //TODO: throw error or no?
         }
     }
 

@@ -264,16 +264,17 @@ class Html
             }
 
             $html .= self::htmlTag(
-                'label', array(
-                              'for' => get_class($model) . '_' . $field . '_' . $i,
-                              #'id'  => get_class($model) . '_' . $field,
-                         ),
-                $v
+                'input',
+                $opt
             );
 
             $html .= self::htmlTag(
-                'input',
-                $opt
+                'label', array(
+                    'for' => get_class($model) . '_' . $field . '_' . $i,
+                    'class' => 'radio-label'
+                    #'id'  => get_class($model) . '_' . $field,
+                ),
+                $v
             );
 
             $html .= $divider;

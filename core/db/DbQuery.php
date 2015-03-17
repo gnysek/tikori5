@@ -38,6 +38,9 @@ class DbQuery
         return new DbQuery();
     }
 
+    /**
+     * @return array|bool|Record
+     */
     public function execute()
     {
         return Core::app()->db->query($this->_parseSql());

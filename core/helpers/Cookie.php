@@ -66,7 +66,7 @@ class Cookie extends TModule
     {
 //              setcookie($name, $this->salt($name, $value) . '#' . $value, time() + $expire, $this->path, $this->domain, $secure, $httponly);
         setcookie(
-            $name, base64_encode($this->salt($name, $value) . '#' . $value), ($expire === 0) ? 0 : (time() + $expire),
+            $name, base64_encode($this->salt($name, $value) . '#' . ((string) $value)), ($expire === 0) ? 0 : (time() + $expire),
             $this->path, $this->domain, $secure, $httponly
         );
         return TRUE;

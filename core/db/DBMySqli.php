@@ -49,6 +49,13 @@ class DbMySqli extends DBAbstract
         Profiler::addLog(__CLASS__ . ' connected');
     }
 
+    /**
+     * @param        $sql
+     * @param string $skip
+     * @param bool   $assoc
+     * @return array|bool|Record
+     * @throws DbError
+     */
     public function query($sql, $skip = '', $assoc = TRUE)
     {
         Profiler::addLog('SQL QUERY: <kbd title="' . $sql . '">' . $sql . '</kbd>', Profiler::LEVEL_SQL);
