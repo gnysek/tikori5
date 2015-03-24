@@ -8,12 +8,46 @@
 class Error
 {
     public static $renderStarted = false;
+    public static $enableStrict = true;
 
     /* register all handlers */
     public static function registerErrors()
     {
         set_exception_handler(array('Error', 'exch'));
         set_error_handler(array('Error', 'errh'), E_ALL);
+    }
+
+    public static function shutdown_handler() {
+        if ($error = error_get_last() AND in_array($error['type'], array(E_PARSE, E_ERROR, E_USER_ERROR))) {
+            if (ob_get_level()) {
+                ob_clean();
+                ob_end_clean();
+            }
+
+            $exception = new ErrorException($error['message'], $error['type'], 1, $error['file'], $error['line']);
+            if (function_exists('xdebug_get_function_stack')) {
+                $stack = array();
+                foreach (array_slice(array_reverse(xdebug_get_function_stack()), 2, -1) as $row) {
+                    $frame = array(
+                        'file' => $row['file'],
+                        'line' => $row['line'],
+                        'function' => isset($row['function']) ? preg_replace('/(.*?):(.*)/i','$1',$row['function']) : '*unknown*',
+                        'args' => array(),
+                    );
+                    if (!empty($row['class'])) {
+                        $frame['type'] = isset($row['type']) && $row['type'] === 'dynamic' ? '->' : '::';
+                        $frame['class'] = $row['class'];
+                    }
+                    $stack[] = $frame;
+                }
+                $ref = new \ReflectionProperty('Exception', 'trace');
+                $ref->setAccessible(TRUE);
+                $ref->setValue($exception, $stack);
+            }
+            Error::exch($exception);
+
+            exit(1); // prevent infinity-loop
+        }
     }
 
     /**
@@ -34,11 +68,16 @@ class Error
      * @param string $errfile
      * @param int $errline
      * @param mixed $errcontext
+     * @return bool
      */
     public static function errh($errno, $errstr, $errfile, $errline, $errcontext)
     {
         //echo Error::display(new Exception($errstr, $errno), array('file' => $errfile, 'line' => $errline));
-        echo Error::display(new ErrorException($errstr, 0, $errno, $errfile, $errline), true);
+        if (self::$enableStrict === false and in_array($errno, array(E_NOTICE, E_STRICT))) {
+            return false;
+        }
+        echo Error::display(new ErrorException($errstr, $errno, 1, $errfile, $errline), true);
+        return true;
     }
 
     public static function log($data, $file = 'system.log')
@@ -78,11 +117,15 @@ class Error
         $errors = array();
 
         $current = $exception;
+
         do {
             $files = array();
 
+            $lastTrace = null;
+
             foreach (array_reverse($current->getTrace()) as $trace) {
                 if (isset($trace['line'], $trace['file'])) {
+                    #$traced = true;
 
                     $info = array();
                     foreach (array('function', 'class', 'type') as $key) {
@@ -96,20 +139,24 @@ class Error
                         'info' => $info,
                         'html' => self::getFile($trace['file'], $trace['line'], $trace),
                     );
+
+                    $lastTrace = $trace['file'] . $trace['line'];
                 }
             }
 
-            $files[] = array(
-                'file' => str_replace(TIKORI_ROOT, '...', $exception->getFile()),
-                'line' => $exception->getLine(),
-                'info' => array(),
-                'html' => self::getFile($exception->getFile(), $exception->getLine(), $exception->getTrace()),
-            );
+            if ($lastTrace != ($exception->getFile() . $exception->getLine())) {
+                $files[] = array(
+                    'file' => str_replace(TIKORI_ROOT, '...', $exception->getFile()),
+                    'line' => $exception->getLine(),
+                    'info' => array(),
+                    'html' => self::getFile($exception->getFile(), $exception->getLine(), $exception->getTrace()),
+                );
+            }
 
             $errors[] = array(
                 'message' => $current->getMessage(),
                 'id' => (count($errors)),
-                'files' => $files,
+                'files' => array_reverse($files),//&$files,
                 'file' => str_replace(TIKORI_ROOT, '...', $exception->getFile()),
                 'line' => $exception->getLine(),
             );
@@ -121,9 +168,39 @@ class Error
 
         // TODO: check that its needed since erh have ErrorException used
         if ($isErrorHandler === false) {
-            $files[] = self::getFile(
-                $exception->getFile(), $exception->getLine(), array('class' => 'Error::display()')
-            );
+            /*$files[] = array(
+                'file' => str_replace(TIKORI_ROOT, '...', $exception->getFile()),
+                'line' => $exception->getLine(),
+                'info' => '',
+                'html' => self::getFile($exception->getFile(), $exception->getLine(), array('class' => 'Error::display()')
+            ));*/
+        }
+
+        //$files = array_reverse($files);
+
+        $code = '<unknown>';
+        $codeInt = $exception->getCode();
+        $codesArray = array(
+            E_ERROR => 'E_ERROR / Fatal error', // 1
+            E_WARNING => 'E_WARNING / Warning', // 2
+            E_PARSE => 'E_PARSE / Parse Error', // 4
+            E_NOTICE => 'E_NOTICE / Notice', // 8
+            E_CORE_ERROR => 'Fatal core startup error', // 16
+            E_CORE_WARNING => 'Core startup warning', // 32
+            E_COMPILE_ERROR => 'Compiler error', // 64
+            E_COMPILE_WARNING => 'Compile warning', // 128
+            E_USER_ERROR => 'E_ERROR', //256
+            E_USER_WARNING => 'Warning (user)', // 512
+            E_USER_NOTICE => 'E_USER_NOTICE', // 1024
+            E_STRICT => 'E_STRICT', // 2048
+            E_RECOVERABLE_ERROR => 'Recoverable', // 4096
+            E_DEPRECATED => 'E_DEPRECEATD', // 8192
+            E_USER_DEPRECATED => 'E_DEPRECEATD', // 16384
+            #E_ALL => 'All ?', // 32767
+        );
+
+        if (isset($codesArray[$codeInt])) {
+            $code = $codesArray[$codeInt];
         }
 
         if (self::$renderStarted == false) {
@@ -132,13 +209,14 @@ class Error
             $body = $view->renderPartial(
                 (Core::app()->getMode() == Core::MODE_PROD) ? 'error.fatal' : 'core.exception',
                 array(
+                    'errorType' => $code,
+                    'errorId' => $codeInt,
                     'message' => $exception->getMessage(),
                     'errors' => array_reverse($errors),
                     #'messages'  => $messages,
                     'file' => $exception->getFile(),
                     'line' => $exception->getLine(),
-                    'reqMethod' => (empty($e[Request::REQUEST_METHOD])) ? ''
-                            : $e[Request::REQUEST_METHOD],
+                    'reqMethod' => (empty($e[Request::REQUEST_METHOD])) ? '' : $e[Request::REQUEST_METHOD],
                     'reqPath' => (empty($e[Request::PATH_INFO])) ? '' : $e[Request::PATH_INFO],
                     #'files'     => $files,
                     'view' => $view,
@@ -190,7 +268,7 @@ class Error
                 uniqid();
 
             $html[] = '<p class="pink">' . $dispName . ':' . $line . '</p>' . PHP_EOL;
-            $html[] = '<p><code class="prettyprint lang-php highlight linenums:5">'; #onclick="$(\'#' . $index . '\').toggle();"
+            $html[] = '<p><code class="prettyprint lang-php highlight linenums:' . $line . '">'; #onclick="$(\'#' . $index . '\').toggle();"
             $html[] = '<span class="num nocode">' . sprintf('%04d', $line) . '.</span>';
             $html[] = ltrim(substr($file[min(count($file), $line) - 1], 0, 85)) . '<br/>';
             $html[] = '<span class="num nocode">   &raquo;</span>';

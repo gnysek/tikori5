@@ -1,0 +1,25 @@
+AddHandler text/x-component .htc
+SetEnv TIKORI_MODE 1
+
+# Turn on URL rewriting
+RewriteEngine On
+
+# Installation directory
+RewriteBase /
+
+# Protect hidden files from being viewed
+<Files .*>
+	Order Deny,Allow
+	Deny From All
+</Files>
+
+# Protect application and system files from being viewed
+RewriteRule ^(?:class|special|app)\b.* index.php/$0 [L]
+
+# Allow any files or directories that exist to be displayed directly
+RewriteCond %{REQUEST_FILENAME} !-f
+#RewriteRule ^.*(\.gif|\.jpe?g|\.png)$ http://betahmt.pl/images/404.gif [L]
+#RewriteCond %{REQUEST_FILENAME} !-d
+
+# Rewrite all other URLs to index.php/URL
+RewriteRule .* tests/index.php/$0 [PT]

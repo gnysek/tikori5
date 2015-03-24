@@ -17,8 +17,10 @@
             <?php foreach ($errors as $eid => $errorData): ?>
                 <div id="error_<?php echo $eid; ?>" class="box">
                     <p>Looks that there is a problem here:</p>
+                    <h1><strong> <code>[<?php echo $errorId; ?>] <?php echo $errorType; ?>:</code></strong></h1>
                     <h1><strong><?php if (count($errors) > 1): echo ($eid + 1) . '/' . count($errors); endif; ?><?php echo $errorData['message']; ?></strong></h1>
                     <code class="box-wrap"><?php echo $errorData['file']; ?>:<?php echo $errorData['line']; ?></code>
+                    <p>Call stack:</p>
                 </div>
                 <?php foreach ($errorData['files'] as $fid => $fileData): ?>
                     <div id="link_<?php echo $eid . '-' . $fid; ?>" class="box box-clickable">
@@ -37,7 +39,7 @@
             <?php endforeach; ?>
         </div>
         <div id="right">
-            <h1><?php echo Core::app()->cfg('appName'); ?> Critical Error</h1>
+            <h1><?php echo Core::app()->cfg('appName'); ?> Application Error</h1>
 
             <?php foreach ($errors as $eid => $errorData): ?>
                 <?php foreach ($errorData['files'] as $fid => $fileData): ?>
@@ -58,8 +60,13 @@
         $('.codebox').hide();
         $('.codebox').first().show();
 
+        $($('.codebox').first().attr('id').replace('file_','#link_')).addClass('active');
+        console.log($('.codebox').first().attr('id').replace('file_','#link_'));
+
         $('.box-clickable').click(function () {
             var fileId = $(this).attr('id').replace(/link_/g, '#file_');
+            $('.active').removeClass('active');
+            $(this).addClass('active');
             $('.codebox').hide();
             $(fileId).show();
         });

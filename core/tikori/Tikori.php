@@ -101,7 +101,7 @@ class Tikori
         // register error handlers
         Error::registerErrors();
         ob_start('tikori');
-        register_shutdown_function(array('Core', 'shutdown_handler'));
+        register_shutdown_function(array('Error', 'shutdown_handler'));
         Profiler::addLog('Registered errors');
 
         if (ini_get('short_open_tag') != 1) {

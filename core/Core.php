@@ -242,20 +242,6 @@ class Core
         Core::app()->observer->fireEvent($eventName, $data);
     }
 
-    public static function shutdown_handler()
-    {
-        if ($error = error_get_last() AND in_array($error['type'], array(E_PARSE, E_ERROR, E_USER_ERROR))) {
-            if (ob_get_level()) {
-                ob_clean();
-                ob_end_clean();
-            }
-
-            Error::exch(new ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']));
-
-            exit(1); // prevent infinity-loop
-        }
-    }
-
     public static function component($componentName)
     {
         return Core::app()->component($componentName);
