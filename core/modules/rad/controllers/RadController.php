@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Class RadController
+ */
+
 class RadController extends Controller
 {
 
@@ -18,11 +22,13 @@ class RadController extends Controller
     public function modelCreateAction($model, $save = '')
     {
         $result = Core::app()->db->query('SHOW columns in ' . $model);
+		$modelName = str_replace(' ', '', ucwords(str_replace('_', ' ', $model)));
+		$displaySrc = '/app/models/' . $modelName . '.php';
+		$src = TIKORI_ROOT . $displaySrc;
+		$fileExists = file_exists($src);
 
-        $src = TIKORI_ROOT . '/app/models/' . ucfirst($model) . '.php';
-        $fileExists = file_exists($src);
 
-        $primaryKey = '';
+		$primaryKey = '';
         foreach ($result as $v) {
             if ($v['Key'] == 'PRI') {
                 #var_dump($v);
@@ -31,48 +37,6 @@ class RadController extends Controller
             }
         }
 
-        $buildFile = array('<?php');
-        $buildFile[] = '/** Class ' . ucfirst(strtolower($model));
-        $buildFile[] = ' *';
-        foreach ($result as $v) {
-            $buildFile[] = ' * @property ' . (preg_match('/int/', $v['Type']) ? 'int' : 'string') . ' $' . $v['Field'];
-        }
-        $buildFile[] = ' */';
-        $buildFile[] = 'class ' . ucfirst(strtolower($model)) . ' extends Model {';
-        $buildFile[] = '';
-        $buildFile[] = '    protected $_primaryKey = \'' . $primaryKey . '\';';
-        /*$buildFile[] = '';
-        $buildFile[] = '    public function getTable()';
-        $buildFile[] = '    {';
-        $buildFile[] = '        return \'' . $model . '\';';
-        $buildFile[] = '    }';*/
-        $buildFile[] = '';
-
-        $buildFile[] = '    /**';
-        $buildFile[] = '     * @param null|string $model';
-        $buildFile[] = '     * @return ' . ucfirst(strtolower($model)) . '|Model';
-        $buildFile[] = '     */';
-        $buildFile[] = '    public static function model($model = __CLASS__)';
-        $buildFile[] = '    {';
-        $buildFile[] = '        return parent::model($model);';
-        $buildFile[] = '    }';
-        $buildFile[] = '';
-
-        /* getFields */
-        $buildFile[] = '    public function getFields()';
-        $buildFile[] = '    {';
-        $buildFile[] = '        return array(';
-        foreach ($result as $v) {
-            $buildFile[] = '            \'' . $v['Field'] . '\',';
-        }
-        $buildFile[] = '        );';
-        $buildFile[] = '    }';
-        $buildFile[] = '';
-
-        /* rules */
-        $buildFile[] = '    public function rules()';
-        $buildFile[] = '    {';
-        $buildFile[] = '        return array(';
         $rules = array();
         foreach ($result as $v) {
             if (preg_match('/char/', $v['Type'])) {
@@ -88,16 +52,17 @@ class RadController extends Controller
             }
         }
 
+		$rulesHtml = array();
+
         foreach ($rules as $ruleName => $rule) {
             foreach ($rule as $ruleValue => $ruleFields) {
-                $buildFile[] = '            array(array(' . implode(', ', $ruleFields) . '), \'' . $ruleName . '\', \''
-                    . $ruleValue . '\'),';
+				$rulesHtml[] = 'array(array(' . implode(', ', $ruleFields) . '), \'' . $ruleName . '\', \'' . $ruleValue . '\')';
             }
         }
 
         /* foreign keys */
 
-        $foreign = Core::app()->db->query('SHOW CREATE TABLE ' . $model);
+        /*$foreign = Core::app()->db->query('SHOW CREATE TABLE ' . $model);
 
         $matches = array();
         $regexp = '/FOREIGN KEY\s+\(([^\)]+)\)\s+REFERENCES\s+([^\(^\s]+)\s*\(([^\)]+)\)/mi';
@@ -113,38 +78,32 @@ class RadController extends Controller
             foreach ($keys as $k => $name) {
                 $foreignKeys[$name] = array(str_replace('`', '', $match[2]), $fks[$k]);
                 /*if(isset($table->columns[$name]))
-                    $table->columns[$name]->isForeignKey=true;*/
+                    $table->columns[$name]->isForeignKey=true;* /
             }
         }
 
         $buildFile[] = '        );';
         $buildFile[] = '    }';
         $buildFile[] = '';
-
+		*/
         /* additional relations */
+		$relationsHtml = array();
         if ($this->request->isPost()) {
             if ($this->request->getPost('addRelations') == 1) {
                 $relations = array();
-                foreach ($this->request->getPost('relation') as $relation) {
-                    $relations[] = $relation;
-                }
+				if ($this->request->getPost('relation')) {
+					foreach ($this->request->getPost('relation') as $relation) {
+						$relations[] = $relation;
+					}
+				}
 
                 if (count($relations)) {
-                    $buildFile[] = '    public function relations()';
-                    $buildFile[] = '    {';
-                    $buildFile[] = '        return array(';
                     foreach ($relations as $relation) {
-                        $buildFile[] = '            ' . $relation;
+						$relationsHtml[] = $relation;
                     }
-                    $buildFile[] = '        );';
-                    $buildFile[] = '    }';
-                    $buildFile[] = '';
                 }
             }
         }
-
-        $buildFile[] = '}';
-        $buildFile[] = '';
 
         # --- get additional tables for relations ---
         $relationsTables = Core::app()->db->query('SHOW tables', '', false);
@@ -161,7 +120,16 @@ class RadController extends Controller
             $fields[] = $column['Field'];
         }
 
-        if ($this->request->isPost()) {
+		$buildFile = array($this->renderPartial('modelTemplate', array(
+			'model' => $model,
+			'modelName' => $modelName,
+			'result' => $result,
+			'primaryKey' => $primaryKey,
+			'rulesHtml' => $rulesHtml,
+			'relationsHtml' => $relationsHtml,
+		)));
+
+        if ($this->request->isPost() and $this->request->getPost('save')) {
             $dir = dirname($src);
             if (!file_exists($dir)) {
                 mkdir($dir, 0755, true);
@@ -172,12 +140,14 @@ class RadController extends Controller
             $this->render(
                 'modelCreate', array(
                                     'src'        => $src,
+                                    'displaySrc'        => $displaySrc,
                                     'fileExists' => $fileExists,
                                     'table'      => $model,
                                     'PK'         => $primaryKey,
                                     'file'       => implode(PHP_EOL, $buildFile),
                                     'relations'  => $relations,
                                     'fields'     => $fields,
+					'relationsHtml' => $relationsHtml,
                                )
             );
         }

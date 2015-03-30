@@ -14,7 +14,7 @@
 <div class="block"><?php highlight_string($file); ?></div>
 
 <div>
-    <input type="checkbox" name="addRelations" value="1" id="addRelations">
+    <input type="checkbox" name="addRelations" value="1" id="addRelations"<?php if (!empty($relationsHtml)) { echo 'checked'; } ?>>
     <label for="addRelations"><?php echo __('Add relations'); ?></label>
 </div>
 
@@ -39,12 +39,19 @@
 
     <select id="selectTable">
         <?php foreach ($relations as $table => $fields): ?>
+			<optgroup label="<?php echo $table; ?>"><?php echo ''; ?>
             <?php foreach ($fields as $field => $isPK): ?>
-                <option value="<?php echo
-                    $table . $field; ?>" data-table="<?php echo $table; ?>" data-field="<?php echo $field; ?>"
-                        data-ispk="<?php echo $isPK ? '1' : '0'; ?>">
-                    <?php echo ucfirst($table) . 's: ' . $table . ' . ' . $field; ?></option>
+				<?php
+					$tableName = str_replace(' ','',ucwords(str_replace('_', ' ', $table)));
+					if (substr($tableName,-1,1) !== 's') {
+						$tableName .= 's';
+					}
+				?>
+                <option value="<?php echo $table . $field; ?>" data-table="<?php echo $table; ?>" data-field="<?php echo $field; ?>" data-ispk="<?php echo $isPK ? '1' : '0'; ?>">
+                    <?php echo $tableName . ': ' . $table . ' . ' . $field; ?>
+				</option>
             <?php endforeach; ?>
+			</optgroup>
         <?php endforeach; ?>
     </select>
 
@@ -52,10 +59,18 @@
 </div>
 
 <div>
-    <ul id="addedRelations"></ul>
+    <ul id="addedRelations">
+		<?php foreach($relationsHtml as $relation): ?>
+			<li><code><?php echo $relation; ?></code>
+				<input type="hidden" name="relation[]" value="<?php echo $relation; ?>">
+				&bull; <a class="removeRel">&times; Remove</a>
+			</li>
+		<?php endforeach; ?>
+    </ul>
 </div>
 
-<input type="submit" value="<?php echo ((!$fileExists) ? __('Create') : __('Rewrite')) . ' ' . $src; ?>">
+<input type="submit" value="<?php echo __('Preview') . ' ' . $displaySrc; ?>">
+<input type="submit" name="save" value="<?php echo ((!$fileExists) ? __('Create') : __('Rewrite')) . ' ' . $displaySrc; ?>">
 
 <?php echo Html::endForm(); ?>
 
@@ -67,12 +82,12 @@
 
     $(document).ready(function () {
         var where = $('#addedRelations');
-        var cnt = 0;
+        var cnt = <?php echo count($relationsHtml) ?>;
 
         $('#selectRelation').on('change', function () {
             switch ($(this).val()) {
                 case 'hasmany':
-                    $('#selectTable > option').each(function () {
+                    $('#selectTable option').each(function () {
                         $(this).toggle(($(this).data('ispk') == 0) ? true : false);
                     });
 
@@ -82,7 +97,7 @@
                     $('#selectTable').val($($('#selectTable option[data-ispk="0"]')[0]).val());
                     break;
                 case 'belongsto':
-                    $('#selectTable > option').each(function () {
+                    $('#selectTable option').each(function () {
                         $(this).toggle(($(this).data('ispk') == 0) ? false : true);
                     });
 
@@ -102,29 +117,47 @@
         $('#addBtn').on('click', function () {
 
             var text = '---';
+			var html = '---';
             var sel = $('#selectTable option:selected');
 
             switch ($('#selectRelation option:selected').val()) {
                 case 'belongsto':
                     text = '\'' + capitaliseFirstLetter(sel.data('table')) + '\' => array(self::BELONGS_TO, \''
                         + capitaliseFirstLetter(sel.data('table'))
-                        + '\', \'' + $('#selectField option:selected').val() + '\'),';
+                        + '\', \'' + $('#selectField option:selected').val() + '\')';
 
-                    text = '<code>' + text + '</code><input type="hidden" name="relation[]" value="' + text + '">';
+					html = '<code>' + text + '</code><input type="hidden" name="relation[]" value="' + text + '">';
                     break;
                 case 'hasmany':
                     text = '\'' + capitaliseFirstLetter(sel.data('table')) + 's\' => array(self::HAS_MANY, \''
                         + capitaliseFirstLetter(sel.data('table'))
-                        + '\', \'' + sel.data('field') + '\'),';
+                        + '\', \'' + sel.data('field') + '\')';
 
-                    text = '<code>' + text + '</code><input type="hidden" name="relation[]" value="' + text + '">';
+                    html = '<code>' + text + '</code><input type="hidden" name="relation[]" value="' + text + '">';
                     break;
                 default:
                     return false;
             }
 
-            $('<li>' + text + ' &bull; <a class="removeRel">&times; Remove</a></li>').appendTo(where);
-            cnt++;
+			try {
+				var canAdd = true;
+				$('ul li code').filter(function(item) {
+					if ($(this).text() == text) {
+						canAdd = false;
+						return false;
+					}
+				});
+
+				if (canAdd) {
+					$('<li>' + html + ' &bull; <a class="removeRel">&times; Remove</a></li>').appendTo(where);
+					cnt++;
+				} else {
+					alert('Already added');
+				}
+
+			}catch(e){
+				console.log(e);
+			}
             return false;
         });
 
