@@ -42,7 +42,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
     public $timestamps = true;
     public $massProtected = array(); // which attrs can be saved using mass
 
-    public function __construct($attributes = array())
+    public function __construct($attributes = array(), $isNew = true)
     {
         $this->_scopes = $this->scopes();
         $this->_relations = $this->relations();
@@ -58,6 +58,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
         $this->_rules = $this->_prepareRules();
         $this->_table = $this->getTable();
         $this->_primaryKey = $this->getPK();
+        $this->_isNewRecord = $isNew;
 
         $this->_populate($attributes);
         //$this->_new = true;
@@ -257,7 +258,8 @@ abstract class Model implements IteratorAggregate, ArrayAccess
             $mainClassName = get_called_class();
 //            $c->setValues($row->getIterator()->getArrayCopy());
             $values = $row->getIterator()->getArrayCopy();
-            $c = new $mainClassName($values);
+            $c = new $mainClassName($values, false);
+            /* @var $c Model */
 //            $c->setAttributes($values);
 
             if (!empty($this->_eagers)) {
@@ -273,7 +275,8 @@ abstract class Model implements IteratorAggregate, ArrayAccess
                                     $rvalues[$relationfield] = $values[$relationfieldName];
                                 }
                                 $relatedClassName = $this->_relations[$relationName][1];
-                                $r = new $relatedClassName($rvalues);
+                                $r = new $relatedClassName($rvalues, false);
+                                /* @var $r Model */
 //                                $r->setAttributes($rvalues);
                                 $relationCacheByPk[$values[ $this->_relations[$relationName][2] ]] = $r;
                             }

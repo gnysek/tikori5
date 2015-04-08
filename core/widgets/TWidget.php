@@ -20,6 +20,8 @@ class TWidget extends TView
                 $this->$k = $v;
             }
         }
+
+        return $this;
     }
 
     private $_data = array();
