@@ -43,7 +43,7 @@
             <?php foreach ($fields as $field => $isPK): ?>
 				<?php
 					$tableName = str_replace(' ','',ucwords(str_replace('_', ' ', $table)));
-					if (substr($tableName,-1,1) !== 's') {
+					if (substr($tableName,-1) != 's') {
 						$tableName .= 's';
 					}
 				?>
@@ -88,7 +88,7 @@
             switch ($(this).val()) {
                 case 'hasmany':
                     $('#selectTable option').each(function () {
-                        $(this).toggle(($(this).data('ispk') == 0) ? true : false);
+                        $(this).toggle(true);
                     });
 
                     $('#selectField').hide();
@@ -97,8 +97,8 @@
                     $('#selectTable').val($($('#selectTable option[data-ispk="0"]')[0]).val());
                     break;
                 case 'belongsto':
-                    $('#selectTable option').each(function () {
-                        $(this).toggle(($(this).data('ispk') == 0) ? false : true);
+                    $('#selectTable option[data-ispk="0"]').each(function () {
+                        $(this).toggle(false);
                     });
 
                     $('#selectField').show();
@@ -120,16 +120,22 @@
 			var html = '---';
             var sel = $('#selectTable option:selected');
 
+			$( "#addRelations" ).prop( "checked", true );
+
             switch ($('#selectRelation option:selected').val()) {
                 case 'belongsto':
-                    text = '\'' + capitaliseFirstLetter(sel.data('table')) + '\' => array(self::BELONGS_TO, \''
+                    text = '\'' + sel.data('table') + '\' => array(self::BELONGS_TO, \''
                         + capitaliseFirstLetter(sel.data('table'))
                         + '\', \'' + $('#selectField option:selected').val() + '\')';
 
 					html = '<code>' + text + '</code><input type="hidden" name="relation[]" value="' + text + '">';
                     break;
                 case 'hasmany':
-                    text = '\'' + capitaliseFirstLetter(sel.data('table')) + 's\' => array(self::HAS_MANY, \''
+					text = sel.data('table');
+					if (text.lastIndexOf('s') != text.length-1) {
+						text += 's';
+					}
+                    text = '\'' + text + '\' => array(self::HAS_MANY, \''
                         + capitaliseFirstLetter(sel.data('table'))
                         + '\', \'' + sel.data('field') + '\')';
 
@@ -166,6 +172,9 @@
                 $(this).parents('li').remove();
                 cnt--;
             }
+			if (cnt < 1) {
+				$( "#addRelations" ).prop( "checked", false );
+			}
             return false;
         });
     });

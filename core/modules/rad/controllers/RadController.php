@@ -86,6 +86,7 @@ class RadController extends Controller
         $buildFile[] = '    }';
         $buildFile[] = '';
 		*/
+
         /* additional relations */
 		$relationsHtml = array();
         if ($this->request->isPost()) {
@@ -104,6 +105,22 @@ class RadController extends Controller
                 }
             }
         }
+
+		if ($fileExists) {
+			$class = new $modelName;
+			/* @var $class Model */
+			foreach($class->relations() as $relationName => $relation) {
+				switch($relation[0]) {
+					case Model::HAS_MANY:
+						$relationsHtml[] = '\'' . $relationName .'\' => array(self::HAS_MANY, \''. $relation[1] .'\', \''.$relation[2].'\''. (!empty($relation[3]) ? (', \'' . $relation[3] . '\'' ) : '' ) . ')';
+					break;
+					case Model::BELONGS_TO:
+						$relationsHtml[] = '\'' . $relationName .'\' => array(self::BELONGS_TO, \''. $relation[1] .'\', \''.$relation[2].'\''. (!empty($relation[3]) ? (', \'' . $relation[3] . '\'' ) : '' ) . ')';
+				}
+			}
+		}
+
+		$relationsHtml = array_unique($relationsHtml);
 
         # --- get additional tables for relations ---
         $relationsTables = Core::app()->db->query('SHOW tables', '', false);
@@ -147,7 +164,7 @@ class RadController extends Controller
                                     'file'       => implode(PHP_EOL, $buildFile),
                                     'relations'  => $relations,
                                     'fields'     => $fields,
-					'relationsHtml' => $relationsHtml,
+									'relationsHtml' => $relationsHtml,
                                )
             );
         }

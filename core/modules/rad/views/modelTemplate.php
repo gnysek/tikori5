@@ -35,7 +35,7 @@ class <?php echo $modelName; ?> extends Model
 	public function relations()
 	{
 		return array(
-			<?php echo implode(PHP_EOL."\t\t\t", $relationsHtml); ?>
+			<?php echo implode(','.PHP_EOL."\t\t\t", $relationsHtml); ?>
 
 		);
 	}

@@ -3,7 +3,7 @@
 class Log
 {
 
-    public static function log($data, $file = 'system.log')
+    public static function write($data, $file = 'system.log')
     {
         if (!file_exists(TIKORI_ROOT . '/log')) {
             mkdir(TIKORI_ROOT . '/log', 0777, true);

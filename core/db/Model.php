@@ -67,7 +67,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
     public function getTable()
     {
         if (empty($this->_table)) {
-            return strtolower(get_called_class());
+			$this->_table = strtolower(preg_replace('/(.)([A-Z])/', "$1_$2", get_called_class()));
         }
         return $this->_table;
     }

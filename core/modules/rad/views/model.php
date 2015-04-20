@@ -3,7 +3,17 @@
 
 <ol>
     <?php foreach ($tables as $table): ?>
-        <li><?php echo Html::link($table[0], array('rad/modelCreate', 'model' => $table[0])); ?></li>
+        <li><?php
+			$exists = true;
+			try {
+				$modelName = str_replace(' ', '', ucwords(str_replace('_', ' ', $table[0])));
+				$class = new $modelName;
+			} catch (Exception $e) {
+				#echo $e->getMessage();
+				$exists = false;
+			}; ?>
+			<?php echo Html::link($table[0], array('rad/modelCreate', 'model' => $table[0]), array('style'=>($exists) ? 'background-color: yellowgreen;' : '')); ?> <kbd><?php echo $modelName; ?></kbd>
+		</li>
     <?php endforeach; ?>
 </ol>
 
