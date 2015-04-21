@@ -69,7 +69,7 @@ class Response
 //		foreach ($header as $key => $value) {
 //			$headers[$key] = $value;
 //		}
-        $this->_headers = array_merge(array('Content-Type' => 'text/html', 'X-Powered-By' => 'Tikori5'), $header);
+        $this->_headers = array_merge(array('Content-Type' => 'text/html; charset=utf-8', 'X-Powered-By' => 'Tikori5'), $header);
         $this->write($body, true);
     }
 

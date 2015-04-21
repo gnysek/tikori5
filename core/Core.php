@@ -11,8 +11,6 @@ defined('TIKORI_STARTED') or define('TIKORI_STARTED', microtime());
 defined('TIKORI_DEBUG') or define('TIKORI_DEBUG', false);
 defined('TIKORI_FPATH') or define('TIKORI_FPATH', dirname(__FILE__));
 
-require_once TIKORI_FPATH . '/tikori/Tikori.php';
-
 /**
  * @author  Piotr Gnys <gnysek@gnysek.pl>
  * @package core
@@ -37,6 +35,8 @@ class Core
      */
     private static $_registry = array();
 
+    private static $_isconsole = true;
+
     /**
      * Runs an application
      *
@@ -48,12 +48,34 @@ class Core
     public static function run($path = '', $config = 'default')
     {
         defined('TIKORI_ROOT') or define('TIKORI_ROOT', $path);
-        self::createTikoriApplication($config);
+        chdir(TIKORI_ROOT);
+
+        spl_autoload_register(array('Core', 'autoload'));
+
+        if (self::_isCli()) {
+            self::createApplication('TikoriConsole', $config);
+        } else {
+            self::createApplication('Tikori', $config);
+            self::$_isconsole = false;
+        }
     }
 
-    public static function createTikoriApplication($config = NULL)
+    public static function isConsoleApplication() {
+        return self::$_isconsole;
+    }
+
+    protected static function _isCli()
     {
-        return self::createApplication('Tikori', $config);
+        if (defined('STDIN') || php_sapi_name() === 'cli') {
+            return true;
+        }
+
+        if (empty($_SERVER['REMOTE_ADDR']) and !isset($_SERVER['HTTP_USER_AGENT']) and count($_SERVER['argv']) > 0) {
+            return true;
+        }
+
+        self::$_isconsole = false;
+        return false;
     }
 
     /**
@@ -177,25 +199,31 @@ class Core
 
         $filenames = array();
 
-        foreach (Core::app()->autoloadPaths as $dir) {
+        $pathes = (Core::app()) ? Core::app()->autoloadPaths : array(
+            TIKORI_FPATH . DIRECTORY_SEPARATOR,
+            TIKORI_FPATH . DIRECTORY_SEPARATOR . 'tikori' . DIRECTORY_SEPARATOR,
+        );
+
+        foreach ($pathes as $dir) {
             $filename = $dir . $search;
             $filenames[] = $filename;
             if (file_exists($filename)) {
                 if (class_exists('Profiler')) {
                     Profiler::addLog(
-                        '<div style="padding-left: 20px;"><i>Loading <code>' . $namespace . '\\' . $class
-                        . '</code> from <kbd>' . $filename . '<kbd></i></div>'
+                        sprintf('<div style="padding-left: 20px;"><i>Loading <code>%s\\%s</code> from <kbd>%s<kbd></i></div>', $namespace, $class, $filename)
                     );
                 }
                 require $filename;
+                if (!class_exists($class) && $throw) {
+                    throw new Exception(sprintf('Class %s not found inside autoloaded file [%s]', $class, $search));
+                }
                 #class_alias($class, '\Tikori\\' . $class);
                 return true;
             }
         }
 
         if ($throw) {
-            throw new Exception("Cannot autoload class " . $class . ' [' . $search
-                . '] ' /* . implode(', ', $filenames)*/);
+            throw new Exception(sprintf('Cannot autoload class %s [%s] %s', $class, $search, implode(', ' . PHP_EOL, $filenames)));
         }
         return false;
     }
@@ -252,5 +280,3 @@ class Core
     );
 
 }
-
-spl_autoload_register(array('Core', 'autoload'));
