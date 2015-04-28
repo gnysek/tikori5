@@ -3,8 +3,9 @@
 class TView
 {
 
-    private $_jsFiles = array();
-    private $_cssFiles = array();
+    protected $_jsFiles = array();
+    protected $_cssFiles = array();
+    protected $_theme = '';
 
     public function __construct()
     {
@@ -16,6 +17,12 @@ class TView
 
         if ($files = Core::app()->cfg('layout/js')) {
             $this->_jsFiles = $files;
+        }
+
+        if ($theme = Core::app()->cfg('theme')) {
+            if ($theme != 'default') {
+                $this->_theme = $theme;
+            }
         }
     }
 
@@ -83,6 +90,10 @@ class TView
         if (substr($file, 0, 2) != '//') {
 
             if (isset($this->controller)) {
+                if (!empty($this->_theme)) {
+                    $paths[] = Core::app()->appDir . '/themes/' . $this->_theme . '/' . $this->controller . '/';
+                    $paths[] = Core::app()->coreDir . '/themes/' . $this->_theme . '/' . $this->controller . '/';
+                }
                 $paths[] = Core::app()->appDir . '/views/' . $this->controller . '/';
                 $paths[] = Core::app()->coreDir . '/views/' . $this->controller . '/';
             }
@@ -109,6 +120,10 @@ class TView
             }
         }
 
+        if (!empty($this->_theme)) {
+            $paths[] = Core::app()->appDir . '/themes/' . $this->_theme . '/';
+            $paths[] = Core::app()->coreDir . '/themes/' . $this->_theme . '/';
+        }
         $paths[] = Core::app()->appDir . '/views/';
         $paths[] = Core::app()->coreDir . '/views/';
 
