@@ -5,7 +5,8 @@ class TView
 
     protected $_jsFiles = array();
     protected $_cssFiles = array();
-    protected $_theme = '';
+    protected $_themes = array();
+    protected $_usedTheme = 'default';
 
     public function __construct()
     {
@@ -19,9 +20,15 @@ class TView
             $this->_jsFiles = $files;
         }
 
-        if ($theme = Core::app()->cfg('theme')) {
-            if ($theme != 'default') {
-                $this->_theme = $theme;
+        if ($themes = Core::app()->cfg('theme')) {
+            if (!is_array($themes)) {
+                $themes = array($themes);
+            }
+
+            foreach($themes as $theme) {
+                if ($theme != 'default') {
+                    $this->_themes[] = $theme;
+                }
             }
         }
     }
@@ -90,9 +97,11 @@ class TView
         if (substr($file, 0, 2) != '//') {
 
             if (isset($this->controller)) {
-                if (!empty($this->_theme)) {
-                    $paths[] = Core::app()->appDir . '/themes/' . $this->_theme . '/' . $this->controller . '/';
-                    $paths[] = Core::app()->coreDir . '/themes/' . $this->_theme . '/' . $this->controller . '/';
+                if (!empty($this->_themes)) {
+                    foreach($this->_themes as $theme) {
+                        $paths[] = Core::app()->appDir . '/themes/' . $theme . '/' . $this->controller . '/';
+                        $paths[] = Core::app()->coreDir . '/themes/' . $theme . '/' . $this->controller . '/';
+                    }
                 }
                 $paths[] = Core::app()->appDir . '/views/' . $this->controller . '/';
                 $paths[] = Core::app()->coreDir . '/views/' . $this->controller . '/';
@@ -120,9 +129,11 @@ class TView
             }
         }
 
-        if (!empty($this->_theme)) {
-            $paths[] = Core::app()->appDir . '/themes/' . $this->_theme . '/';
-            $paths[] = Core::app()->coreDir . '/themes/' . $this->_theme . '/';
+        if (!empty($this->_themes)) {
+            foreach ($this->_themes as $theme) {
+                $paths[] = Core::app()->appDir . '/themes/' . $theme . '/';
+                $paths[] = Core::app()->coreDir . '/themes/' . $theme . '/';
+            }
         }
         $paths[] = Core::app()->appDir . '/views/';
         $paths[] = Core::app()->coreDir . '/views/';
@@ -140,6 +151,10 @@ class TView
         foreach ($paths as $path) {
             $filename = $path . $file . '.php';
             if (file_exists($filename)) {
+                //TODO: change it so it won't use preg_match, to be much faster
+                if (preg_match('/\/themes\/(.*?)\//i', $filename, $matches)) {
+                    $this->_usedTheme = $matches[1];
+                }
                 return $filename;
             }
         }
