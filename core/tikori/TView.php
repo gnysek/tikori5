@@ -77,7 +77,13 @@ class TView
             ob_start();
             ob_implicit_flush(false);
             Profiler::addLog('Rendering <kbd>' . str_replace(Core::app()->appDir, '', $_fileNC) . '</kbd>');
+            if (Core::app()->getMode() != Core::MODE_PROD) {
+                echo '<!-- START ' . str_replace(Core::app()->appDir, '', $_fileNC) . ' -->';
+            }
             require($_fileNC);
+            if (Core::app()->getMode() != Core::MODE_PROD) {
+                echo '<!-- END ' . str_replace(Core::app()->appDir, '', $_fileNC) . ' -->';
+            }
             return ob_get_clean();
         } else {
             require $_fileNC;
