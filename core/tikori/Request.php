@@ -42,34 +42,6 @@ class Request
 
     const UNKNOWN_BROWSER = 'Unknown';
 
-    public $requestMethod = 'POST';
-    public $scriptName = 'index.php';
-    public $pathInfo;
-    public $queryString;
-    public $serverName;
-    public $serverPort = 80;
-    public $accept = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
-    public $acceptLang = 'en-US,en;q=0.8';
-    public $acceptCharset = 'ISO-8859-2,utf-8;q=0.7,*;q=0.3';
-    public $userAgent = self::UNKNOWN_BROWSER;
-    public $ip = '127.0.0.1';
-    public $proxyIp = '127.0.0.1';
-    public $urlScheme = 'http';
-    public $isSecure = false;
-    public $route = array();
-
-    public $url = '/';
-    public $referer = 'organic';
-    public $isAjax = false;
-    public $requestData = '';
-    public $contentType;
-    public $contentLength;
-
-    public $getData = array();
-    public $postData = array();
-    public $cookiesData = array();
-    public $files = array();
-
     //public $secure // move to method ?
 
 
@@ -109,25 +81,6 @@ class Request
 
     public function mock()
     {
-        $runDir = str_replace(array('\\',' '), array('/','%20'), dirname($_SERVER['SCRIPT_NAME']));
-        $this->_baseUrl = $runDir;
-        $this->requestMethod = getenv('REQUEST_METHOD') ?: 'GET';
-        $this->referer = getenv('HTTP_REFERER') ?: '';
-        $this->ip = getenv('REMOTE_ADDR') ?: '';
-        $this->proxyIp = $this->getProxyIpAddress();
-        $this->isAjax = $this->isAjax();
-        $this->scheme = getenv('SERVER_PROTOCOL') ?: 'HTTP/1.1';
-        $this->userAgent = getenv('HTTP_USER_AGENT') ?: self::UNKNOWN_BROWSER;
-        $this->requestData = file_get_contents('php://input');
-        $this->contentType =  getenv('CONTENT_TYPE') ?: '';
-        $this->contentLength = getenv('CONTENT_LENGTH') ?: 0;
-        $this->getData = new Collection($_GET);
-        $this->postData = new Collection($_GET);
-        $this->cookiesData = new Collection($_COOKIE);
-        $this->files = new Collection($_FILES);
-        $this->isSecure = getenv('HTTPS') && getenv('HTTPS') != 'off';
-        $this->accept = getenv('HTTP_ACCEPT') ?: '';
-
         return array(
             self::REQUEST_METHOD => 'GET',
             self::SCRIPT_NAME    => 'index.php',
@@ -287,6 +240,7 @@ class Request
         //The IP
 //		$env['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
         $env[self::REMOTE_ADDR] = $_SERVER['REMOTE_ADDR'];
+        $env['proxy-ip'] = $this->getProxyIpAddress();
 
         /**
          * Application paths
@@ -304,71 +258,76 @@ class Request
          * used for application routing.
          */
         if (strpos($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME']) === 0) {
-            $env['SCRIPT_NAME'] = $_SERVER['SCRIPT_NAME']; //Without URL rewrite
+            $env['script-name'] = $_SERVER['SCRIPT_NAME']; //Without URL rewrite
         } else {
-            $env['SCRIPT_NAME'] = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])); //With URL rewrite
+            $env['script-name'] = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])); //With URL rewrite
         }
-        $env['PATH_INFO'] = substr_replace($_SERVER['REQUEST_URI'], '', 0, strlen($env['SCRIPT_NAME']));
-        if (strpos($env['PATH_INFO'], '?') !== false) {
-            $env['PATH_INFO'] = substr_replace(
-                $env['PATH_INFO'], '', strpos($env['PATH_INFO'], '?')
+        $env['path-info'] = substr_replace($_SERVER['REQUEST_URI'], '', 0, strlen($env['script-name']));
+        if (strpos($env['path-info'], '?') !== false) {
+            $env['path-info'] = substr_replace(
+                $env['path-info'], '', strpos($env['path-info'], '?')
             ); //query string is not removed automatically
         }
-        $env['SCRIPT_NAME'] = rtrim($env['SCRIPT_NAME'], '/');
-        $env['PATH_INFO'] = '/' . ltrim($env['PATH_INFO'], '/');
+        $env['script-name'] = rtrim($env['script-name'], '/');
+        $env['path-info'] = '/' . ltrim($env['path-info'], '/');
 
-        $env['tikori.path_info'] = $env['PATH_INFO'];
+        $env['tikori.path-info'] = $env['path-info'];
 
 //		var_dump(Core::app()->cfg('url/pathInsteadGet'));
 
         if (Core::app()->cfg('url/pathInsteadGet') === true and !empty($_GET[self::ROUTE_TOKEN])) {
-            $env['PATH_INFO'] = '/' . $_GET[self::ROUTE_TOKEN];
+            $env['path-info'] = '/' . $_GET[self::ROUTE_TOKEN];
             foreach (array_slice($_GET, 1) as $key => $val) {
-                $env['PATH_INFO'] .= '/' . $key . '/' . $val;
+                $env['path-info'] .= '/' . $key . '/' . $val;
             }
         }
 
-//		var_dump($env['PATH_INFO']);
+//		var_dump($env['path-info']);
         //The portion of the request URI following the '?'
-        $env['QUERY_STRING'] = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '';
+        $env['query-string'] = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '';
 
         //Name of server host that is running the script
-        $env['SERVER_NAME'] = $_SERVER['SERVER_NAME'];
+        $env['server-name'] = $_SERVER['SERVER_NAME'];
 
         //Number of server port that is running the script
-        $env['SERVER_PORT'] = $_SERVER['SERVER_PORT'];
+        $env['server-port'] = $_SERVER['SERVER_PORT'];
 
         //HTTP request headers
-        $specialHeaders = array('CONTENT_TYPE', 'CONTENT_LENGTH', 'PHP_AUTH_USER', 'PHP_AUTH_PW', 'PHP_AUTH_DIGEST',
-                                'AUTH_TYPE');
+        $specialHeaders = array('CONTENT_TYPE', 'CONTENT_LENGTH', 'PHP_AUTH_USER', 'PHP_AUTH_PW', 'PHP_AUTH_DIGEST', 'AUTH_TYPE');
         foreach ($_SERVER as $key => $value) {
             $value = is_string($value) ? trim($value) : $value;
             if (strpos($key, 'HTTP_') === 0) {
-                $env[substr($key, 5)] = $value;
+                $key = substr($key, 5);
             } elseif (strpos($key, 'X_') === 0 || in_array($key, $specialHeaders)) {
-                $env[$key] = $value;
+                //
+            } else {
+                continue;
             }
+
+            $key = strtolower(str_replace('_','-', $key));
+
+            $env[$key] = $value;
+            #$env['x-'.$key] = $value;
         }
 
         //Is the application running under HTTPS or HTTP protocol?
         $env['tikori.url_scheme'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off' ? 'http' : 'https';
 
         //Input stream (readable one time only; not available for mutipart/form-data requests)
-//		$rawInput = @file_get_contents('php://input');
-//		if (!$rawInput) {
-//			$rawInput = '';
-//		}
-//		$env['slim.input'] = $rawInput;
-        //Error stream
-//		$env['slim.errors'] = fopen('php://stderr', 'w');
-//		$env['tikori.route'] = Route::process_uri($env['PATH_INFO']);
-//		if (empty($env['tikori.route']['params'])) {
-//			throw new Exception('404');
-//		}
-        preg_match('#(.*)/(.*?)\.php#i', $env['SCRIPT_NAME'], $match);
-        $env['tikori.root_path'] = (count($match) == 3) ? $env['HOST'] . $match[1] : $env['HOST'];
+		$rawInput = @file_get_contents('php://input');
+		if (!$rawInput) {
+			$rawInput = '';
+		}
+		$env['raw-input'] = $rawInput;
+        $env['raw-type'] = getenv('CONTENT_TYPE') ?: '';
+        $env['raw-length'] = getenv('CONTENT_LENGTH') ?: 0;
+        $env['is-secure'] = getenv('HTTPS') && getenv('HTTPS') != 'off';
+        $env['tikori.base-dir'] = str_replace(array('\\',' '), array('/','%20'), dirname($_SERVER['SCRIPT_NAME']));
+
+        preg_match('#(.*)/(.*?)\.php#i', $env['script-name'], $match);
+        $env['tikori.root_path'] = (count($match) == 3) ? $env['host'] . $match[1] : $env['host'];
         if (Core::app()->cfg('url/addScriptName') === true) {
-            $path = ((count($match) != 3)) ? $env['SCRIPT_NAME'] : dirname($env['SCRIPT_NAME']);
+            $path = ((count($match) != 3)) ? $env['script-name'] : dirname($env['script-name']);
             $env['tikori.root_path'] = $env['HOST'] . $path;
         }
 
@@ -397,6 +356,10 @@ class Request
             }
         }
 
+        $env['is-ajax'] = $this->isAjax();
+        $env['protocol'] = getenv('SERVER_PROTOCOL') ?: 'HTTP/1.1';
+
+        ksort($env);
         $this->env = $env;
 //		Core::app()->cfg('env', $env);
 //		Core::app()->cfg()->env = $env;
@@ -406,7 +369,7 @@ class Request
     public function getRouterPath()
     {
         //return (empty($this->env['PATH_INFO'])) ? '' : $this->env['PATH_INFO'];
-        return Core::app()->cfg('env/PATH_INFO');
+        return Core::app()->cfg('env/path-info');
     }
 
     public function getPost($key, $default = NULL)

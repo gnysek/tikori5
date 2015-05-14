@@ -5,10 +5,48 @@ blockquote {
 	padding-left: 50px;
 }
 
+sub, sup {
+    font-size: 75%;
+}
+
+sup {
+    vertical-align: super;
+}
+
+sub {
+    vertical-align: sub;
+}
+
+#layout {
+    max-width: 1200px;
+}
+
+@media(max-width: 1250px) {
+    #layout {
+        max-width: 960px;
+    }
+}
+
+@media(max-width: 1000px) {
+    #layout {
+        max-width: 800px;
+    }
+}
+
 .doc-empty {
 	text-decoration: line-through;
 }
 
 .doc-not-empty {
 	text-decoration: none !important;
+}
+
+.optional {
+    color: gray;
+}
+
+.custom, .optional {
+    font-style: italic;
+    border-style: dashed;
+    background: none;
 }

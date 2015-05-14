@@ -1,35 +1,33 @@
 /* Pretty printing styles. Used with prettify.js. */
 
 /* SPAN elements with the classes below are added by prettyprint. */
-.pln { color: #000 }  /* plain text */
 
-@media screen {
-  .str { color: #080 }  /* string content */
-  .kwd { color: #008 }  /* a keyword */
-  .com { color: #800 }  /* a comment */
-  .typ { color: #606 }  /* a type name */
-  .lit { color: #066 }  /* a literal value */
-  /* punctuation, lisp open bracket, lisp close bracket */
-  .pun, .opn, .clo { color: #660 }
-  .tag { color: #008 }  /* a markup tag name */
-  .atn { color: #606 }  /* a markup attribute name */
-  .atv { color: #080 }  /* a markup attribute value */
-  .dec, .var { color: #606 }  /* a declaration; a variable name */
-  .fun { color: red }  /* a function name */
-}
+pre .str, code .str { color: #65B042; } /* string  - green */
+pre .kwd, code .kwd { color: #E28964; } /* keyword - dark pink */
+pre .com, code .com { color: #AEAEAE; font-style: italic; } /* comment - gray */
+pre .typ, code .typ { color: #89bdff; } /* type - light blue */
+pre .lit, code .lit { color: #3387CC; } /* literal - blue */
+pre .pun, code .pun { color: #fff; } /* punctuation - white */
+pre .pln, code .pln { color: #fff; } /* plaintext - white */
+pre .tag, code .tag { color: #89bdff; } /* html/xml tag    - light blue */
+pre .atn, code .atn { color: #bdb76b; } /* html/xml attribute name  - khaki */
+pre .atv, code .atv { color: #65B042; } /* html/xml attribute value - green */
+pre .dec, code .dec { color: #3387CC; } /* decimal - blue */
 
-/* Use higher contrast and text-weight for printable form. */
-@media print, projection {
-  .str { color: #060 }
-  .kwd { color: #006; font-weight: bold }
-  .com { color: #600; font-style: italic }
-  .typ { color: #404; font-weight: bold }
-  .lit { color: #044 }
-  .pun, .opn, .clo { color: #440 }
-  .tag { color: #006; font-weight: bold }
-  .atn { color: #404 }
-  .atv { color: #060 }
-}
+
+#layout .str { color: #080 }  /* string content */
+#layout .kwd { color: #008 }  /* a keyword */
+#layout .com { color: #800 }  /* a comment */
+#layout .typ { color: #606 }  /* a type name */
+#layout .lit { color: #066 }  /* a literal value */
+    /* punctuation, lisp open bracket, lisp close bracket */
+#layout .pun, #layout .opn, #layout .clo { color: #660 }
+#layout .tag { color: #008 }  /* a markup tag name */
+#layout .atn { color: #606 }  /* a markup attribute name */
+#layout .atv { color: #080 }  /* a markup attribute value */
+#layout .dec, #layout  .var { color: #606 }  /* a declaration; a variable name */
+#layout .fun { color: red }  /* a function name */
+#layout .pln { color: black;}
 
 /* Put a border around prettyprinted code snippets. */
 pre.prettyprint { padding: 2px; border: 1px solid #888 }
@@ -49,4 +47,4 @@ li.L1,
 li.L3,
 li.L5,
 li.L7,
-li.L9 { background: #eee }
+li.L9 { background: #252525 }

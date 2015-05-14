@@ -13,11 +13,10 @@
 
         <h1><?php echo Core::app()->cfg('appName'); ?> <?php echo Core::VERSION ?></h1>
         <hr/>
-        <div
-            style="width: 224px; margin-right: 10px; float: left; border-right: 1px solid #333;"><?php echo $this->renderPartial(
+        <div style="width: 224px; margin-right: 10px; float: left; display: inline; border-right: 1px solid #333;"><?php echo $this->renderPartial(
                 'static/_menu'
             ); ?></div>
-        <div style="width: 535px; float: right;">
+        <div style="width: auto; display: block; overflow: hidden; vertical-align: top;">
             <?php
             if (!empty($this->breadcrumbs)) {
                 $breadcrumbs = $this->widget(

@@ -35,8 +35,8 @@ class TProfiler
         $logs = array();
 
         $logs[] = 'Profiler:<br/>';
-        $logs[] = '<table style="width: 98%; margin: 5px auto;" class="tikori-profiler-table">';
-        $logs[] = '<tr>';
+        $logs[] = '<table style="width: 98%; margin: 5px auto; background: white; font-size: 11px; font-family: Arial, sans-serif;" class="tikori-profiler-table">';
+        $logs[] = '<tr style="border-bottom: 1px solid black; background: gray; color: white;">';
         $logs[] = '<th>ID</th>';
         $logs[] = '<th>Type</th>';
         $logs[] = '<th>Action</th>';
@@ -68,7 +68,7 @@ class TProfiler
                 $style = ($log[0] > 0 and array_key_exists($log[0], $styles)) ? $styles[$log[0]] : '';
                 $type = ($log[0] > 0 and array_key_exists($log[0], $types)) ? $types[$log[0]] : '&ndash;';
 
-                $logs[] = '<tr>';
+                $logs[] = '<tr style="border-bottom: 1px solid black;">';
                 $logs[] = '<td>' . $id . '</td>';
                 $logs[] = '<td' . $style . '>' . $type . '</td>';
                 $logs[] = '<td' . $style . '>' . $log[1] . '</td>';
