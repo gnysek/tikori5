@@ -152,7 +152,7 @@ class Route
      * @uses    Route::REGEX_ESCAPE
      * @uses    Route::REGEX_SEGMENT
      */
-    public static function compile($uri, array $regex = NULL)
+    public static function compile($uri, $regex = NULL)
     {
         if (!is_string($uri)) {
             return;
@@ -366,7 +366,7 @@ class Route
      *
      * @return  $this or array
      */
-    public function defaults(array $defaults = NULL)
+    public function defaults($defaults = NULL)
     {
         if ($defaults === NULL) {
             return $this->_defaults;

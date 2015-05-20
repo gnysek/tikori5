@@ -16,10 +16,10 @@ class TConfig
      */
     public function get($path = null, $default = null)
     {
-        return $this->_getNode($this->_data, trim($path, '/'), $default);
+        return $this->_getNode($this->_data, trim($path, '/'), trim($path, '/'), $default);
     }
 
-    private function _getNode(&$node, $path, $default = null)
+    private function _getNode($node, $path, $fullPath, $default = null)
     {
         $_paths = explode('/', $path);
 
@@ -27,16 +27,19 @@ class TConfig
             return $this->_data;
         } else {
             if (count($_paths) == 1) {
-                if (array_key_exists($path, $node)) {
+                if (isset($node[$path]) and (is_array($node) or is_object($node))) { //isset > array_key_exists, cause can be used on ArrayAccess
                     return $node[$path];
                 }
                 return $default;
             } else {
-                if (array_key_exists($_paths[0], $node)) {
-                    return $this->_getNode($node[$_paths[0]], implode('/', array_slice($_paths, 1)), $default);
+                if (isset($node[$_paths[0]]) and (is_array($node) or is_object($node))) {
+                    return $this->_getNode($node[$_paths[0]], implode('/', array_slice($_paths, 1)), $fullPath, $default);
                 }
             }
         }
+
+        Profiler::addLog('Cannot find cfg for ' . $fullPath, Profiler::LEVEL_DEBUG);
+
         return $default;
     }
 
@@ -73,6 +76,7 @@ class TConfig
                 return false;
             } else {
                 if (!array_key_exists($_paths[0], $node)) {
+                    // if one of subnodes from path to set doesn't yet exists
                     $node[$_paths[0]] = array();
                 }
                 return $this->_setNode($node[$_paths[0]], implode('/', array_slice($_paths, 1)), $value, $overwrite);
@@ -100,7 +104,7 @@ class TConfig
                     throw new Exception('Config isn\'t valid JSON file.');
                 }
 
-                $this->_data = $decoded;
+                $this->_data = new \Core\Common\DefaultObject($decoded);
                 $this->_checksum = md5_file($filename);
 
                 return true;

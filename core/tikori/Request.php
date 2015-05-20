@@ -7,7 +7,10 @@
  * @param string $request_method (GET|POST|PUT|DELETE)
  * @param string $script_name
  */
-class Request
+
+use \Core\Common\DefaultObject as DefaultObject;
+
+class Request extends DefaultObject
 {
 
     const METHOD_HEAD = 'HEAD';
@@ -196,7 +199,7 @@ class Request
      */
     public function params($key = NULL)
     {
-        $union = array_merge($this->get(), $this->post());
+        $union = array_merge($this->paramGet(), $this->paramPost());
         if ($key) {
             if (isset($union[$key])) {
                 return $union[$key];
@@ -208,12 +211,12 @@ class Request
         }
     }
 
-    public function get()
+    public function paramGet()
     {
         return (empty($_GET)) ? array() : $_GET;
     }
 
-    public function post()
+    public function paramPost()
     {
         return (empty($_POST)) ? array() : $_POST;
     }
@@ -360,16 +363,16 @@ class Request
         $env['protocol'] = getenv('SERVER_PROTOCOL') ?: 'HTTP/1.1';
 
         ksort($env);
-        $this->env = $env;
+        $this->replace($env);
 //		Core::app()->cfg('env', $env);
 //		Core::app()->cfg()->env = $env;
-        return Core::app()->cfg()->set('env', $env, true);
+        return Core::app()->cfg()->set('request', $this, true);
     }
 
     public function getRouterPath()
     {
         //return (empty($this->env['PATH_INFO'])) ? '' : $this->env['PATH_INFO'];
-        return Core::app()->cfg('env/path-info');
+        return $this->get('path-info');
     }
 
     public function getPost($key, $default = NULL)
@@ -408,9 +411,9 @@ class Request
     {
         if ($this->_hostInfo === NULL) {
             if (isset($_SERVER['HTTP_HOST'])) {
-                $this->_hostInfo = $this->env['tikori.url_scheme'] . '://' . $_SERVER['HTTP_HOST'];
+                $this->_hostInfo = $this->get('tikori.url_scheme') . '://' . $_SERVER['HTTP_HOST'];
             } else {
-                $this->_hostInfo = $this->env['tikori.url_scheme'] . '://' . $_SERVER['SERVER_NAME'];
+                $this->_hostInfo = $this->get('tikori.url_scheme') . '://' . $_SERVER['SERVER_NAME'];
             }
         }
 
@@ -444,7 +447,7 @@ class Request
 
     public function scheme()
     {
-        return $this->env['tikori.url_scheme'];
+        return $this->get('tikori.url_scheme');
     }
 
     /**

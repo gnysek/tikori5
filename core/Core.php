@@ -164,6 +164,8 @@ class Core
         }
     }
 
+    public static $namespacesEnabled = false;
+
     /**
      * Autoloader method
      *
@@ -175,6 +177,11 @@ class Core
      */
     public static function autoload($class, $throw = true)
     {
+        // TODO: remove self::$namespacesEnabled so if namespace, then path will be taken from it instead of autloadPaths
+        if (class_exists($class) and self::$namespacesEnabled == false) {
+            return true;
+        }
+
         $namespace = '';
         $class = ltrim($class, '\\');
 //        $parts = explode('\\', $class);
@@ -182,14 +189,14 @@ class Core
 //        $search = implode('/', $parts);
 
         if ($ns_pos = strripos($class, '\\')) {
-            $namespace = substr($class, 0, $ns_pos);
+            $namespace = substr($class, 0, $ns_pos) . '\\';
             $class = substr($class, $ns_pos + 1);
         }
 
-        $search = strtolower(str_replace('_', '/', (($namespace) ? ($namespace . '/') : '') . $class));
+        $search = strtolower(str_replace('_', '/', (($namespace and self::$namespacesEnabled) ? ($namespace . '/') : '') . $class));
 
         preg_match('#(.*)/(.*)#i', $search, $match);
-        if (!empty($match)) {
+        if (!empty($match) and self::$namespacesEnabled) {
             $search = strtolower($match[1]) . '/' . $match[2];
         } else {
             $search = ucfirst($class);
@@ -210,12 +217,12 @@ class Core
             if (file_exists($filename)) {
                 if (class_exists('Profiler')) {
                     Profiler::addLog(
-                        sprintf('<div style="padding-left: 20px;"><i>Loading <code>%s\\%s</code> from <kbd>%s<kbd></i></div>', $namespace, $class, $filename)
+                        sprintf('<div style="padding-left: 20px;"><i>Loading <code>%s%s</code> from <kbd>%s<kbd></i></div>', $namespace, $class, $filename)
                     );
                 }
-                require $filename;
-                if (!class_exists($class) && $throw) {
-                    throw new Exception(sprintf('Class %s not found inside autoloaded file [%s]', $class, $search));
+                require_once $filename;
+                if (!class_exists($namespace.$class) && $throw) {
+                    throw new Exception(sprintf('Class %s not found inside autoloaded file [%s]', $namespace.$class, $filename . $search));
                 }
                 #class_alias($class, '\Tikori\\' . $class);
                 return true;
@@ -223,7 +230,7 @@ class Core
         }
 
         if ($throw) {
-            throw new Exception(sprintf('Cannot autoload class %s [%s] %s', $class, $search, implode(', ' . PHP_EOL, $filenames)));
+            throw new Exception(sprintf('Cannot autoload class %s [namespace: %s] [%s] %s', $class, $namespace, $search, implode(', ' . PHP_EOL, $filenames)));
         }
         return false;
     }

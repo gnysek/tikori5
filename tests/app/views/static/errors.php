@@ -7,6 +7,7 @@ $links = array(
     array('title' => 'E_NOTICE', 'link' => 'errortest/notice'),
     array('title' => 'E_PARSE', 'link' => 'errortest/parse'),
     array('title' => 'E_FATAL', 'link' => 'errortest/fatal'),
+    array('title' => 'E_USER', 'link' => 'errortest/user'),
 
 );
 

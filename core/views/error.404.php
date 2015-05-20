@@ -20,7 +20,7 @@
         echo $debug;
     } ?>
     Request params:
-    <pre class="debug-pre"><?php echo var_export(Core::app()->request->env, true); ?></pre>
+    <pre class="debug-pre"><?php echo var_export(Core::app()->request->all(), true); ?></pre>
 <?php endif;
 ?>
 <p class="footer">&copy; 2012 gnysek.pl</p>

@@ -164,7 +164,7 @@ class Error
         } while ($current = $current->getPrevious());
 
         $view = new Controller();
-        $e = Core::app()->cfg('env');
+        $e = Core::app()->cfg('request');
 
         // TODO: check that its needed since erh have ErrorException used
         if ($isErrorHandler === false) {

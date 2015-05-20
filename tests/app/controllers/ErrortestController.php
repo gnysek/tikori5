@@ -17,4 +17,8 @@ class ErrorTestController extends Controller
     {
         $this->renderPartial('test/fatal');
     }
+
+    public function userAction() {
+        $this->renderPartial('test/user');
+    }
 }

@@ -47,7 +47,7 @@ class Cookie extends TModule
             }
         } else {
             $this->path = '/';
-            $this->domain = '.' . Core::app()->cfg('env/HOST');
+            $this->domain = '.' . Core::app()->cfg('request/host');
         }
     }
 

@@ -42,7 +42,7 @@ class Session extends Model
                 $this->logged_in = 0;
             }
             $this->start_time = $this->current_time;
-            $this->ip = Core::app()->request->env['ip'];
+            $this->ip = Core::app()->request->get('ip');
         }
 
         return true;
