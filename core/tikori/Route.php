@@ -203,6 +203,10 @@ class Route
         $area = null;
         if (Core::app()->cfg('areas') !== null) {
             $test = Core::app()->cfg('areas'); // prevent to cause E_STRICT
+            if (is_object($test)) {
+                /* @var $test array|\Core\Common\DefaultObject */
+                $test = $test->all();
+            }
             $test = end($test);
 
             if (preg_match('#^(' . $test . ')(?:/*).*#', $uri)) {

@@ -63,6 +63,10 @@ class Html
     {
         if (!is_array($url)) {
             return self::url(array($url));
+        } else {
+            if (count($url) == 0) {
+                $url[0] = '';
+            }
         }
 
         // external

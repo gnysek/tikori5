@@ -23,7 +23,7 @@ class TConfig
     {
         $_paths = explode('/', $path);
 
-        if (empty($_paths[0])) {
+        if (count($_paths[0]) < 1 or empty($_paths[0])) {
             return $this->_data;
         } else {
             if (count($_paths) == 1) {
