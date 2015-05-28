@@ -19,7 +19,7 @@ class TConfig
         return $this->_getNode($this->_data, trim($path, '/'), trim($path, '/'), $default);
     }
 
-    private function _getNode($node, $path, $fullPath, $default = null)
+    protected function _getNode($node, $path, $fullPath, $default = null)
     {
         $_paths = explode('/', $path);
 
@@ -27,12 +27,12 @@ class TConfig
             return $this->_data;
         } else {
             if (count($_paths) == 1) {
-                if (isset($node[$path]) and (is_array($node) or is_object($node))) { //isset > array_key_exists, cause can be used on ArrayAccess
+                if (isset($node[$path]) and is_array($node)) { //isset > array_key_exists, cause can be used on ArrayAccess
                     return $node[$path];
                 }
                 return $default;
             } else {
-                if (isset($node[$_paths[0]]) and (is_array($node) or is_object($node))) {
+                if (isset($node[$_paths[0]]) and is_array($node)) {
                     return $this->_getNode($node[$_paths[0]], implode('/', array_slice($_paths, 1)), $fullPath, $default);
                 }
             }
@@ -61,7 +61,7 @@ class TConfig
         return $this->_setNode($this->_data, trim($path, '/'), $value, $overwrite);
     }
 
-    private function _setNode(&$node, $path, $value = true, $overwrite = false)
+    protected function _setNode(&$node, $path, $value = true, $overwrite = false)
     {
         $_paths = explode('/', $path);
 
@@ -104,7 +104,7 @@ class TConfig
                     throw new Exception('Config isn\'t valid JSON file.');
                 }
 
-                $this->_data = new \Core\Common\DefaultObject($decoded);
+                $this->_data = $decoded;
                 $this->_checksum = md5_file($filename);
 
                 return true;

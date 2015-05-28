@@ -366,7 +366,7 @@ class Request extends DefaultObject
         $this->replace($env);
 //		Core::app()->cfg('env', $env);
 //		Core::app()->cfg()->env = $env;
-        return Core::app()->cfg()->set('request', $this, true);
+        return Core::app()->cfg()->set('request', $this->all(), true);
     }
 
     public function getRouterPath()

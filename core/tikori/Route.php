@@ -152,7 +152,7 @@ class Route
      * @uses    Route::REGEX_ESCAPE
      * @uses    Route::REGEX_SEGMENT
      */
-    public static function compile($uri, $regex = NULL)
+    public static function compile($uri, array $regex = NULL)
     {
         if (!is_string($uri)) {
             return;
@@ -201,12 +201,9 @@ class Route
 
         // get area
         $area = null;
-        if (Core::app()->cfg('areas') !== null) {
+        $test = Core::app()->cfg('areas');
+        if ($test !== null && is_array($test)) {
             $test = Core::app()->cfg('areas'); // prevent to cause E_STRICT
-            if (is_object($test)) {
-                /* @var $test array|\Core\Common\DefaultObject */
-                $test = $test->all();
-            }
             $test = end($test);
 
             if (preg_match('#^(' . $test . ')(?:/*).*#', $uri)) {

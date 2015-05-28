@@ -21,7 +21,7 @@ class TView
         }
 
         if ($themes = Core::app()->cfg('theme')) {
-            if (!is_array($themes) and !is_object($themes)) {
+            if (!is_array($themes)) {
                 $themes = array($themes);
             }
 
