@@ -69,7 +69,7 @@ class TDbSchema
             return $this->_tables[$name];
         }
 
-        return $this->_tables[$name] = $this->loadTableSchema($name);
+        return $this->loadTableSchema($name);
     }
 
     /**
@@ -85,7 +85,7 @@ class TDbSchema
 
         if ($this->findColumns($table)) {
             $this->findConstraints($table);
-            return $table;
+            return $this->_tables[$name] = $table;
         }
 
         return NULL;
@@ -94,6 +94,10 @@ class TDbSchema
     public function getTableNames()
     {
         return array_keys($this->_tables);
+    }
+
+    public function hasTable($table) {
+        return $this->getTableSchema($table);
     }
 
     public function quoteValue($str)
@@ -163,10 +167,12 @@ class TDbSchema
 
         try {
             $columns = Core::app()->db->query($sql);
-        } catch (Exception $e) {
-            if (preg_match('/42S02/', $e->getMessage())) {
+        } catch (DbError $e) {
+            if (preg_match('/42S02/', $e->getMessage()) or $e->getMysqlError() == 1146) {
                 return false;
             }
+            throw $e;
+        } catch (Exception $e) {
             throw $e;
         }
 

@@ -62,11 +62,11 @@ class DbMySqli extends DBAbstract
         $this->_queries++;
         $this->_queryList[] = $sql;
 
-        if (preg_match('/^(create|insert|update|delete|replace|alter)/i', $sql)) {
+        if (preg_match('/^(create|insert|update|delete|replace|alter)/i', trim($sql))) {
             $result = $this->conn()->query($sql);
             Profiler::addLog('Exec finished');
             if ($result === false) {
-                throw new DbError($sql . '<br/>' . $this->conn()->error);
+                throw new DbError($sql . '<br/>' . $this->conn()->error, mysqli_errno($this->conn()));
             }
             return true;
         } else {
@@ -77,7 +77,7 @@ class DbMySqli extends DBAbstract
 
         if (!$result instanceof mysqli_result) {
 //            if (mysqli_error($this->conn())) {
-            throw new DbError($sql . '<br/>' . $this->conn()->error);
+            throw new DbError('Expected mysql_result, got ' . (is_object($result) ? get_class($result) : gettype($result)) . '<br/>' . $sql . '<br/>' . $this->conn()->error, mysqli_errno($this->conn()));
 //            }
 //            return NULL;
         } else {
@@ -97,7 +97,7 @@ class DbMySqli extends DBAbstract
                     return new Record();
                 }
             } else {
-                throw new DbError('SQL ERROR ' . $sql . '<br/>' . mysqli_error($this->conn()));
+                throw new DbError('SQL ERROR ' . $sql . '<br/>' . mysqli_error($this->conn()), mysqli_errno($this->conn()));
             }
         }
     }
