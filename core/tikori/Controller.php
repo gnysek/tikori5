@@ -152,8 +152,8 @@ class Controller extends ControllerView
                         if ($paramObject->isOptional() === false and !array_key_exists($paramObject->name, $this->params)) {
                             //throw new RouteNotFoundException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
                             throw new ErrorException(
-                                'Not enough arguments on method ' . $this->getActionMethodName()
-                                . '() or wrong argument name [' . $paramObject->name . '] - should be one of <code>'
+                                'Not enough arguments for method ' . $this->getActionMethodName()
+                                . '() or wrong argument name, (expected [' . $paramObject->name . ']) - should be one of <code>'
                                 . implode(', ', array_keys($this->params)) . '</code>'
                             );
                         }

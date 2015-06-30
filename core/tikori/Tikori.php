@@ -139,7 +139,7 @@ class Tikori extends Application
         $this->response->send();
 
         Profiler::addLog('Finishing application');
-        if ($this->mode != Core::MODE_PROD) {
+        if ($this->mode != Core::MODE_PROD and $this->cfg('debug/profiler') == 'enabled') {
             echo Profiler::getLogs();
         }
         return true;
