@@ -18,6 +18,10 @@ code, pre, tt, kbd, h2, h3 {
 	font-family: Consolas, "Courier New", monospace;
 }
 
+small {
+    font-size: 70%;
+}
+
 #main {
 	position: fixed;
 	width: 100%;
@@ -79,6 +83,10 @@ h3 {
 	border-width: 0 0 1px 0;
 	background: gainsboro;
 	padding: 10px 5px;
+}
+
+.box:last-child {
+    border: none;
 }
 
 .box-clickable:hover {
@@ -178,4 +186,49 @@ ol li:hover {
 p.pink {
 	color: lightpink;
 	font-family: Consolas, "Courier New", monospace;
+}
+
+.codebox {
+    border-left: 10px solid lightpink;
+    margin: -10px;
+    padding: 10px;
+}
+
+.error-header,.vars {
+    margin: -10px;
+    padding: 20px;
+    border-left: 10px solid mediumvioletred;
+}
+
+.error-header {
+    background: gainsboro;
+    margin-bottom: 10px;
+}
+
+.vars {
+    background: #ccc;
+    margin-top: 10px;
+}
+
+.vars h1 {
+    font-size: 20px;
+    margin: 5px 0;
+    border-bottom: 1px solid gray;
+}
+
+table {
+    width: 100%;
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+}
+
+.d-k {
+    width: 30%;
+    font-weight: bold;
+}
+
+.d-v {
+    width: 70%;
+    word-wrap: break-word;
+    word-break: break-all;
 }
