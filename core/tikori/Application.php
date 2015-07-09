@@ -74,6 +74,8 @@ abstract class Application
         // config
         $this->reconfigure($config);
 
+        $this->observer = new Observer();
+
         $this->run($config);
     }
 

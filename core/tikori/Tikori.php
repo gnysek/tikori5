@@ -78,7 +78,7 @@ class Tikori extends Application
         Route::reconfigure();
 
         //TODO: this should be moved to parent!
-        $this->observer = new Observer();
+        //$this->observer = new Observer();
 
 		if ($this->cfg('db/type') != "") {
 			if ($this->cfg('db/type') == 'mysqli') {
