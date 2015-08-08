@@ -20,7 +20,7 @@
  * @property string  $url
  * @property int     $comm
  */
-class ContentTranslation extends Model
+class ContentTranslation extends TModel
 {
 
     //put your code here
@@ -32,7 +32,7 @@ class ContentTranslation extends Model
     /**
      * @param null|string $model
      *
-     * @return ContentTranslation|Model
+     * @return ContentTranslation|TModel
      */
     public static function model($model = __CLASS__)
     {

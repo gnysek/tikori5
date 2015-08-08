@@ -108,13 +108,13 @@ class RadController extends Controller
 
 		if ($fileExists) {
 			$class = new $modelName;
-			/* @var $class Model */
+			/* @var $class TModel */
 			foreach($class->relations() as $relationName => $relation) {
 				switch($relation[0]) {
-					case Model::HAS_MANY:
+					case TModel::HAS_MANY:
 						$relationsHtml[] = '\'' . $relationName .'\' => array(self::HAS_MANY, \''. $relation[1] .'\', \''.$relation[2].'\''. (!empty($relation[3]) ? (', \'' . $relation[3] . '\'' ) : '' ) . ')';
 					break;
-					case Model::BELONGS_TO:
+					case TModel::BELONGS_TO:
 						$relationsHtml[] = '\'' . $relationName .'\' => array(self::BELONGS_TO, \''. $relation[1] .'\', \''.$relation[2].'\''. (!empty($relation[3]) ? (', \'' . $relation[3] . '\'' ) : '' ) . ')';
 				}
 			}

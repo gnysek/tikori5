@@ -37,7 +37,7 @@
  */
 
 
-class User extends Model
+class User extends TModel
 {
 
     const USER_TYPE_ANONYMOUS = 1;
@@ -53,7 +53,7 @@ class User extends Model
     /**
      * @param null|string $model
      *
-     * @return User|Model
+     * @return User|TModel
      */
     public static function model($model = __CLASS__)
     {

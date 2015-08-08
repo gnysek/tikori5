@@ -16,7 +16,7 @@
  * @property int     $author
  * @proprety ContentTranslations content_translations
  */
-class Content extends Model
+class Content extends TModel
 {
 
 //	protected $_pkId = 'id';
@@ -24,7 +24,7 @@ class Content extends Model
     /**
      * @param string $model
      *
-     * @return Content|Model
+     * @return Content|TModel
      */
     public static function model($model = __CLASS__)
     {

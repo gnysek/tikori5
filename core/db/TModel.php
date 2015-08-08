@@ -6,7 +6,7 @@
  * @property string $tableName  Table Name
  * @property array  $attributes Attribute values
  */
-abstract class Model implements IteratorAggregate, ArrayAccess
+abstract class TModel implements IteratorAggregate, ArrayAccess
 {
 
     const BELONGS_TO = 'BELONGS_TO';
@@ -84,7 +84,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
     /**
      * @param string $model
      *
-     * @return Model
+     * @return TModel
      */
     public static function model($model = NULL)
     {
@@ -142,7 +142,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
     /**
      * @param $id
      *
-     * @return $this|Model
+     * @return $this|TModel
      */
     public function load($id)
     {
@@ -232,8 +232,8 @@ abstract class Model implements IteratorAggregate, ArrayAccess
                 switch ($this->_relations[$relationName][0]) {
                     case self::BELONGS_TO:
 
-                        $model = Model::model($this->_relations[$relationName][1]);
-                        /* @var $model Model */
+                        $model = TModel::model($this->_relations[$relationName][1]);
+                        /* @var $model TModel */
                         $sql->joinOn($model->getTable(), array($model->getPK(), '=', $this->_relations[$relationName][2]));
 
                         break;
@@ -259,7 +259,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 //            $c->setValues($row->getIterator()->getArrayCopy());
             $values = $row->getIterator()->getArrayCopy();
             $c = new $mainClassName($values, false);
-            /* @var $c Model */
+            /* @var $c TModel */
 //            $c->setAttributes($values);
 
             if (!empty($this->_eagers)) {
@@ -276,7 +276,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
                                 }
                                 $relatedClassName = $this->_relations[$relationName][1];
                                 $r = new $relatedClassName($rvalues, false);
-                                /* @var $r Model */
+                                /* @var $r TModel */
 //                                $r->setAttributes($rvalues);
                                 $relationCacheByPk[$values[ $this->_relations[$relationName][2] ]] = $r;
                             }
@@ -307,7 +307,7 @@ abstract class Model implements IteratorAggregate, ArrayAccess
 //                            var_dump($byField . ' ' . $row->$byField . ' ' . $this->_relations[$relationName][2]);
                             $toAssign = $related->getRowsByColumnValue($this->_relations[$relationName][2], $row->$byField);
 //                            var_dump(count($toAssign));
-                            /* @var Model $row */
+                            /* @var TModel $row */
                             $row->populateRelation($relationName, $toAssign);
                         }
                         break;

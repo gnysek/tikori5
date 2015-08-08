@@ -189,7 +189,7 @@ class Html
     }
 
     /**
-     * @param Model  $model
+     * @param TModel  $model
      * @param string $field
      *
      * @return string Html code
@@ -204,8 +204,9 @@ class Html
     }
 
     /**
-     * @param $model Model
-     * @return string
+     * @param $model TModel
+     *
+*@return string
      */
     public static function errorsInModel($model)
     {

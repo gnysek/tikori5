@@ -32,7 +32,7 @@ class GridWidget extends Widget
 
         // render rows
         foreach ($this->data as $record) {
-            if ($record instanceof Model) {
+            if ($record instanceof TModel) {
                 $th = '';
                 //render each column for current row
                 foreach ($this->columns as $column) {

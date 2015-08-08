@@ -1,6 +1,6 @@
 <?php
 
-class Language extends Model
+class Language extends TModel
 {
 
     protected $_primaryKey = 'language_id';
@@ -8,7 +8,7 @@ class Language extends Model
     /**
      * @param string $model
      *
-     * @return Language|Model
+     * @return Language|TModel
      */
     public static function model($model = __CLASS__)
     {

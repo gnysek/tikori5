@@ -23,16 +23,18 @@ class TConfig
     {
         $_paths = explode('/', $path);
 
-        if (count($_paths[0]) < 1 or empty($_paths[0])) {
-            return $this->_data;
+        if (count($_paths[0]) < 1) {
+            if ( strlen($fullPath) == 0) {
+                return $this->_data;
+            }
         } else {
             if (count($_paths) == 1) {
-                if (isset($node[$path]) and is_array($node)) { //isset > array_key_exists, cause can be used on ArrayAccess
+                if (array_key_exists($path, $node) and is_array($node)) {
                     return $node[$path];
                 }
-                return $default;
+                #return $default;
             } else {
-                if (isset($node[$_paths[0]]) and is_array($node)) {
+                if (array_key_exists($_paths[0], $node) and is_array($node)) {
                     return $this->_getNode($node[$_paths[0]], implode('/', array_slice($_paths, 1)), $fullPath, $default);
                 }
             }

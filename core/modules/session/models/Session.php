@@ -14,7 +14,7 @@
  * @property string $browser
  * @property string $data
  */
-class Session extends Model
+class Session extends TModel
 {
 
     protected $_table = 'sessions';
@@ -23,7 +23,7 @@ class Session extends Model
     /**
      * @param string|null $model
      *
-     * @return Session|Model
+     * @return Session|TModel
      */
     public static function model($model = null)
     {

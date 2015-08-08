@@ -14,7 +14,7 @@ class Collection implements ArrayAccess, Iterator, Countable
     /**
      * Collection data.
      *
-     * @var array|Model[]
+     * @var array|TModel[]
      */
     private $_data;
 
@@ -307,6 +307,17 @@ class Collection implements ArrayAccess, Iterator, Countable
         return new Collection($values);
     }
 
+    public function getWhere($function) {
+        $values = array();
+        foreach ($this->_data as $record) {
+            if ($function($record) == true) {
+                $values[] = $record;
+            }
+        }
+
+        return new Collection($values);
+    }
+
     public function countRowsByColumnValue($column, $value)
     {
         $total = 0;
@@ -334,7 +345,7 @@ class Collection implements ArrayAccess, Iterator, Countable
     {
         foreach ($this->_data as $key => $row) {
             // TODO mass deletion
-            if (is_a($row, 'Model')) {
+            if (is_a($row, 'TModel')) {
                 $row->delete();
             }
             unset($this->_data[$key]);
@@ -345,7 +356,7 @@ class Collection implements ArrayAccess, Iterator, Countable
     public function save()
     {
         foreach ($this->_data as $row) {
-            if (is_a($row, 'Model')) {
+            if (is_a($row, 'TModel')) {
                 $row->save();
             }
         }
