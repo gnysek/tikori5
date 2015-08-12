@@ -17,6 +17,7 @@ class DbQuery
     private $_from = array();
     private $_fromAliases = array();
     private $_where = array();
+    private $_customWhere = ''; //TODO: add real AND/OR wheres builder
     private $_order = array();
     private $_group = array();
     private $_limit = -1;
@@ -162,6 +163,10 @@ class DbQuery
         return $this;
     }
 
+    public function customwhere($where) {
+        $this->_customWhere = $where;
+    }
+
     public function order($orderby)
     {
         $this->_order = $orderby;
@@ -192,6 +197,9 @@ class DbQuery
                     break;
                 case 'where':
                     $this->where($conditionValue);
+                    break;
+                case 'orwhere': case 'customwhere':
+                    $this->customwhere($conditionValue);
                     break;
             }
         }
@@ -397,6 +405,14 @@ class DbQuery
                     $where[] = $bld;
                 }
                 $sql[] = implode(' AND ', $where);
+            }
+
+            if (!empty($this->_customWhere)) {
+                if (!in_array('WHERE', $sql)) {
+                    $sql[] = 'WHERE';
+                }
+
+                $sql[] = $this->_customWhere;
             }
 
             // group
