@@ -45,6 +45,12 @@ class TWidget extends TView
 
     public function setupProperties($properties)
     {
+        $cfg = Core::app()->cfg('widgets/' . str_replace('widget', '', strtolower(get_called_class())), array());
+
+        if (is_array($cfg) and count($cfg) > 0) {
+            $properties = array_merge($properties, $cfg);
+        }
+
         foreach ($properties as $k => $v) {
             if (isset($this->$k)) {
                 $this->$k = $v;
