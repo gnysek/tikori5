@@ -88,17 +88,16 @@ class Lang
         }
     }
 
-    public function translate($args)
-    {
+    public function translateTo($lang, $args) {
         if (empty($args)) {
             return '';
         }
 
         $text = $args[0];
 
-        if (in_array($this->currentLanguage, $this->languages)) {
-            if (array_key_exists($args[0], $this->translations[$this->currentLanguage])) {
-                $text = $this->translations[$this->currentLanguage][$text];
+        if (in_array($lang, $this->languages)) {
+            if (array_key_exists($text, $this->translations[$lang])) {
+                $text = $this->translations[$lang][$text];
             }
         }
 
@@ -111,5 +110,10 @@ class Lang
         }
 
         return $text;
+    }
+
+    public function translate($args)
+    {
+        return $this->translateTo($this->currentLanguage, $args);
     }
 }
