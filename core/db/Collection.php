@@ -318,6 +318,15 @@ class Collection implements ArrayAccess, Iterator, Countable
         return new Collection($values);
     }
 
+    /**
+     * @return Collection
+     */
+    public function getRandomized() {
+        $values = $this->_data;
+        shuffle($values);
+        return new Collection($values);
+    }
+
     public function countRowsByColumnValue($column, $value)
     {
         $total = 0;
