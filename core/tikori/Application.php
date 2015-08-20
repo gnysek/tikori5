@@ -72,6 +72,10 @@ abstract class Application
 //		$this->defaultCfg();
 
         // config
+        if (!is_array($config)) {
+            $config = explode(',', $config);
+        }
+
         $this->reconfigure($config);
 
         $this->observer = new Observer();
@@ -230,7 +234,10 @@ abstract class Application
      */
     public function reconfigure($config)
     {
-        $this->cfg()->load($config);
+        $this->cfg()->clear();
+        foreach($config as $file) {
+            $this->cfg()->load($file);
+        }
         $this->getMode();
     }
 

@@ -4,7 +4,11 @@ class TConfig
 {
 
     private $_data = array();
-    private $_checksum = array();
+    #private $_checksum = array();
+
+    public function clear() {
+        $this->_data = array();
+    }
 
     /**
      * Returns config value if exists and default value if not found
@@ -106,8 +110,8 @@ class TConfig
                     throw new Exception('Config isn\'t valid JSON file.');
                 }
 
-                $this->_data = $decoded;
-                $this->_checksum = md5_file($filename);
+                $this->_data = array_merge($this->_data, $decoded);
+                #$this->_checksum = md5_file($filename);
 
                 return true;
             }
@@ -116,10 +120,10 @@ class TConfig
         throw new Exception('Config file ' . $file . '.json doesn\'t exists');
     }
 
-    public function checksum()
+    /*public function checksum()
     {
         return $this->_checksum;
-    }
+    }*/
 
     public function save($file, $item)
     {

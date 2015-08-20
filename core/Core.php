@@ -82,7 +82,7 @@ class Core
      * @param $class
      * @param $config
      *
-     * @return Tikori
+     * @return Tikori|TikoriConsole
      */
     public static function createApplication($class, $config)
     {
