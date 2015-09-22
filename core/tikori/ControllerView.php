@@ -9,7 +9,7 @@ class ControllerView extends TView
      * @param string $class
      * @param array  $properties
      * @param bool   $captureOutput
-     * @return Widget
+     * @return Widget|mixed
      */
     public function widget($class, $properties = array(), $captureOutput = false)
     {
@@ -30,14 +30,15 @@ class ControllerView extends TView
 
     private function _createWidget($class, $properties)
     {
-        if (!array_key_exists($class, $this->_widgets)) {
+        $_widgetHash = strtolower($class);
+        if (!array_key_exists($_widgetHash, $this->_widgets)) {
             $className = ucfirst($class) . 'Widget';
-            $widget = new $className;
+            $widget = new $className();
             /* @var $widget Widget */
             $widget->setupProperties($properties);
             $widget->init();
-            $this->_widgets[$class] = $widget;
+            $this->_widgets[$_widgetHash] = $widget;
         }
-        return $this->_widgets[$class];
+        return $this->_widgets[$_widgetHash];
     }
 }

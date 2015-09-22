@@ -92,6 +92,23 @@ class Cookie extends TModule
     }
 
     /**
+     * Gets cookie
+     *
+     * @param       string $name           Nazwa ciacha
+     * @param       string $defValue       Domyślna wartość
+     *
+     * @return      boolean
+     */
+    public function getClean($name, $defValue = NULL)
+    {
+        if (array_key_exists($name, $_COOKIE)) {
+            return $_COOKIE[$name];
+        }
+
+        return $defValue;
+    }
+
+    /**
      * Deletes cookie
      *
      * @param       string $name           Nazwa ciacha
