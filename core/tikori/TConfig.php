@@ -99,25 +99,34 @@ class TConfig
     //load('x') loads x.json, load('forum:x') loads modules/forum/config/x.json :)
     public function load($file, $reload = false)
     {
+        $atLeastOneFound =  true;
         foreach (\Core::app()->namespaces as $path) {
-            $filename = $path . '/config/' . $file . '.json';
 
-            if (file_exists($filename)) {
-                $data = file_get_contents($filename);
+            foreach (array('', '.dev') as $suffix) {
+                $filename = $path . '/config/' . $file . $suffix . '.json';
 
-                $decoded = json_decode($data, true);
-                if ($decoded == null) {
-                    throw new Exception('Config isn\'t valid JSON file.');
+                if (file_exists($filename)) {
+                    $data = file_get_contents($filename);
+
+                    $decoded = json_decode($data, true);
+                    if ($decoded == null) {
+                        throw new Exception('Config isn\'t valid JSON file.');
+                    }
+
+                    //$this->_data = array_merge_recursive($this->_data, $decoded);
+                    $this->_data = array_replace_recursive($this->_data, $decoded);
+                    #$this->_checksum = md5_file($filename);
+
+                    $atLeastOneFound = true;
                 }
-
-                $this->_data = array_merge($this->_data, $decoded);
-                #$this->_checksum = md5_file($filename);
-
-                return true;
             }
         }
 
-        throw new Exception('Config file ' . $file . '.json doesn\'t exists');
+        if ($atLeastOneFound) {
+            return true;
+        } else {
+            throw new Exception('Config file ' . $file . '.json doesn\'t exists');
+        }
     }
 
     /*public function checksum()

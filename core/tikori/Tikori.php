@@ -57,7 +57,7 @@ class Tikori extends Application
             $this->request = new Request();
 
             $this->lang = new Lang();
-            $this->lang->loadLanguages();
+            //$this->lang->loadLanguages();
 
             $this->response = new Response();
             $this->response->status(503);
@@ -121,7 +121,7 @@ class Tikori extends Application
 
         // load languages
         $this->lang = new Lang();
-        $this->lang->loadLanguages();
+        //$this->lang->loadLanguages();
 
         // process route
         $this->route = Route::process_uri($this->request->getRouterPath());

@@ -8,6 +8,7 @@ class TWidget extends TView
     public static function begin($properties = array())
     {
         $class = get_called_class();
+        /* @var $widget TWidget|mixed */
         $widget = new $class();
         $widget->setupProperties($properties);
         $widget->init();
