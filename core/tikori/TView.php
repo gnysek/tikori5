@@ -182,12 +182,18 @@ class TView
         return implode(PHP_EOL . $prefix, $return);
     }
 
-    public function getJsForHead($prefix = '') {
+    public function getJsForHead($prefix = '')
+    {
         $return = array();
         foreach ($this->_jsFiles as $jsSrc) {
             $return[] = '<script type="text/javascript" src="' . $jsSrc . '"></script>';
         }
 
         return implode(PHP_EOL . $prefix, $return);
+    }
+
+    public function __()
+    {
+        return call_user_func_array('__', func_get_args());
     }
 }
