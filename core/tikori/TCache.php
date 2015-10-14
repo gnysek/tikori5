@@ -25,7 +25,7 @@ class TCache extends TModule
         $this->cachePath = Core::app()->appDir . '/cache/';
         $this->cacheTime = time();
         if (!file_exists($this->cachePath)) {
-            mkdir($this->cachePath, true);
+            mkdir($this->cachePath, 0777, true);
         }
     }
 

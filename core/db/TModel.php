@@ -357,6 +357,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      */
     public function countWhere($by = null, $conditions)
     {
+        //TODO: with conditions not working here!
         $sql = DbQuery::sql()->select('COUNT(*) AS tikori_total')->from($this->_table);
         $sql->conditions($conditions);
         $result = $sql->execute();
