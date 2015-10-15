@@ -191,6 +191,11 @@ class Collection implements ArrayAccess, Iterator, Countable
         return array_keys($this->_data);
     }
 
+    public function reverse()
+    {
+        $this->_data = array_reverse($this->_data);
+    }
+
     /**
      * Gets the collection data.
      *

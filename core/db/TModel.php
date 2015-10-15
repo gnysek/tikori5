@@ -214,6 +214,14 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 //		return $this;
     }
 
+    /**
+     * @param null  $where
+     * @param       $limit
+     * @param int   $offset
+     * @param array $conditions
+     * @return Collection
+     * @throws Exception
+     */
     public function findWhere($where = NULL, $limit = -1, $offset = 0, $conditions = array())
     {
         $sql = DbQuery::sql()->select()->from($this->_table);
