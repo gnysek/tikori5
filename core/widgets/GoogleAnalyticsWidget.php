@@ -4,7 +4,7 @@ class GoogleAnalyticsWidget extends Widget
 
     public $id = 'UA-XXXXXXX-X';
 
-    public function run()
+    public function onCall()
     {
         echo <<<HTML
 <script type="text/javascript">

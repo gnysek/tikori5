@@ -36,7 +36,7 @@ class ControllerView extends TView
             $widget = new $className();
             /* @var $widget Widget */
             $widget->setupProperties($properties);
-            $widget->init();
+            $widget->onCreate();
             $this->_widgets[$_widgetHash] = $widget;
         }
         return $this->_widgets[$_widgetHash];

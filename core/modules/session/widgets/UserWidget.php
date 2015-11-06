@@ -12,7 +12,7 @@
 class UserWidget extends Widget
 {
 
-    public function run()
+    public function onCall()
     {
         $this->data();
         return false;

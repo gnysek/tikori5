@@ -9,7 +9,7 @@ class GridWidget extends Widget
     public $renderer = array();
     public $options = array();
 
-    public function run()
+    public function onCall()
     {
 
         $html = '';

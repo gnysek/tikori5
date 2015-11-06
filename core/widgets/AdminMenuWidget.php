@@ -6,7 +6,7 @@ class AdminMenuWidget extends Widget
     public $links = array();
     public $homeLink = 'Home';
 
-    public function run()
+    public function onCall()
     {
         if (empty($this->links)) {
             return;

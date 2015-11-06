@@ -11,7 +11,7 @@ class TWidget extends TView
         /* @var $widget TWidget|mixed */
         $widget = new $class();
         $widget->setupProperties($properties);
-        $widget->init();
+        $widget->onCreate();
 
         self::$widgetStack[] = $widget;
 
@@ -34,12 +34,12 @@ class TWidget extends TView
     }
 
 
-    public function run()
+    public function onCall()
     {
         return null;
     }
 
-    public function init()
+    public function onCreate()
     {
 
     }

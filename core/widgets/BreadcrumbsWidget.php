@@ -8,7 +8,7 @@ class BreadcrumbsWidget extends Widget
     public $homeTitle = 'Home';
     public $divider = ' &raquo; ';
 
-    public function run()
+    public function onCall()
     {
         if (empty($this->links)) {
             return;
