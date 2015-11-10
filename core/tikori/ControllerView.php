@@ -19,7 +19,7 @@ class ControllerView extends TView
         }
 
         $widget = $this->_createWidget($class, $properties);
-        $widget->run();
+        $widget->onCall();
 
         if ($captureOutput) {
             return ob_get_clean();
@@ -28,7 +28,12 @@ class ControllerView extends TView
         return $widget;
     }
 
-    private function _createWidget($class, $properties)
+    /**
+     * @param $class
+     * @param $properties
+     * @return Widget|mixed
+     */
+    protected function _createWidget($class, $properties)
     {
         $_widgetHash = strtolower($class);
         if (!array_key_exists($_widgetHash, $this->_widgets)) {

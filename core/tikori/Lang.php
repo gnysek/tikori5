@@ -9,6 +9,8 @@ class Lang
     public $defaultLanguage = 'en';
     public $currentLanguage = 'en';
     public $usingLanguages = false;
+    protected $_debug = false;
+    protected $_debugMissingTranslations = array();
 
     function __construct()
     {
@@ -52,6 +54,8 @@ class Lang
         } else {
             //areas, todo
         }
+
+        $this->_debug = Core::app()->cfg('languages/debug') == 'on';
 
         $this->loadLanguages($this->currentLanguage);
     }
@@ -145,8 +149,7 @@ class Lang
 
     public function translateTo($lang, $args) {
         if (empty($args)) {
-            //return '';
-            throw new Exception('Tryint to translate empty chain');
+            throw new Exception('Trying to translate empty chain');
         }
 
         $text = $args[0];
@@ -154,6 +157,10 @@ class Lang
         if (in_array($lang, $this->languages)) {
             if (array_key_exists($text, $this->translations[$lang])) {
                 $text = $this->translations[$lang][$text];
+            } elseif ($this->_debug) {
+                if (!in_array($text, $this->_debugMissingTranslations)) {
+                    $this->_debugMissingTranslations[] = $text;
+                }
             }
         }
 
@@ -172,4 +179,13 @@ class Lang
     {
         return $this->translateTo($this->currentLanguage, $args);
     }
+
+    function __destruct()
+    {
+        if ($this->_debug && !empty($this->_debugMissingTranslations)) {
+            Log::write($this->_debugMissingTranslations, 'missing_langauges.log');
+        }
+    }
+
+
 }
