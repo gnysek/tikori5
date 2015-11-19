@@ -196,7 +196,7 @@ class Core
         $search = strtolower(str_replace('_', '/', (($namespace and self::$namespacesEnabled) ? ($namespace . '/') : '') . $class));
 
         preg_match('#(.*)/(.*)#i', $search, $match);
-        if (!empty($match) and self::$namespacesEnabled) {
+        if (!empty($match) /*and self::$namespacesEnabled*/) {
             $search = strtolower($match[1]) . '/' . $match[2];
         } else {
             $search = ucfirst($class);
@@ -230,7 +230,7 @@ class Core
         }
 
         if ($throw) {
-            throw new Exception(sprintf('Cannot autoload class %s [namespace: %s] [%s] %s', $class, $namespace, $search, implode(', ' . PHP_EOL, $filenames)));
+            throw new Exception(sprintf('Cannot autoload class %s [namespace: %s] [search: %s] [filenames: %s]', $class, $namespace, $search, implode(', ' . PHP_EOL, $filenames)));
         }
         return false;
     }
