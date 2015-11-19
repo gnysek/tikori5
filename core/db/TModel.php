@@ -235,27 +235,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             $sql->conditions($conditions);
         }
 
-        if (!empty($this->_eagers)) {
-            foreach ($this->_eagers as $relationName) {
-                switch ($this->_relations[$relationName][0]) {
-                    case self::BELONGS_TO:
-
-                        $model = TModel::model($this->_relations[$relationName][1]);
-                        /* @var $model TModel */
-                        $sql->joinOn($model->getTable(), array($model->getPK(), '=', $this->_relations[$relationName][2]));
-
-                        break;
-					/*case self::HAS_MANY:
-
-						$model = Model::model($this->_relations[$relationName][1]);
-						$sql->joinOn($model->getTable(), array($this->_relations[$relationName][2], '=', $this->getPK()));
-					*/
-                    default:
-                        //throw new DbError('Eager join for this type of relation is not yet implemented!');
-                        break;
-                }
-            }
-        }
+        $this->_applyEagers($sql);
 
         $result = $sql->execute();
         $return = array();
@@ -353,7 +333,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     public function count($by = NULL)
     {
-        $result = DbQuery::sql()->select('COUNT(*) AS tikori_total')->from($this->_table)->execute();
+        $sql = DbQuery::sql()->select('COUNT(*) AS tikori_total')->from($this->_table);
+        $this->_applyEagers($sql);
+        $result = $sql->execute();
         return (!empty($result[0])) ? $result[0]->tikori_total : 0;
     }
 
@@ -368,8 +350,33 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         //TODO: with conditions not working here!
         $sql = DbQuery::sql()->select('COUNT(*) AS tikori_total')->from($this->_table);
         $sql->conditions($conditions);
+        $this->_applyEagers($sql);
         $result = $sql->execute();
         return (!empty($result[0])) ? $result[0]->tikori_total : 0;
+    }
+
+    protected function _applyEagers(DbQuery $sql) {
+        if (!empty($this->_eagers)) {
+            foreach ($this->_eagers as $relationName) {
+                switch ($this->_relations[$relationName][0]) {
+                    case self::BELONGS_TO:
+
+                        $model = TModel::model($this->_relations[$relationName][1]);
+                        /* @var $model TModel */
+                        $sql->joinOn($model->getTable(), array($model->getPK(), '=', $this->_relations[$relationName][2]));
+
+                        break;
+                    /*case self::HAS_MANY:
+
+                        $model = Model::model($this->_relations[$relationName][1]);
+                        $sql->joinOn($model->getTable(), array($this->_relations[$relationName][2], '=', $this->getPK()));
+                    */
+                    default:
+                        //throw new DbError('Eager join for this type of relation is not yet implemented!');
+                        break;
+                }
+            }
+        }
     }
 
     // eager
