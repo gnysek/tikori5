@@ -33,7 +33,8 @@ class TConfig
             }
         } else {
             if (count($_paths) == 1) {
-                if (array_key_exists($path, $node) and is_array($node)) {
+                // TODO: what if asking for config/node/node, but only config exists ?
+                if (is_array($node) and array_key_exists($path, $node)) {
                     return $node[$path];
                 }
                 #return $default;

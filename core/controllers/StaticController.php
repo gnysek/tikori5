@@ -3,7 +3,7 @@
 class StaticController extends Controller
 {
 
-    public $defaultPath = 'none';
+    public $defaultPath = 'static_default';
 
     /**
      * It tries to display view /views/static/<path> when /static/<path> URI requested
@@ -25,9 +25,9 @@ class StaticController extends Controller
         }
 
         $this->render(
-            '//static', array(
-                             'content' => $content
-                        )
+            '//core/static', array(
+                'content' => $content
+            )
         );
 
     }

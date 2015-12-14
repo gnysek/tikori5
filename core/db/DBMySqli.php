@@ -42,8 +42,8 @@ class DbMySqli extends DBAbstract
             throw new DbError('Nie wybrać tabeli: ' . $this->conn()->error);
         }
 
-        if (!$this->conn()->set_charset('utf8')) {
-            throw new DbError('Cannot set encoding to UTF-8');
+        if (!$this->conn()->set_charset(Core::app()->cfg('db/encoding','utf8'))) {
+            throw new DbError('Cannot change encoding.');
         }
 
         Profiler::addLog(__CLASS__ . ' connected');
@@ -62,7 +62,7 @@ class DbMySqli extends DBAbstract
         $this->_queries++;
         $this->_queryList[] = $sql;
 
-        if (preg_match('/^(create|insert|update|delete|replace|alter)/i', trim($sql))) {
+        if (preg_match('/^(create|insert|update|delete|replace|alter|set)/i', trim($sql))) {
             $result = $this->conn()->query($sql);
             Profiler::addLog('Exec finished');
             if ($result === false) {

@@ -326,6 +326,12 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return $collection;
     }
 
+    /**
+     * @param       $limit
+     * @param int   $offset
+     * @param array $conditions
+     * @return Collection[]
+     */
     public function findAll($limit = -1, $offset = 0, $conditions = array())
     {
         return $this->findWhere(NULL, $limit, $offset, $conditions);
