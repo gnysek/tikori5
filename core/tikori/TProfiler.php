@@ -20,12 +20,10 @@ class TProfiler
             self::$_log[] = array(
                 $level,
                 $message,
-                sprintf('%0.4f', $tn),
+                $tn,
                 (count(self::$_log) > 0)
                     ? sprintf('%0.4f', $tn - self::$_log[count(self::$_log) - 1][2])
-                    : sprintf(
-                    '%0.4f', $tn
-                ),
+                    : sprintf('%0.4f', $tn),
             );
         }
     }

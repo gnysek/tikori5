@@ -1,6 +1,5 @@
 <?php echo '<?php'; ?>
 
-
 /**
  *
 <?php foreach ($result as $v): ?>
@@ -8,7 +7,7 @@
 
 <?php endforeach; ?>
  */
-class <?php echo $modelName; ?> extends Model
+class <?php echo $modelName; ?> extends TModel
 {
 
 	protected $_primaryKey = '<?php echo $primaryKey; ?>';

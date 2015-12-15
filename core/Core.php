@@ -255,9 +255,7 @@ class Core
 
         $_time = ($_time == 0 and $returnLessWhenZero)
             ? '&lt; 0.' . str_repeat('0', $decimalPart - 1) . '1'
-            : sprintf(
-                '%.' . $decimalPart . 'f', $_time
-            );
+            : sprintf('%.' . $decimalPart . 'f', $_time);
 
         return $_time;
     }

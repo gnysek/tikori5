@@ -48,7 +48,15 @@ class Tikori extends Application
 //        $this->setModules($modules);
     }
 
-
+    public function getDatabaseDriver()
+    {
+        if ($this->cfg('db/type') != "") {
+            if ($this->cfg('db/type') == 'mysqli') {
+                return 'DbMySqli';
+            }
+        }
+        return 'DbPDO';
+    }
 
     public function run($config) {
 
@@ -80,14 +88,11 @@ class Tikori extends Application
         //TODO: this should be moved to parent!
         //$this->observer = new Observer();
 
-		if ($this->cfg('db/type') != "") {
-			if ($this->cfg('db/type') == 'mysqli') {
-				$db = new DbMySqli();
-			} else {
-				$db = new DbPDO();
-			}
-			$this->setComponent('db', $db);
-		}
+        $_db = $this->getDatabaseDriver();
+        $db = new $_db();
+        $this->setComponent('db', $db);
+
+        unset($_db, $db);
 
         // configure modules
         $modules = $this->cfg('modules');

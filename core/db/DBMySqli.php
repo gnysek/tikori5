@@ -9,6 +9,27 @@ class DbMySqli extends DBAbstract
      */
     protected $_conn;
 
+    public function __construct($cfg = array())
+    {
+        if (!empty($cfg)) {
+            $required = array('dbhost', 'dbuser', 'dbpass', 'dbname');
+            if (count(array_intersect_key(array_flip($required), $cfg)) === count($required)) {
+                foreach ($required as $key) {
+                    $this->_config[$key] = $cfg[$key];
+                }
+            }
+        }
+
+        if (empty($this->_config)) {
+            $this->_config = array(
+                'dbhost' => Core::app()->cfg('db/dbhost'),
+                'dbuser' => Core::app()->cfg('db/dbuser'),
+                'dbpass' => Core::app()->cfg('db/dbpass'),
+                'dbname' => Core::app()->cfg('db/dbname'),
+            );
+        }
+    }
+
     public function connect()
     {
         Profiler::addLog(__CLASS__ . ' connecting');
@@ -21,10 +42,10 @@ class DbMySqli extends DBAbstract
 
         try {
             $this->_conn = new mysqli(
-                Core::app()->cfg('db/dbhost'),
-                Core::app()->cfg('db/dbuser'),
-                Core::app()->cfg('db/dbpass'),
-                Core::app()->cfg('db/dbname')
+                $this->_config['dbhost'],
+                $this->_config['dbuser'],
+                $this->_config['dbpass'],
+                $this->_config['dbname']
             );
         } catch (mysqli_sql_exception $e) {
             throw new DbError('Can\'t connect to database: ' . mysqli_connect_error());
@@ -42,7 +63,7 @@ class DbMySqli extends DBAbstract
             throw new DbError('Nie wybrać tabeli: ' . $this->conn()->error);
         }
 
-        if (!$this->conn()->set_charset(Core::app()->cfg('db/encoding','utf8'))) {
+        if (!$this->conn()->set_charset(Core::app()->cfg('db/encoding', 'utf8'))) {
             throw new DbError('Cannot change encoding.');
         }
 
@@ -62,7 +83,7 @@ class DbMySqli extends DBAbstract
         $this->_queries++;
         $this->_queryList[] = $sql;
 
-        if (preg_match('/^(create|insert|update|delete|replace|alter|set)/i', trim($sql))) {
+        if (preg_match('/^(create|drop|insert|update|delete|replace|alter|set)/i', trim($sql))) {
             $result = $this->conn()->query($sql);
             Profiler::addLog('Exec finished');
             if ($result === false) {

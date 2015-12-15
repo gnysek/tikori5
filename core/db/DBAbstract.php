@@ -20,6 +20,15 @@ abstract class DbAbstract
      */
     protected $_conn = FALSE;
 
+    protected $_config = array();
+
+    public function __construct($cfg = array())
+    {
+        if (!empty($cfg)) {
+            $this->_config = $cfg;
+        }
+    }
+
     abstract public function connect();
 
     abstract public function query($sql, $skip = '', $assoc = TRUE);
@@ -43,7 +52,6 @@ abstract class DbAbstract
     abstract public function lastId();
 
     abstract public function protect($string);
-
 
     public function conn()
     {
