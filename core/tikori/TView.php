@@ -38,7 +38,7 @@ class TView
         //TODO: no error when file not found?
 
         try {
-            if (!empty($file) && $this->viewExists($file)) {
+            if (!empty($file)) {
                 $out = $this->renderPartial($file, $data);
             } else {
                 $out = (string)$data;
