@@ -168,7 +168,7 @@ class Lang
 
         if (count($args) > 0) {
             foreach ($args as $v) {
-                $text = preg_replace('/%s/', $v, $text, 1);
+                $text = preg_replace('/%s/', str_replace('$', '\$', $v), $text, 1);
             }
         }
 
