@@ -375,7 +375,7 @@ class Request extends DefaultObject
         return $this->get('path-info');
     }
 
-    public function getPost($key, $default = NULL)
+    public function getPost($key = null, $default = NULL)
     {
         if (empty($key)) {
             return $this->_post;
