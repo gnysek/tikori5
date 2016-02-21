@@ -53,7 +53,7 @@ class TWidget extends TView
         }
 
         foreach ($properties as $k => $v) {
-            if (isset($this->$k)) {
+            if (property_exists($this,$k)) {
                 $this->$k = $v;
             }
         }
