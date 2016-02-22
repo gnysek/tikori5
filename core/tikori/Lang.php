@@ -136,7 +136,6 @@ class Lang
                 }
 
                 $file = fopen($filename, 'r');
-                $lang = array();
                 while ($data = fgetcsv($file, NULL, ',')) {
                     if (count($data) == 2) {
                         $this->translations[$language][$data[0]] = $data[1];
