@@ -390,7 +390,7 @@ class DbQuery
 
                     // TODO: better checking...
                     //$afterCondition = ((is_string($w[2]) or is_array($w[2])) ? Core::app()->db->protect($w[2]) : $this->_nullify($w[2]));
-                    $afterCondition = $this->_formatAgainstType($_fromTable, $w[0], $w[2]);
+                    $afterCondition = (is_string($w[2]) and preg_match('/\(SELECT/', $w[2])) ? $w[2] : $this->_formatAgainstType($_fromTable, $w[0], $w[2]);
 
                     if ($w[1] == 'IN') {
                         $afterCondition = '(' . $afterCondition . ')';

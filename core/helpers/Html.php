@@ -59,6 +59,18 @@ class Html
         return $options;
     }
 
+    public static function isActive($url, $byPath = null)
+    {
+        $options = array();
+        if (!empty($byPath)) {
+            $options['_activeByPath'] = array($byPath);
+        }
+
+        $result = self::_linkCheckActiveClass($options, $url);
+
+        return (array_key_exists('class', $result));
+    }
+
     public static function url($url = array())
     {
         if (!is_array($url)) {
