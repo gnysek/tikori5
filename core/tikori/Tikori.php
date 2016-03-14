@@ -88,9 +88,11 @@ class Tikori extends Application
         //TODO: this should be moved to parent!
         //$this->observer = new Observer();
 
-        $_db = $this->getDatabaseDriver();
-        $db = new $_db();
-        $this->setComponent('db', $db);
+        if ($this->cfg('db',null) !== null) {
+            $_db = $this->getDatabaseDriver();
+            $db = new $_db();
+            $this->setComponent('db', $db);
+        }
 
         unset($_db, $db);
 

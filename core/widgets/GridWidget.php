@@ -42,7 +42,9 @@ class GridWidget extends Widget
                     if (array_key_exists($column, $this->renderer)) {
                         $renderer = $this->renderer[$column];
                         if (is_callable(array('Renderer', $renderer))) {
-                            $value = call_user_func(array('Renderer', $renderer), $value);
+                            $value = call_user_func(array('Renderer', $renderer), $value, $record);
+                        } elseif (is_callable($renderer)) {
+                            $value = $renderer($value, $record);
                         }
                     }
 

@@ -331,7 +331,7 @@ class Request extends DefaultObject
         $env['tikori.root_path'] = (count($match) == 3) ? $env['host'] . $match[1] : $env['host'];
         if (Core::app()->cfg('url/addScriptName') === true) {
             $path = ((count($match) != 3)) ? $env['script-name'] : dirname($env['script-name']);
-            $env['tikori.root_path'] = $env['HOST'] . $path;
+            $env['tikori.root_path'] = $env['host'] . $path;
         }
 
         $env['tikori.base_url'] = $env['tikori.url_scheme'] . '://' . $env['tikori.root_path'] . '/';
@@ -340,7 +340,7 @@ class Request extends DefaultObject
 
         $host = explode('.', $parsedUrl['host']);
 
-        $env['tikori.domain'] = $host[count($host)-2] . '.' . $host[count($host)-1];
+        $env['tikori.domain'] = (count($host) >= 2) ? $host[count($host)-2] . '.' . $host[count($host)-1] : $host[0];
         $env['tikori.subdomains'] = array_slice($host, 0, count($host) - 2);
 
         if (!empty($subdomains)) {
