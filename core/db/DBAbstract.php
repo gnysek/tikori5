@@ -31,6 +31,15 @@ abstract class DbAbstract
 
     abstract public function connect();
 
+    /**
+     *
+     * @param string $sql   Sql query to perform
+     * @param string $skip  Not used for now
+     * @param bool   $assoc Assoc or not?
+     *
+     * @throws DbError
+     * @return Collection
+     */
     abstract public function query($sql, $skip = '', $assoc = TRUE);
 
     /**

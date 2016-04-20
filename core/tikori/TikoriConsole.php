@@ -16,6 +16,11 @@ class TikoriConsole extends Application
                 $db = new DbPDO();
             }
             $this->setComponent('db', $db);
+
+            if ($this->cfg(DBConfig::CONFIG_FIELD, null) !== null) {
+                $this->setComponent('dbconfig', new DBConfig());
+            }
+            unset($db);
         }
         // configure modules
         $modules = $this->cfg('modules');
