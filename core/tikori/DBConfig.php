@@ -13,7 +13,7 @@ class DBConfig extends TModule
                 Core::app()->db->update(
                     "CREATE TABLE IF NOT EXISTS `config` (
                       `name` VARCHAR(255) NOT NULL,
-                      `scope` VARCHAR(32) NULL DEFAULT NULL,
+                      `scope` INT( 3 ) NULL DEFAULT  '0',
                       `value` VARCHAR(255) NOT NULL,
                       PRIMARY KEY (`name`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

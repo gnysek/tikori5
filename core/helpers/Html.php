@@ -30,6 +30,11 @@ class Html
     protected static function _linkCheckActiveClass(& $options, $url)
     {
         $current = Core::app()->request != NULL ? trim(Core::app()->request->getRouterPath(), '/') : '';
+        if (Core::app()->route) {
+            if (Core::app()->route->area != null) {
+                $url = Core::app()->route->area . '/' . $url;
+            }
+        }
         $inCurrentLink = ($current == $url);
 
         if (!empty($options['_activeByPath'])) {
