@@ -212,6 +212,53 @@ class Route
             }
         }
 
+        //get scope
+        $scope = null;
+        if ($scopeList = Core::app()->cfg('scopes', array())) {
+            $domain = Core::app()->cfg('request/tikori.domain','foo.bar');
+            foreach ($scopeList as $_scope => $_scopeConfig) {
+
+                $scopeDomainFound = $scopeAreaFound = true;
+
+                if (!empty($_scopeConfig['areas']) and !empty($area)) {
+                    #var_dump('checking for area ' . $area . ' - ' . $_scope);
+                    $scopeAreaFound = false;
+                    if (!is_array($_scopeConfig['areas'])) {
+                        $_scopeConfig['areas'] = array($_scopeConfig['areas']);
+                    }
+
+                    foreach($_scopeConfig['areas'] as $_area) {
+                        if ($area == $_area) {
+                            $scope = $_scope;
+                            $scopeAreaFound = true;
+                        }
+                    }
+                }
+
+                if (!empty($_scopeConfig['domains'])) {
+                    #var_dump('checking for domain - ' . $_scope);
+                    $scopeDomainFound = false;
+                    if (!is_array($_scopeConfig['domains'])) {
+                        $_scopeConfig['domains'] = array($_scopeConfig['domains']);
+                    }
+
+                    foreach($_scopeConfig['domains'] as $_domain) {
+                        if ($domain == $_domain) {
+                            $scope = $_scope;
+                            $scopeDomainFound = true;
+                        }
+                    }
+                }
+
+                // end
+                if ($scopeDomainFound and $scopeAreaFound and !empty($scope)) {
+                    break; // don't check any more rules
+                }
+            }
+        }
+
+        #var_dump($scope);
+
         Profiler::addLog(
             'Processing URI <kbd>/' . $uri . '</kbd> against ' . count($routes) . ' routes' . (empty($area) ? '' : ' using route <kbd>' . $area . '</kbd>')
         );
@@ -223,6 +270,9 @@ class Route
 
                 if (!empty($area)) {
                     $route->area = $area;
+                }
+                if (!empty($scope)) {
+                    $route->scope = $scope;
                 }
 
                 $route->action = (!empty($params['action'])) ? $params['action'] : $route->action;
@@ -294,7 +344,8 @@ class Route
      * @var array
      */
     public $params = array();
-    public $area = '';
+    public $scope = null;
+    public $area = null;
     public $action = 'default';
     public $controller = '';
 

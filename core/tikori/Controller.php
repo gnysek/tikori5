@@ -13,7 +13,8 @@ class Controller extends ControllerView
     public $controller = 'default';
     public $action = 'default';
     public $params = array();
-    public $area = '';
+    public $area = null;
+    public $scope = null;
     public $checkPermissions = false;
     public $pageTitle = '';
     /**
@@ -21,10 +22,11 @@ class Controller extends ControllerView
      */
     public $request = NULL;
 
-    public function __construct($area = NULL)
+    public function __construct($area = NULL, $scope = NULL)
     {
         Profiler::addLog('&bull; New controller <code>' . get_called_class() . '</code> Created');
         $this->area = $area;
+        $this->scope = $scope;
         $this->pageTitle = Core::app()->cfg('appName');
         $this->afterConstruct();
         // if HMVC will come some day, this need to be changed
