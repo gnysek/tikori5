@@ -97,7 +97,7 @@ class TDbSchema
     }
 
     public function hasTable($table) {
-        return $this->getTableSchema($table);
+        return $this->getTableSchema($table) === null ? false : true;
     }
 
     public function quoteValue($str)
