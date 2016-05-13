@@ -252,18 +252,21 @@ class TDbSchema
      */
     protected function getColumnPhpType($column)
     {
-        static $typeMap = array( // abstract type => php type
+        static $typeMap = array(
+            // abstract type => php type
             'smallint' => 'integer',
             'integer' => 'integer',
             'bigint' => 'integer',
             'boolean' => 'boolean',
             'float' => 'double',
+            'double' => 'double',
+            'binary' => 'resource', //TODO: check it's compatible
         );
         if (isset($typeMap[$column->type])) {
             if ($column->type === 'bigint') {
-                return PHP_INT_SIZE == 8 ? 'integer' : 'string';
+                return PHP_INT_SIZE === 8 && !$column->unsigned ? 'integer' : 'string';
             } elseif ($column->type === 'integer') {
-                return PHP_INT_SIZE == 4 ? 'string' : 'integer';
+                return PHP_INT_SIZE === 4 && $column->unsigned ? 'string' : 'integer';
             } else {
                 return $typeMap[$column->type];
             }

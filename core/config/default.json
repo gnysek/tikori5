@@ -7,7 +7,9 @@
     },
     "db": {
         "dblink": "",
-        "dbuser": "",
+        "dbhost": "127.0.0.1",
+        "dbname": "tikori5",
+        "dbuser": "root",
         "dbpass": "",
         "dbprefix": ""
     },

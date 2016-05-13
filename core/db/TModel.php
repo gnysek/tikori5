@@ -41,18 +41,24 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      */
     public $timestamps = true;
     public $massProtected = array(); // which attrs can be saved using mass
+    /**
+     * @var null|TDbTableSchema
+     */
+    protected $_schema = null;
 
     public function __construct($attributes = array(), $isNew = true)
     {
+        $this->_schema = Core::app()->db->getTableInfo($this->getTable());
         $this->_scopes = $this->scopes();
         $this->_relations = $this->relations();
         $this->_fields = $this->getFields();
+
         if (!empty($this->_fields)) {
             foreach ($this->_fields as $fieldName) {
                 if (array_key_exists($fieldName, $this->_relations)) {
                     throw new DbError('Model ' . get_class($this) . ' have field named same as relation: ' . $fieldName);
                 }
-                $this->_values[$fieldName] = ($fieldName == $this->getPk()) ? NULL : Core::app()->db->getTableColumnDefaultValue($this->getTable(), $fieldName);
+                $this->_values[$fieldName] = ($fieldName == $this->getPk()) ? NULL : ($this->_schema->getColumn($fieldName)->defaultValue);
             }
         }
         $this->_rules = $this->_prepareRules();
@@ -481,6 +487,16 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return true;
     }
 
+    public function isModified()
+    {
+        return count($this->_modified) > 0;
+    }
+
+    public function isNewRecord()
+    {
+        return $this->_isNewRecord;
+    }
+
     protected function _getModifiedFields($force = false)
     {
         $modified = array();
@@ -719,7 +735,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * @return array
      */
     public function getFields() {
-        return Core::app()->db->getSchema()->getTableSchema($this->getTable())->getColumnNames();
+        return $this->_schema->getColumnNames();
     }
 
     public function attributeLabels()
@@ -819,11 +835,12 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     {
         $setter = 'set' . ucfirst($name);
         if (array_key_exists($name, $this->_values)) {
+            $value = $this->_schema->columns[$name]->typecast($value);
             //TODO: choose that it should be != or !== for $value=$this->_values compare
-            if (!in_array($name, $this->_modified) && $value != $this->_values[$name]) {
+            if (!in_array($name, $this->_modified) && $value !== $this->_values[$name]) {
                 $this->_modified[] = $name;
+                $this->_values[$name] = $value;
             }
-            $this->_values[$name] = $value;
         } else {
             if (method_exists($this, $setter)) {
                 $this->$setter($value);
@@ -843,7 +860,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 if (isset($values[$field])) {
                     $this->__set($field, $values[$field]);
                 } else {
-                    $this->__set($field, Core::app()->db->getTableColumnDefaultValue($this->getTable(), $field));
+                    $this->__set($field, $this->_schema->columns[$field]->defaultValue);
                 }
             }
 
@@ -861,7 +878,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         if (is_array($attributes)) {
             foreach ($attributes as $k => $v) {
                 if (in_array($k, $this->_fields)) {
-                    $this->__set($k, $v);
+                    $this->_values[$k] = $v;
                 }
             }
         }

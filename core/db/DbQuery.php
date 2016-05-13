@@ -455,6 +455,8 @@ class DbQuery
             if (!($columnInfo = $tableInfo->getColumn($field))) {
                 throw new DbError('Table ' . $table . ' don\'t have field ' . $field . '. Only ' . implode(', ', $tableInfo->getColumnNames()));
             }
+        } else {
+            throw new DbError('Table ' . $table . ' don\'t exists');
         }
 
         if ($columnInfo->allowNull && $value === NULL) {
@@ -490,7 +492,11 @@ class DbQuery
     public function __toString()
     {
         if (!$this->_locked) {
-            $this->_parseSql();
+            try {
+                $this->_parseSql();
+            } catch (Exception $e) {
+                trigger_error($e->getMessage());
+            }
         }
 
         return $this->_preparedSql;

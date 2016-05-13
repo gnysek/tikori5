@@ -188,6 +188,7 @@ class Controller extends ControllerView
                 Core::app()->response->body($response);
             } catch (DbError $e) {
                 //TODO: shouldn't be like that...
+                ob_get_clean();
                 Error::exch($e);
             } catch (Exception $e) {
                 if (Core::app()->getMode() !== Core::MODE_PROD) {

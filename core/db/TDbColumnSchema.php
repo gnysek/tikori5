@@ -51,11 +51,21 @@ class TDbColumnSchema
         switch ($this->phpType) {
             case 'resource':
             case 'string':
-                return is_resource($value) ? $value : (string)$value;
+                if (is_resource($value)) {
+                    return $value;
+                }
+                if ($this->unsigned) {
+                    $value = ltrim($value, '-');
+                }
+                if (is_float($value)) {
+                    // ensure type cast always has . as decimal separator in all locales
+                    return str_replace(',', '.', (string)$value);
+                }
+                return (string)$value;
             case 'integer':
                 return (int)$value;
             case 'boolean':
-                return (bool)$value;
+                return (bool) $value && $value !== "\0";
             case 'double':
                 return (double)$value;
         }
