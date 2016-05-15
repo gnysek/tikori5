@@ -334,7 +334,8 @@ class Html
             if ($key == $model->$field) {
                 $_options['selected'] = 'selected';
             }
-            $html .= self::htmlTag('option', array_merge($options, $_options), $value);
+            //$html .= self::htmlTag('option', array_merge($options, $_options), $value);
+            $html .= self::htmlTag('option', $_options, $value);
         }
         $html .= self::htmlCloseTag('select');
 

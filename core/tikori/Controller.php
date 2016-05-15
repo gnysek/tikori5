@@ -128,12 +128,17 @@ class Controller extends ControllerView
         }
 
         if (!method_exists($this, $this->getActionMethodName())) {
+
+            $this->_actionBefore();
+
             Profiler::addLog('No method found for <code>' . $this->getActionMethodName() . '</code>');
             if (method_exists($this, 'defaultAction')) {
                 $this->defaultAction();
             } else {
                 $this->unknownAction();
             }
+
+            $this->_afterAction();
         } else {
             Profiler::addLog(
                 'Calling controller: <kbd>' . $this->getControllerClassName() . '::' . $this->getActionMethodName() . '</kbd>'
