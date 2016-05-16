@@ -29,6 +29,32 @@ class ControllerView extends TView
     }
 
     /**
+     * @param       $template Template name
+     * @param int   $time Time in seconds to look back. Set 0 to give infinity
+     * @param array $tags Unique tags by which it will be cleared/stored
+     */
+    public function cachedBlock($uniquename, $template, $data, $time = 0, $tags = array())
+    {
+        $block = new CacheableBlock($this, $uniquename, $tags);
+        $exists = $block->checkCacheExists($time == 0 ? 0 : (time() - $time));
+
+        if (!$exists) {
+            Profiler::addLog('Cache [' . $uniquename .'] not found, or too old', Profiler::LEVEL_DEBUG);
+            $__cacheContent = $this->renderPartial($template, $data, true);
+            $block->save($__cacheContent);
+            return $__cacheContent;
+        } else {
+            Profiler::addLog('Cache [' . $uniquename .'] found', Profiler::LEVEL_DEBUG);
+            return $block->load();
+        }
+    }
+
+    public function renderCached($uniquename, $template, $data, $time = 0, $tags = array())
+    {
+        return $this->render(null, $this->cachedBlock($uniquename, $template, $data, $time, $tags));
+    }
+
+    /**
      * @param $class
      * @param $properties
      * @return Widget|mixed
