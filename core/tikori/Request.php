@@ -369,6 +369,35 @@ class Request extends DefaultObject
         return Core::app()->cfg()->set('request', $this->all(), true);
     }
 
+    protected $_hardRefresh = null;
+
+    public function isHardRefresh()
+    {
+        if ($this->_hardRefresh === null) {
+            // request headers
+            $headersToCheck = array('If-Modified-Since', 'Pragma', 'Cache-Control');
+            $cacheRequest = array();
+            foreach ($headersToCheck as $header) {
+                $envName = 'HTTP_' . strtoupper(str_replace('-', '_', $header));
+                if (!empty($_SERVER[$envName])) {
+                    $cacheRequest[$header] = $_SERVER[$envName];
+                } else {
+                    $cacheRequest[$header] = null;
+                }
+            }
+
+            $this->_hardRefresh = false;
+            if ($cacheRequest['Pragma'] == 'no-cache') {
+                $this->_hardRefresh = true;
+            }
+            if ($cacheRequest['Cache-Control'] == 'no-cache') {
+                $this->_hardRefresh = true;
+            }
+        }
+
+        return $this->_hardRefresh;
+    }
+
     public function getRouterPath()
     {
         //return (empty($this->env['PATH_INFO'])) ? '' : $this->env['PATH_INFO'];
