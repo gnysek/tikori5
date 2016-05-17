@@ -175,8 +175,13 @@ class TView
     public function getCssForHead($prefix = '')
     {
         $return = array();
-        foreach ($this->_cssFiles as $cssSrc) {
-            $return[] = '<link rel="stylesheet" href="' . $cssSrc . '">';
+
+        if (Core::app()->cfg('layout/cssmerge', false) == true) {
+            $return = Asset::mergeCssAssets($this->_cssFiles);
+        } else {
+            foreach ($this->_cssFiles as $cssSrc) {
+                $return[] = Asset::cssAsset($cssSrc);//'<link rel="stylesheet" href="' . $cssSrc . '">';
+            }
         }
 
         return implode(PHP_EOL . $prefix, $return);

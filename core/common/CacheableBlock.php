@@ -50,7 +50,7 @@ class CacheableBlock
 
     public function checkCacheExists($time = 0)
     {
-        if (Core::app()->mode != Core::MODE_PROD && Core::app()->request->isHardRefresh()) return false;
+        if (Core::app()->mode !== Core::MODE_PROD && Core::app()->request->isHardRefresh()) return false;
 
         if (file_exists($this->_cachedRealname)) {
             if ($time == 0 or filemtime($this->_cachedRealname) > $time) {
