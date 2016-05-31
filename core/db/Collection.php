@@ -367,11 +367,11 @@ class Collection implements ArrayAccess, Iterator, Countable
         return $this;
     }
 
-    public function save()
+    public function save($forceToSave = false)
     {
         foreach ($this->_data as $row) {
             if (is_a($row, 'TModel')) {
-                $row->save();
+                $row->save($forceToSave);
             }
         }
         return $this;

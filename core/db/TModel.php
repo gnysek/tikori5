@@ -19,6 +19,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     protected $_table = '';
     protected $_fields = array();
     protected $_values = array();
+    protected $_original = array();
     protected $_rules = array();
     protected $_related = NULL;
     protected $_primaryKey = 'id';
@@ -53,12 +54,13 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $this->_relations = $this->relations();
         $this->_fields = $this->getFields();
 
+        // set default values
         if (!empty($this->_fields)) {
             foreach ($this->_fields as $fieldName) {
                 if (array_key_exists($fieldName, $this->_relations)) {
                     throw new DbError('Model ' . get_class($this) . ' have field named same as relation: ' . $fieldName);
                 }
-                $this->_values[$fieldName] = ($fieldName == $this->getPk()) ? NULL : ($this->_schema->getColumn($fieldName)->defaultValue);
+                $this->_values[$fieldName] = $this->_original[$fieldName] = ($fieldName == $this->getPk()) ? NULL : ($this->_schema->getColumn($fieldName)->defaultValue);
             }
         }
         $this->_rules = $this->_prepareRules();
@@ -179,7 +181,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         if (count($result) == 1) {
             foreach ($this->_fields as $field) {
                 if ($result[0]->offsetExists($field)) {
-                    $this->_values[$field] = $result[0]->$field;
+                    $this->_values[$field] = $this->_original[$field] = $result[0]->$field;
                 }
             }
             $this->_isNewRecord = false;
@@ -878,7 +880,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         if (is_array($attributes)) {
             foreach ($attributes as $k => $v) {
                 if (in_array($k, $this->_fields)) {
-                    $this->_values[$k] = $v;
+                    $this->_values[$k] = $this->_original[$k] = $v;
                 }
             }
         }
