@@ -67,6 +67,9 @@ class Asset
                     $css .= '/* ' . basename($file) . ' */' . "\r\n";
                     $css .= file_get_contents($file) . "\r\n\r\n";
                 }
+                
+                $css = CssMin::minify($css, array('RemoveComments' => false));
+                
                 file_put_contents(TIKORI_ROOT . '/media/assets/' . $mergedFilename, $css);
             }
 

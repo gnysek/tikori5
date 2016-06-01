@@ -35,6 +35,10 @@ class ControllerView extends TView
      */
     public function cachedBlock($uniquename, $template, $data, $time = 0, $tags = array())
     {
+        if (Core::app()->lang->usingLanguages) {
+            $uniquename .= '_' . Core::app()->lang->currentLanguage;
+        }
+
         $block = new CacheableBlock($this, $uniquename, $tags);
         $exists = $block->checkCacheExists($time == 0 ? 0 : (time() - $time));
 
