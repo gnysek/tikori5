@@ -839,7 +839,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         if (array_key_exists($name, $this->_values)) {
             $value = $this->_schema->columns[$name]->typecast($value);
             //TODO: choose that it should be != or !== for $value=$this->_values compare
-            if (!in_array($name, $this->_modified) && $value !== $this->_values[$name]) {
+            if ($value !== $this->_values[$name]) {
                 $this->_modified[] = $name;
                 $this->_values[$name] = $value;
             }

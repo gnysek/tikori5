@@ -42,7 +42,7 @@ class Lang
             }
         } elseif (Core::app()->cfg('languages/type') == 'domains') {
             $domains = Core::app()->cfg('languages/domains');
-            if (count($domains)) {
+            if (count($domains) and Core::isConsoleApplication() === false) {
                 $currentDomain = Core::app()->request->get('tikori.domain');
                 foreach ($domains as $language => $domain) {
                     if ($currentDomain == $domain && in_array($language, $avaliableLanguages)) {

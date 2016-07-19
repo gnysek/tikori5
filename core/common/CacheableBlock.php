@@ -11,7 +11,6 @@ class CacheableBlock
 
     public static function clearByTags($tags = array())
     {
-
         foreach ($tags as $tag) {
             $path = Core::app()->cache->cachePath . '*__' . strtoupper(preg_replace('/[^a-z0-9]/', '', strtolower($tag))) . '__*';
 

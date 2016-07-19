@@ -8,6 +8,10 @@ class TikoriConsole extends Application
         error_reporting(E_ALL | E_STRICT);
         ini_set('error_display', 1);
 
+        // enable cache, we need that for config
+        $this->setComponent('cache', new Cache());
+        $this->lang = new Lang();
+
         //TODO: this should be moved to parent!
         if ($this->cfg('db/type') != "") {
             if ($this->cfg('db/type') == 'mysqli') {
