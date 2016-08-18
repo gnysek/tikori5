@@ -48,3 +48,5 @@
 </div>
 </body>
 </html>
+
+<?php echo Profiler::getLogs(); ?>
