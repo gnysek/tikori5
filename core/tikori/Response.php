@@ -91,16 +91,17 @@ class Response
     /**
      * Get and set header
      *
-     * @param   string      $name   Header name
-     * @param   string|null $value  Header value
+     * @param   string|null $name Header name
+     * @param   string|null $value Header value
      *
      * @return  string                  Header value
      */
-    public function header( $name, $value = null ) {
-        if ( !is_null($value) ) {
+    public function header($name = null, $value = null)
+    {
+        if (!is_null($value)) {
             $this->_headers[$name] = $value;
         }
-        return $this->_headers[$name];
+        return (empty($name)) ? $this->_headers : $this->_headers[$name];
     }
 
     /**

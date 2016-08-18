@@ -10,6 +10,8 @@ class TConfig
         $this->_data = array();
     }
 
+    public $setOnNotFound = true;
+
     /**
      * Returns config value if exists and default value if not found
      *
@@ -46,6 +48,11 @@ class TConfig
         }
 
         Profiler::addLog('Cannot find cfg for ' . $fullPath, Profiler::LEVEL_DEBUG);
+
+        if ($this->setOnNotFound) {
+            Profiler::addLog('> Setting ' . $fullPath . ' to null for future queries.', Profiler::LEVEL_DEBUG);
+            $this->set($fullPath, $default);
+        }
 
         return $default;
     }
