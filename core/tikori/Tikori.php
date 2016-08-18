@@ -1,16 +1,17 @@
 <?php
+use Core\User\NullSession;
 
 /**
- * @property Request                       $request
- * @property Response                      $response
- * @property Route                         $route
- * @property int                           $mode           Core::MODE_XXX
- * @property DbAbstract                    $db
- * @property Cache                         $cache          Cache module
- * @property SessionModule|Session         $session        Cache module
- * @property array                         $autoloadPaths  Array of autoload paths
- * @property Observer                      observer
- * @property Cookie                        cookie
+ * @property Request $request
+ * @property Response $response
+ * @property Route $route
+ * @property int $mode           Core::MODE_XXX
+ * @property DbAbstract $db
+ * @property Cache $cache          Cache module
+ * @property SessionModule|Session|AbstractSession $session        Session module
+ * @property array $autoloadPaths  Array of autoload paths
+ * @property Observer $observer
+ * @property Cookie $cookie
  */
 class Tikori extends Application
 {
@@ -106,6 +107,9 @@ class Tikori extends Application
                 $this->preloadModule($module, $configPath);
             }
         }
+
+        $this->session = new Core\Common\NullSession();
+        $this->user = new Core\Common\EmptyUser();
 
         // default routes
 //		Route::set('tikori-admin', '<directory>(/<controller>(/<action>(/<id>)))(.html)', array('directory' => 'admin', 'id' => '.+'))

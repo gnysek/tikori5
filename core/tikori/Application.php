@@ -64,7 +64,7 @@ abstract class Application
         // register error handlers
         if (!Core::isConsoleApplication()) {
             Error::registerErrors();
-            ob_start('tikori');
+            ob_start();
             register_shutdown_function(array('Error', 'shutdown_handler'));
             Profiler::addLog('Registered errors');
         }
@@ -198,7 +198,7 @@ abstract class Application
                 }
             }
 
-            $this->mode = intval($envMode);
+            $this->mode = intval($this->mode);
 
             switch ($this->mode) {
                 case Core::MODE_DEBUG:
