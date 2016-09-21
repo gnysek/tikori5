@@ -42,7 +42,7 @@
         &copy; 2003 - <?php echo date('Y'); ?> <a href="http://gnysek.pl" target="_blank">gnysek.pl</a>
 
         <div class="pull-right">
-            <?php echo Core::poweredBy(); ?> &bull; Generated in: <strong><?php echo Core::genTimeNow(2); ?></strong>s.
+            <?php echo Core::poweredBy(); ?> at PHPv<?php echo phpversion(); ?> &bull; Generated in: <strong><?php echo Core::genTimeNow(2); ?></strong>s.
         </div>
     </div>
 </div>

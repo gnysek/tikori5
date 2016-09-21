@@ -215,7 +215,7 @@ class Route
         //get scope
         $scope = null;
         if ($scopeList = Core::app()->cfg('scopes', array())) {
-            $domain = Core::app()->cfg('request/tikori.domain','foo.bar');
+            $domain = Core::app()->cfg('request/tikori.domain', 'foo.bar');
             foreach ($scopeList as $_scope => $_scopeConfig) {
 
                 $scopeDomainFound = $scopeAreaFound = true;
@@ -227,7 +227,7 @@ class Route
                         $_scopeConfig['areas'] = array($_scopeConfig['areas']);
                     }
 
-                    foreach($_scopeConfig['areas'] as $_area) {
+                    foreach ($_scopeConfig['areas'] as $_area) {
                         if ($area == $_area) {
                             $scope = $_scope;
                             $scopeAreaFound = true;
@@ -242,7 +242,7 @@ class Route
                         $_scopeConfig['domains'] = array($_scopeConfig['domains']);
                     }
 
-                    foreach($_scopeConfig['domains'] as $_domain) {
+                    foreach ($_scopeConfig['domains'] as $_domain) {
                         if ($domain == $_domain) {
                             $scope = $_scope;
                             $scopeDomainFound = true;
