@@ -8,8 +8,9 @@ class Html
 
     public static function link($text, $url, $options = array())
     {
-        self::_linkCheckActiveClass($options, $url);
-        return html::htmlTag('a', $options + array('href' => self::url($url), 'title' => htmlspecialchars($text)), $text);
+        $_url = self::url($url);
+        self::_linkCheckActiveClass($options, $_url);
+        return html::htmlTag('a', $options + array('href' => $_url, 'title' => htmlspecialchars($text)), $text);
 //        return '<a href="' . self::url($url) . '"' . implode(' ', $opt) . '>' . $text . '</a>';
     }
 
