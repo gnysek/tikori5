@@ -23,9 +23,8 @@ class SingletonOptions
             $result = TModel::model($table)->findAll();
             $values = array();
             foreach ($result as $row) {
-                $values[$result->$key] = $result->value;
+                $values[$row->$key] = $row->$value;
             }
-
             self::$_loaded[$arr_key] = $values;
         }
 
