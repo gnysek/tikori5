@@ -6,6 +6,7 @@
  */
 class Asset
 {
+
     protected static $_cssPlaceholder = '<link rel="stylesheet" type="text/css" href="%s"/>';
     protected static $_cssPlaceholderContent = '<style type="text/css">%s</style>';
     protected static $_jsPlaceholder = '<script type="text/javascript" src="%s"></script>';
@@ -23,13 +24,14 @@ class Asset
         return self::_returnAsset($relativeFilePath, self::TYPE_CSS) . PHP_EOL;
     }
 
-    public static function mergeCssAssets($listOfCssFiles) {
+    public static function mergeCssAssets($listOfCssFiles)
+    {
 
         Profiler::addLog('File merging started');
         $externalFiles = array();
         $filesToMerge = array();
 
-        foreach($listOfCssFiles as $cssFile) {
+        foreach ($listOfCssFiles as $cssFile) {
             if (stripos('http', $cssFile) === 0) {
                 $externalFiles[] = self::cssAsset($cssFile);
             } else {
@@ -63,13 +65,13 @@ class Asset
 
             if (!file_exists(TIKORI_ROOT . '/media/assets/' . $mergedFilename)) {
                 $css = '';
-                foreach($filesToMergeThatExists as $file) {
+                foreach ($filesToMergeThatExists as $file) {
                     $css .= '/* ' . basename($file) . ' */' . "\r\n";
                     $css .= file_get_contents($file) . "\r\n\r\n";
                 }
-                
+
                 $css = CssMin::minify($css, array('RemoveComments' => false));
-                
+
                 file_put_contents(TIKORI_ROOT . '/media/assets/' . $mergedFilename, $css);
             }
 
@@ -80,13 +82,19 @@ class Asset
         return $externalFiles;
     }
 
+    static protected $_alreadyJs = array();
+
     /**
      * @param $relativeFilePath
      * @return string
      */
     public static function jsAsset($relativeFilePath)
     {
-        return self::_returnAsset($relativeFilePath, self::TYPE_JS) . PHP_EOL;
+        if (!in_array($relativeFilePath, self::$_alreadyJs)) {
+            self::$_alreadyJs[] = $relativeFilePath;
+            return self::_returnAsset($relativeFilePath, self::TYPE_JS) . PHP_EOL;
+        }
+        return '';
     }
 
     protected static function _returnAsset($relativeFilePath, $type)

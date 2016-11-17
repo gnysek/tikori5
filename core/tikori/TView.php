@@ -58,7 +58,12 @@ class TView
 
     public function renderPartial($file, $data = NULL, $return = true)
     {
-        if ($filename = $this->_findViewFile($file)) {
+        return $this->renderPartialInContext($file, null, $data, $return);
+    }
+
+    public function renderPartialInContext($file, $context = null, $data = null, $return = true)
+    {
+        if ($filename = $this->_findViewFile($file, $context)) {
             return $this->renderInternal($filename, $data, $return);
         } else {
             throw new Exception('View ' . $file . ' not found.');
@@ -90,12 +95,22 @@ class TView
         }
     }
 
-    public function viewExists($view)
+    /**
+     * @param string      $view
+     * @param null|object $context
+     * @return bool
+     */
+    public function viewExists($view, $context = null)
     {
-        return ($this->_findViewFile($view) !== false);
+        return ($this->_findViewFile($view, $context) !== false);
     }
 
-    protected function _findViewFile($file)
+    /**
+     * @param string      $file
+     * @param null|object $context
+     * @return bool|string
+     */
+    protected function _findViewFile($file, $context = null)
     {
         $paths = array();
 
@@ -115,8 +130,7 @@ class TView
 
             $modules = Core::app()->cfg('modules');
             if (!empty($modules)) {
-                //TODO: find a better way to get module name...
-                $reflection = new ReflectionClass($this);
+                $reflection = new ReflectionClass(($context !== null && is_object($context)) ? $context : $this);
                 $currentModule = strtolower(
                     preg_replace('#(?:.*?)modules(?:\\\|/)([a-zA-Z0-9_]*)(?:.*)#i', '$1', $reflection->getFilename())
                 );

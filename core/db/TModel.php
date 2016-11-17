@@ -69,6 +69,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $this->_isNewRecord = $isNew;
 
         $this->_populate($attributes);
+        if ($this->_isNewRecord) {
+            $this->_populateOnNewRecord();
+        }
         //$this->_new = true;
     }
 
@@ -394,6 +397,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     }
 
     // eager
+    /**
+     * @param $with
+     * @return $this
+     * @throws Exception
+     */
     public function with($with)
     {
         if (is_array($with)) {
@@ -615,7 +623,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
                 switch ($rule) {
                     case 'required':
-                        if (empty($this->_values[$field]) && $this->_values[$field] == NULL) {
+                        if (empty($this->_values[$field]) && $this->_values[$field] == NULL && ($this->_schema->getColumn($field)->phpType !== 'integer' && $this->_values[$field] == 0)) {
                             $valid = false;
                             $this->_errors[$field][] = 'Required';
                         }
@@ -690,7 +698,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     {
         $resultErrors = array();
         foreach ($this->_errors as $field => $errors) {
-            $resultErrors[] = $this->getAttributeLabel($field) . ': ' . implode('<br/>', $errors);
+            $resultErrors[] = $this->getAttributeLabel($field) . ': ' . implode(', ', $errors);
         }
 
         return $resultErrors;
@@ -874,6 +882,10 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         } else {
             //TODO: throw error or no?
         }
+    }
+
+    protected function _populateOnNewRecord() {
+        return false;
     }
 
     protected function _populate($attributes = array()) {
