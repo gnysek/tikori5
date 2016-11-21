@@ -83,7 +83,7 @@ class DbMySqli extends DBAbstract
         $this->_queries++;
         $this->_queryList[] = $sql;
 
-        if (preg_match('/^(create|drop|insert|update|delete|replace|alter|set)/i', trim($sql))) {
+        if (preg_match('/^(create|drop|insert|update|delete|replace|alter|set|truncate)/i', trim($sql))) {
             $result = $this->conn()->query($sql);
             Profiler::addLog('Exec finished');
             if ($result === false) {

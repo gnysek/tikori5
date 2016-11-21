@@ -352,7 +352,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * @param       $limit
      * @param int   $offset
      * @param array $conditions
-     * @return Collection[]
+     * @return Collection[]|Collection
      */
     public function findAll($limit = -1, $offset = 0, $conditions = array())
     {
@@ -579,7 +579,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     public function save($forceToSave = false)
     {
         if ($this->timestamps) {
-            if ($this->_isNewRecord && in_array('created_at', $this->_fields)) {
+            if ($this->_isNewRecord && in_array('created_at', $this->_fields) && $this->created_at == 0) {
                 $this->created_at = $this->_getDateFormat();
             }
 
@@ -876,24 +876,12 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     public function setAttributes($values)
     {
         if (is_array($values)) {
-
-            // TODO: default value setting by column type
-
-            $keys = array_merge(array_keys($this->_rules), array_keys($values));
-
-            foreach($keys as $field) {
+            // TODO: default value setting by column type//probablu moved now to populate
+            foreach(array_keys($values) as $field) {
                 if (isset($values[$field])) {
                     $this->__set($field, $values[$field]);
-                } else {
-                    $this->__set($field, $this->_schema->columns[$field]->defaultValue);
                 }
             }
-
-            /*foreach ($value as $k => $v) {
-                if (in_array($k, $this->_fields)) {
-                    $this->__set($k, $v);
-                }
-            }*/
         } else {
             //TODO: throw error or no?
         }
@@ -904,11 +892,15 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     }
 
     protected function _populate($attributes = array()) {
-        if (is_array($attributes)) {
-            foreach ($attributes as $k => $v) {
-                if (in_array($k, $this->_fields)) {
-                    $this->_values[$k] = $this->_original[$k] = $v;
-                }
+        if (!is_array($attributes)) {
+            $attributes = array();
+        }
+
+        foreach($this->_fields as $fieldName) {
+            if (array_key_exists($fieldName, $attributes)) {
+                $this->_values[$fieldName] = $this->_original[$fieldName] = $attributes[$fieldName];
+            } else {
+                $this->_values[$fieldName] = $this->_original[$fieldName] = $this->_schema->columns[$fieldName]->defaultValue;
             }
         }
     }
