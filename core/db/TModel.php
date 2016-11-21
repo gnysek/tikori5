@@ -282,6 +282,12 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
                             $c->populateRelation($relationName, $relationCacheByPk[$values[ $this->_relations[$relationName][2] ]]);
                             break;
+                        default:
+                            $methodName = '__doRelationBeforePopulate_' . $this->_relations[$relationName][0];
+                            if (method_exists($this, $methodName)) {
+                                $this->$methodName($relationName);
+                            }
+                            break;
                     }
                 }
             }
@@ -327,7 +333,12 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 //                        throw new Exception('Not yet implemented');
                         break;*/
                     default:
-                        throw new Exception('Not yet implemented');
+                        $methodName = '__doRelation_' . $this->_relations[$relationName][0];
+                        if (method_exists($this, $methodName)) {
+                            $this->$methodName($relationName);
+                        } else {
+                            throw new Exception('Not yet implemented, or no __doRelation_' . $methodName . ' found');
+                        }
                         break;
                 }
                 ///var_dump($this->_getRelated($relationName, array('1')));
@@ -389,6 +400,10 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                         $sql->joinOn($model->getTable(), array($this->_relations[$relationName][2], '=', $this->getPK()));
                     */
                     default:
+                        $methodName = '__doEager_' . $this->_relations[$relationName][0];
+                        if (method_exists($this, $methodName)) {
+                            $this->$methodName($relationName, $sql);
+                        }
                         //throw new DbError('Eager join for this type of relation is not yet implemented!');
                         break;
                 }

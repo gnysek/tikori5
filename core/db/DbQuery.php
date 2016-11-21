@@ -11,7 +11,7 @@ class DbQuery
     const JOIN = 'JOIN'; // INNER JOIN
     const JOIN_LEFT = 'LEFT JOIN'; // LEFT OUTER JOIN
     const JOIN_RIGHT = 'RIGHT JOIN'; // RIGHT OUTER JOIN
-    const JOIN_FULL = 'FULL JOIN'; // FULL OUTER JOIN
+    const JOIN_INNER = 'INNER JOIN'; // FULL OUTER JOIN
 
     public $alias = 't';
     private $_from = array();
@@ -214,6 +214,15 @@ class DbQuery
         $this->_joinTables[] = $table;
         $this->_joinOn[$table] = $on;
         $this->_joinType = self::JOIN_LEFT;
+
+        return $this;
+    }
+
+    public function joinType($table, $on, $joinType)
+    {
+        $this->_joinTables[] = $table;
+        $this->_joinOn[$table] = $on;
+        $this->_joinType = (in_array($joinType, array(self::JOIN_INNER, self::JOIN_LEFT, self::JOIN_RIGHT))) ? $joinType : self::JOIN_LEFT;
 
         return $this;
     }
