@@ -20,7 +20,7 @@ class SingletonOptions
     {
         $arr_key = $table . '_' . $key . '_' . $value;
         if (!array_key_exists($arr_key, self::$_loaded) or $rewrite === true) {
-            $result = TModel::model($table)->findAll();
+            $result = TModel::model($table)->findAll(-1, 0, array('order' => $key . ' ASC'));
             $values = array();
             foreach ($result as $row) {
                 $values[$row->$key] = $row->$value;

@@ -908,6 +908,18 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return $this->_getRelated($relationName);
     }
 
+    public function getRelationClass($relationName) {
+        return $this->_getRelatedData($relationName, 1);
+    }
+
+    public function getRelationRelatedField($relationName) {
+        return $this->_getRelatedData($relationName, 2);
+    }
+
+    protected function _getRelatedData($relationName, $field) {
+        return (array_key_exists($relationName, $this->_relations)) ? $this->_relations[$relationName][$field] : null;
+    }
+
     protected function _getRelated($relationName, $populate = true, $customValues = NULL)
     {
         $result = NULL;
