@@ -21,7 +21,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     protected $_values = array();
     protected $_original = array();
     protected $_rules = array();
-    protected $_related = NULL;
+    protected $_related = null;
     protected $_primaryKey = 'id';
     protected $_scopes = array();
     protected $_relations = array();
@@ -60,7 +60,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 if (array_key_exists($fieldName, $this->_relations)) {
                     throw new DbError('Model ' . get_class($this) . ' have field named same as relation: ' . $fieldName);
                 }
-                $this->_values[$fieldName] = $this->_original[$fieldName] = ($fieldName == $this->getPk()) ? NULL : ($this->_schema->getColumn($fieldName)->defaultValue);
+                $this->_values[$fieldName] = $this->_original[$fieldName] = ($fieldName == $this->getPk()) ? null : ($this->_schema->getColumn($fieldName)->defaultValue);
             }
         }
         $this->_rules = $this->_prepareRules();
@@ -78,12 +78,13 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     public function getTable()
     {
         if (empty($this->_table)) {
-			$this->_table = strtolower(preg_replace('/(.)([A-Z])/', "$1_$2", get_called_class()));
+            $this->_table = strtolower(preg_replace('/(.)([A-Z])/', "$1_$2", get_called_class()));
         }
         return $this->_table;
     }
 
-    public static function getTableName($modelName) {
+    public static function getTableName($modelName)
+    {
         return strtolower($modelName);
     }
 
@@ -97,9 +98,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      *
      * @return TModel
      */
-    public static function model($model = NULL)
+    public static function model($model = null)
     {
-        if ($model == NULL) {
+        if ($model == null) {
             $model = get_called_class();
         }
         return new $model();
@@ -189,7 +190,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             }
             $this->_isNewRecord = false;
         } else {
-            return NULL;
+            return null;
         }
         return $this;
     }
@@ -233,7 +234,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * @return Collection
      * @throws Exception
      */
-    public function findWhere($where = NULL, $limit = -1, $offset = 0, $conditions = array())
+    public function findWhere($where = null, $limit = -1, $offset = 0, $conditions = array())
     {
         $sql = DbQuery::sql()->select()->from($this->_table);
         if (!empty($where)) {
@@ -265,10 +266,10 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 foreach ($this->_eagers as $k => $relationName) {
                     switch ($this->_relations[$relationName][0]) {
                         case self::BELONGS_TO:
-                            if (!array_key_exists($values[ $this->_relations[$relationName][2] ], $relationCacheByPk)) {
+                            if (!array_key_exists($values[$this->_relations[$relationName][2]], $relationCacheByPk)) {
 //                                $r = Model::model($this->_relations[$relationName][1]);
                                 $rvalues = array();
-                                $fields = Core::app()->db->getSchema()->getTableSchema( self::getTableName($this->_relations[$relationName][1]) )->getColumnNames();
+                                $fields = Core::app()->db->getSchema()->getTableSchema(self::getTableName($this->_relations[$relationName][1]))->getColumnNames();
                                 foreach ($fields as $relationfield) {
                                     $relationfieldName = 'r' . ($k + 1) . '_' . $relationfield;
                                     $rvalues[$relationfield] = $values[$relationfieldName];
@@ -277,10 +278,10 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                                 $r = new $relatedClassName($rvalues, false);
                                 /* @var $r TModel */
 //                                $r->setAttributes($rvalues);
-                                $relationCacheByPk[$values[ $this->_relations[$relationName][2] ]] = $r;
+                                $relationCacheByPk[$values[$this->_relations[$relationName][2]]] = $r;
                             }
 
-                            $c->populateRelation($relationName, $relationCacheByPk[$values[ $this->_relations[$relationName][2] ]]);
+                            $c->populateRelation($relationName, $relationCacheByPk[$values[$this->_relations[$relationName][2]]]);
                             break;
                         default:
                             $methodName = '__doRelationBeforePopulate_' . $this->_relations[$relationName][0];
@@ -316,7 +317,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                             $row->populateRelation($relationName, $toAssign);
                         }
                         break;
-                    case self::BELONGS_TO: break;
+                    case self::BELONGS_TO:
+                        break;
                     /*case self::BELONGS_TO:
 //                        var_dump($this->_relations[$relationName][2]);
                         $byField = $this->_relations[$relationName][2];
@@ -352,14 +354,14 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * @param       $limit
      * @param int   $offset
      * @param array $conditions
-     * @return Collection[]|Collection
+     * @return Collection|$this|Collection[]|$this[]
      */
     public function findAll($limit = -1, $offset = 0, $conditions = array())
     {
-        return $this->findWhere(NULL, $limit, $offset, $conditions);
+        return $this->findWhere(null, $limit, $offset, $conditions);
     }
 
-    public function count($by = NULL)
+    public function count($by = null)
     {
         $sql = DbQuery::sql()->select('COUNT(*) AS tikori_total')->from($this->_table);
         $this->_applyEagers($sql);
@@ -383,7 +385,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return (!empty($result[0])) ? $result[0]->tikori_total : 0;
     }
 
-    protected function _applyEagers(DbQuery $sql) {
+    protected function _applyEagers(DbQuery $sql)
+    {
         if (!empty($this->_eagers)) {
             foreach ($this->_eagers as $relationName) {
                 switch ($this->_relations[$relationName][0]) {
@@ -638,7 +641,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
                 switch ($rule) {
                     case 'required':
-                        if (empty($this->_values[$field]) && $this->_values[$field] == NULL && ($this->_schema->getColumn($field)->phpType !== 'integer' && $this->_values[$field] == 0)) {
+                        if (empty($this->_values[$field]) && $this->_values[$field] == null && ($this->_schema->getColumn($field)->phpType !== 'integer' && $this->_values[$field] == 0)) {
                             $valid = false;
                             $this->_errors[$field][] = 'Required';
                         }
@@ -659,7 +662,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                         break;
                     case 'null':
                         if (empty($this->_values[$field])) {
-                            $this->_values[$field] = NULL;
+                            $this->_values[$field] = null;
                         }
                         break;
                     default:
@@ -759,7 +762,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * Can be overriden to skip using/validating some fields in model
      * @return array
      */
-    public function getFields() {
+    public function getFields()
+    {
         return $this->_schema->getColumnNames();
     }
 
@@ -832,23 +836,50 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 return $this->_related[$value];
             } else {
                 if (array_key_exists($value, $this->_relations)) {
-//			var_dump('relation ' . __CLASS__);
+//			          var_dump('relation ' . __CLASS__);
                     return $this->getRelated($value);
                 } else {
                     $getter = 'get' . ucfirst($value);
                     if (method_exists($this, $getter)) {
                         return $this->$getter();
                     }
-                    /* else {
-                    //                        if (Core::app()->mode != Core::MODE_PROD) {
-                    //                            return '<span style="color: red;">' . $value . ' IS UNDEFINED!</span>';
-                    //                        }
-                                            return NULL;
-                                        }*/
+//                    else {
+//                        if (Core::app()->mode != Core::MODE_PROD) {
+//                            throw new Exception('No method <code>' . $getter . '</code> or property <code>' . $value . '</code> in <code>' . get_class($this) . '</code>.');
+//                        }
+//                    }
                 }
             }
         }
-        return NULL;
+        return null;
+    }
+
+    public function __call($name, $args = array())
+    {
+        $type = substr($name, 0, 3);
+
+        switch ($type) {
+            case 'get':
+                $value = substr($name, 3);
+
+                if (in_array($value, $this->_fields)) {
+                    if (array_key_exists($value, $this->_values)) {
+                        return $this->_values[$value];
+                    } else {
+                        return null;
+                    }
+                } else {
+                    if (isset($this->_related[$value])) {
+                        return $this->_related[$value];
+                    }
+                }
+
+                throw new Exception('No property <code>' . $value . '</code> called by method <code>' . get_class($this) . '->' . $name . '</code>.');
+
+                break;
+        }
+
+        return null;
     }
 
     public function getData()
@@ -877,7 +908,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     {
         if (is_array($values)) {
             // TODO: default value setting by column type//probablu moved now to populate
-            foreach(array_keys($values) as $field) {
+            foreach (array_keys($values) as $field) {
                 if (isset($values[$field])) {
                     $this->__set($field, $values[$field]);
                 }
@@ -887,16 +918,18 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         }
     }
 
-    protected function _populateOnNewRecord() {
+    protected function _populateOnNewRecord()
+    {
         return false;
     }
 
-    protected function _populate($attributes = array()) {
+    protected function _populate($attributes = array())
+    {
         if (!is_array($attributes)) {
             $attributes = array();
         }
 
-        foreach($this->_fields as $fieldName) {
+        foreach ($this->_fields as $fieldName) {
             if (array_key_exists($fieldName, $attributes)) {
                 $this->_values[$fieldName] = $this->_original[$fieldName] = $attributes[$fieldName];
             } else {
@@ -915,21 +948,24 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return $this->_getRelated($relationName);
     }
 
-    public function getRelationClass($relationName) {
+    public function getRelationClass($relationName)
+    {
         return $this->_getRelatedData($relationName, 1);
     }
 
-    public function getRelationRelatedField($relationName) {
+    public function getRelationRelatedField($relationName)
+    {
         return $this->_getRelatedData($relationName, 2);
     }
 
-    protected function _getRelatedData($relationName, $field) {
+    protected function _getRelatedData($relationName, $field)
+    {
         return (array_key_exists($relationName, $this->_relations)) ? $this->_relations[$relationName][$field] : null;
     }
 
-    protected function _getRelated($relationName, $populate = true, $customValues = NULL)
+    protected function _getRelated($relationName, $populate = true, $customValues = null)
     {
-        $result = NULL;
+        $result = null;
         switch ($this->_relations[$relationName][0]) {
             case self::HAS_MANY:
                 $rel = self::model($this->_relations[$relationName][1]);
@@ -985,7 +1021,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     if (!empty($this->_related[$relationName])) {
                         $head .= '<th rowspan="2" style="vertical-align: middle;">';
                         $head .= 'belongs to model <kbd>' . $relation[1] . '</kbd>';
-                        $head .= '<br/>relation name is <kbd>'. $relationName . '<kbd>';
+                        $head .= '<br/>relation name is <kbd>' . $relationName . '<kbd>';
                         $head .= '</th>';
                         $headerCount++;
 

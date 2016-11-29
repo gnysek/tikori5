@@ -44,20 +44,24 @@
                 <h3><?php echo Core::app()->cfg('appName'); ?> Application Error &bull; [<?php echo $errorId; ?>] <?php echo $errorType; ?></h3>
 
                 <h1>
-                    <strong><?php if (count($errors) > 1): echo ($eid + 1) . '/' . count($errors); endif; ?><?php echo $errorData['message']; ?></strong>
+                    <strong><?php if (count($errors) > 1): echo ($eid) . '/' . count($errors) . ': '; endif; ?><?php echo $errorData['message']; ?></strong>
                 </h1>
             </div>
 
-            <?php foreach ($errors as $eid => $errorData): ?>
-                <?php foreach ($errorData['files'] as $fid => $fileData): ?>
-                    <div id="file_<?php echo $eid . '-' . $fid; ?>" class="codebox">
-                        <a name="file_<?php echo $eid . '-' . $fid; ?>"></a>
-                        <?php if (!empty($fileData['html'])) : ?>
-                            <div><?php echo $fileData['html'] ?></div>
-                        <?php endif; ?>
-                    </div>
+            <div class="error-preview">
+                <?php foreach ($errors as $eid => $errorData): ?>
+                    <?php foreach ($errorData['files'] as $fid => $fileData): ?>
+                        <div id="file_<?php echo $eid . '-' . $fid; ?>" class="codebox">
+                            <a name="file_<?php echo $eid . '-' . $fid; ?>"></a>
+                            <?php if (!empty($fileData['html'])) : ?>
+                                <div><?php echo $fileData['html'] ?></div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
                 <?php endforeach; ?>
-            <?php endforeach; ?>
+            </div>
+
+
             <div class="vars">
                 <h1>Tikori Application</h1>
 
@@ -121,6 +125,9 @@
 
                 <table>
                     <?php foreach($_SERVER as $k => $v): ?>
+                        <?php if (in_array($k, array('HTTP_COOKIE', 'PATH'))) {
+                            $v = str_replace(';', '<br/>', $v);
+                        } ?>
                         <tr>
                             <td class="d-k"><?php echo $k; ?></td>
                             <td class="d-v"><?php echo $v; ?></td>

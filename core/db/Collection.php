@@ -312,6 +312,10 @@ class Collection implements ArrayAccess, Iterator, Countable
         return new Collection($values);
     }
 
+    /**
+     * @param $function
+     * @return Collection
+     */
     public function getWhere($function) {
         $values = array();
         foreach ($this->_data as $record) {

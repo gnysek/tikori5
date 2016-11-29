@@ -108,12 +108,17 @@ h3 {
     background: #b0b0b0;
 }
 
+h1 code {
+	background: white;
+	padding: 0 5px;
+}
+
 /** OLD ONE **/
-#right code {
+#right .error-preview code {
 	padding: 3px;
 }
 
-#right code {
+#right .error-preview code {
 	font-family: 'Consolas', monospace;
 	font-size: 16px;
 	line-height: 21px;
@@ -220,6 +225,10 @@ table {
     width: 100%;
     font-family: 'Consolas', monospace;
     font-size: 13px;
+}
+
+.d-k, .d-v {
+	border-bottom: 1px solid white;
 }
 
 .d-k {

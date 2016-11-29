@@ -46,7 +46,7 @@ class TView
 
             $out = $this->renderPartial($this->layout, array('content' => $out));
         } catch (Exception $e) {
-            throw new Exception('Rendering view error: ' . $e->getMessage());
+            throw new Exception('Rendering view <code>' . $file . '</code> error: ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         if ($return) {
