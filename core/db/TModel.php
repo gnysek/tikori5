@@ -85,7 +85,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     public static function getTableName($modelName)
     {
-        return strtolower($modelName);
+        return strtolower(preg_replace('/(.)([A-Z])/', "$1_$2", $modelName));
     }
 
     public function getPK()
@@ -269,7 +269,13 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                             if (!array_key_exists($values[$this->_relations[$relationName][2]], $relationCacheByPk)) {
 //                                $r = Model::model($this->_relations[$relationName][1]);
                                 $rvalues = array();
-                                $fields = Core::app()->db->getSchema()->getTableSchema(self::getTableName($this->_relations[$relationName][1]))->getColumnNames();
+
+                                if ($schema = Core::app()->db->getSchema()->getTableSchema(self::getTableName($this->_relations[$relationName][1]))) {
+                                    $fields = $schema->getColumnNames();
+                                } else {
+                                    throw new Exception('Cannot find Schema for table ' . self::getTableName($this->_relations[$relationName][1]));
+                                }
+
                                 foreach ($fields as $relationfield) {
                                     $relationfieldName = 'r' . ($k + 1) . '_' . $relationfield;
                                     $rvalues[$relationfield] = $values[$relationfieldName];
@@ -647,7 +653,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                         }
                         break;
                     case 'int':
-                        if (!is_numeric($this->_values[$field])) {
+                        if (!is_numeric($this->_values[$field]) and ($this->_schema->getColumn($field)->allowNull == false)) {
                             $valid = false;
                             $this->_errors[$field][] = 'Needs to be a number';
                         }
