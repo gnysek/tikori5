@@ -257,12 +257,35 @@ class Collection implements ArrayAccess, Iterator, Countable
 	 *
 	 * @return array
 	 */
-	public function getColumnValues($column)
+    public function getColumnValues($column)
     {
         $values = array();
-        foreach ($this->_data as $record) {
-            if (!in_array($record[$column], $values)) {
-                $values[] = $record[$column];
+
+        $isSubproperty = strpos($column, '.');
+
+        if ($isSubproperty > 0) {
+
+            // todo: what in case, where there's more nests like a.b.c.d?
+
+            $subRelation = substr($column, 0, $isSubproperty);
+            $subProperty = substr($column, $isSubproperty + 1);
+
+            foreach ($this->_data as $record) {
+                if (is_array($record->$subRelation)) {
+                    foreach ($record->$subRelation as $subRecord) {
+                        if (!in_array($subRecord[$subProperty], $values)) {
+                            $values[] = $subRecord[$subProperty];
+                        }
+                    }
+                } else {
+                    $values[] = $record->{$subRelation}[$subProperty];
+                }
+            }
+        } else {
+            foreach ($this->_data as $record) {
+                if (!in_array($record[$column], $values)) {
+                    $values[] = $record[$column];
+                }
             }
         }
 
