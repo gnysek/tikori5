@@ -27,6 +27,18 @@ class Asset
     public static function mergeCssAssets($listOfCssFiles)
     {
 
+        if (Core::app()->request->isHardRefresh() && Core::app()->getMode() == Core::MODE_DEV) {
+            $dir = TIKORI_ROOT . '/media/assets';
+
+            if (file_exists($dir)) {
+                foreach (new DirectoryIterator($dir) as $fileInfo) {
+                    if (!$fileInfo->isDot() && !$fileInfo->isDir()) {
+                        unlink($fileInfo->getPathname());
+                    }
+                }
+            }
+        }
+
         Profiler::addLog('File merging started');
         $externalFiles = array();
         $filesToMerge = array();
