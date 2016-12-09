@@ -83,6 +83,10 @@ class DbMySqli extends DBAbstract
         $this->_queries++;
         $this->_queryList[] = $sql;
 
+        if (Core::app()->hasLoadedModule('toolbar')) {
+            Core::app()->toolbar->putValueToTab('SQL', '<code>' . $sql . '</code><br/>');
+        }
+
         if (preg_match('/^(create|drop|insert|update|delete|replace|alter|set|truncate)/i', trim($sql))) {
             $result = $this->conn()->query($sql);
             Profiler::addLog('Exec finished');

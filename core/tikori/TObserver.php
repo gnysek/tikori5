@@ -42,6 +42,8 @@ class TObserver
             foreach ($this->_observers[$eventName] as $observer) {
                 if (method_exists($observer, $methodName)) {
                     call_user_func_array(array($observer, $methodName), array($data));
+                } else {
+                    Profiler::addLog('Firing event <code>' . $eventName . '</code> which is registered but there\'s no method <code>' . $methodName . '</code> for it');
                 }
             }
         } else {

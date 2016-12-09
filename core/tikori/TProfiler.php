@@ -93,6 +93,15 @@ class TProfiler
 
         $logs[] = '</table>';
 
+        if (Core::app()->hasLoadedModule('toolbar')) {
+            Core::app()->toolbar->putValueToTab('profiler', implode(PHP_EOL, $logs));
+
+            Core::app()->toolbar->addStatus(sprintf('Zapytań do bazy: %s.', Core::app()->db->queries()));
+            Core::app()->toolbar->addStatus(sprintf('Czas generowania strony: %ss.', Core::genTimeNow()));
+
+            return '';
+        }
+
         return implode(PHP_EOL, $logs);
     }
 

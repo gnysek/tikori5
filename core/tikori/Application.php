@@ -329,6 +329,10 @@ abstract class Application
         }
     }
 
+    public function hasLoadedModule($moduleName) {
+        return array_key_exists($moduleName, $this->_loadedModules);
+    }
+
     public function component($componentName)
     {
         $module = $this->__get($componentName);

@@ -8,8 +8,8 @@ class Html
 
     public static function link($text, $url, $options = array())
     {
+        self::_linkCheckActiveClass($options, $url);
         $_url = self::url($url);
-        self::_linkCheckActiveClass($options, $_url);
         return html::htmlTag('a', $options + array('href' => $_url, 'title' => htmlspecialchars($text)), $text);
 //        return '<a href="' . self::url($url) . '"' . implode(' ', $opt) . '>' . $text . '</a>';
     }
@@ -31,6 +31,7 @@ class Html
     protected static function _linkCheckActiveClass(& $options, $url)
     {
         $current = Core::app()->request != NULL ? trim(Core::app()->request->getRouterPath(), '/') : '';
+
         if (Core::app()->route) {
             if (Core::app()->route->area != null) {
                 $url = Core::app()->route->area . '/' . $url;

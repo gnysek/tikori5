@@ -49,6 +49,8 @@ class TView
             throw new Exception('Rendering view <code>' . $file . '</code> error: ' . $e->getMessage(), $e->getCode(), $e);
         }
 
+        Core::app()->observer->fireEvent('render_finished', array('output' => &$out));
+
         if ($return) {
             return $out;
         } else {
