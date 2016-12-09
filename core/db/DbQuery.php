@@ -209,19 +209,18 @@ class DbQuery
 
     public function joinOn($table, $on)
     {
-//		$cnt = count($this->_joinTables);
-
-        $this->_joinTables[] = $table;
-        $this->_joinOn[$table] = $on;
-        $this->_joinType = self::JOIN_LEFT;
-
-        return $this;
+        return $this->joinType($table, $on, self::JOIN_LEFT);
     }
 
     public function joinType($table, $on, $joinType)
     {
-        $this->_joinTables[] = $table;
-        $this->_joinOn[$table] = $on;
+        $_tableName = $table;
+        if (is_array($table)) {
+            $_tableName = $table[1];
+        }
+
+        $this->_joinTables[] = $table; // pass table ID also
+        $this->_joinOn[$_tableName] = $on;
         $this->_joinType = (in_array($joinType, array(self::JOIN_INNER, self::JOIN_LEFT, self::JOIN_RIGHT))) ? $joinType : self::JOIN_LEFT;
 
         return $this;
@@ -286,9 +285,17 @@ class DbQuery
 
                     if (!empty($this->_joinTables)) {
                         foreach ($this->_joinTables as $k => $table) {
-                            $_fields = Core::app()->db->getTableInfo($table)->getColumnNames();
+
+                            $_index = $k + 1;
+                            $_tableName = $table;
+
+                            if (is_array($table)) {
+                                list($_index, $_tableName) = $table;
+                            }
+
+                            $_fields = Core::app()->db->getTableInfo($_tableName)->getColumnNames();
                             foreach ($_fields as $_field) {
-                                $fields[] = '`t' . ($k + 1) . '`.`' . $_field . '` AS `r' . ($k + 1) . '_' . $_field . '`';
+                                $fields[] = '`t' . $_index . '`.`' . $_field . '` AS `r' . $_index . '_' . $_field . '`';
                             }
                         }
                     }
@@ -322,14 +329,21 @@ class DbQuery
             if (!empty($this->_joinTables)) {
                 foreach ($this->_joinTables as $k => $table) {
 
-                    $this->_fromAliases[$table] = $this->alias . (count($this->_fromAliases));
+                    $_index = $k + 1;
+                    $_tableName = $table;
+
+                    if (is_array($table)) {
+                        list($_index, $_tableName) = $table;
+                    }
+
+                    $this->_fromAliases[$_tableName] = $this->alias . $_index;
 
                     $sql[] = "\n" . $this->_joinType;
-                    $sql[] = '`' . $table . '` `' . $this->_fromAliases[$table] . '`';
+                    $sql[] = '`' . $_tableName . '` `' . $this->_fromAliases[$_tableName] . '`';
                     $sql[] = 'ON';
-                    $sql[] = '`' . $this->alias . ($k + 1) . '`.`' . $this->_joinOn[$table][0] . '`';
-                    $sql[] = $this->_joinOn[$table][1];
-                    $sql[] = '`' . $this->alias . '`.`' . $this->_joinOn[$table][2] . '`';
+                    $sql[] = '`' . $this->alias . $_index . '`.`' . $this->_joinOn[$_tableName][0] . '`';
+                    $sql[] = $this->_joinOn[$_tableName][1];
+                    $sql[] = '`' . $this->alias . '`.`' . $this->_joinOn[$_tableName][2] . '`';
                 }
             }
         }

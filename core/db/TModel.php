@@ -266,7 +266,10 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 foreach ($this->_eagers as $k => $relationName) {
                     switch ($this->_relations[$relationName][0]) {
                         case self::BELONGS_TO:
-                            if (!array_key_exists($values[$this->_relations[$relationName][2]], $relationCacheByPk)) {
+
+                            $_cacheUniqueName = $relationName . $values[$this->_relations[$relationName][2]];
+
+                            if (!array_key_exists($_cacheUniqueName, $relationCacheByPk)) {
 //                                $r = Model::model($this->_relations[$relationName][1]);
                                 $rvalues = array();
 
@@ -284,10 +287,10 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                                 $r = new $relatedClassName($rvalues, false);
                                 /* @var $r TModel */
 //                                $r->setAttributes($rvalues);
-                                $relationCacheByPk[$values[$this->_relations[$relationName][2]]] = $r;
+                                $relationCacheByPk[$_cacheUniqueName] = $r;
                             }
 
-                            $c->populateRelation($relationName, $relationCacheByPk[$values[$this->_relations[$relationName][2]]]);
+                            $c->populateRelation($relationName, $relationCacheByPk[$_cacheUniqueName]);
                             break;
                         default:
                             $methodName = '__doRelationBeforePopulate_' . $this->_relations[$relationName][0];
@@ -388,19 +391,19 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $sql->conditions($conditions);
         $this->_applyEagers($sql);
         $result = $sql->execute();
-        return (!empty($result[0])) ? $result[0]->tikori_total : 0;
+        return (!empty($result[0])) ? (int) $result[0]->tikori_total : 0;
     }
 
     protected function _applyEagers(DbQuery $sql)
     {
         if (!empty($this->_eagers)) {
-            foreach ($this->_eagers as $relationName) {
+            foreach ($this->_eagers as $k => $relationName) {
                 switch ($this->_relations[$relationName][0]) {
                     case self::BELONGS_TO:
 
                         $model = TModel::model($this->_relations[$relationName][1]);
                         /* @var $model TModel */
-                        $sql->joinOn($model->getTable(), array($model->getPK(), '=', $this->_relations[$relationName][2]));
+                        $sql->joinOn(array($k + 1, $model->getTable()), array($model->getPK(), '=', $this->_relations[$relationName][2]));
 
                         break;
                     /*case self::HAS_MANY:
