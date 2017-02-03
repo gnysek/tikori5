@@ -22,6 +22,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     protected $_original = array();
     protected $_rules = array();
     protected $_related = null;
+    protected static $_oop_relations = array();
     protected $_primaryKey = 'id';
     protected $_scopes = array();
     protected $_relations = array();
@@ -53,6 +54,17 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $this->_scopes = $this->scopes();
         $this->_relations = $this->relations();
         $this->_fields = $this->getFields();
+        $class = get_class($this);
+
+        if (!array_key_exists($class, self::$_oop_relations)) {
+            // always fill with at least empty array, so haveRelationInClass method will work
+            self::$_oop_relations[$class] = array();
+            if (!empty($this->_relations)) {
+                foreach ($this->_relations as $relationName => $relation) {
+                    self::$_oop_relations[$class][$relationName] = new TModelRelation($relationName, $relation[0], $class, $relation[1], $relation[2]);
+                }
+            }
+        }
 
         // set default values
         if (!empty($this->_fields)) {
@@ -262,8 +274,29 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             /* @var $c TModel */
 //            $c->setAttributes($values);
 
+            // after getting data, load those which cannot be joined in another query, to attach them later
             if (!empty($this->_eagers)) {
                 foreach ($this->_eagers as $k => $relationName) {
+
+                    if (stripos($relationName, '.') > 0) {
+                        /*$classes = explode('.', $relationName);
+                        $currentClass = get_class($this);
+
+                        for ($i = 0; $i < count($classes) - 1; $i++) {
+                            $relData = self::getRelationForClass($currentClass, $classes[$i]);
+                            var_dump($relData);
+                            $currentClass = ucfirst($relData->class);
+                            //self::haveRelationForClass($classes[$i]);
+                            //var_dump($classes[$i]);
+                            //$relationData = self::$_oop_relations[$currentClass][$classes[$i]];
+                        }
+
+                        if ($currentClass) {
+                            var_dump($currentClass, $relationName, self::$_oop_relations[$currentClass][$classes[$i]], '----');
+                        }*/
+                        continue;
+                    }
+
                     switch ($this->_relations[$relationName][0]) {
                         case self::BELONGS_TO:
 
@@ -305,10 +338,16 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             $return[] = $c;
         }
 
+        // create collection and attach
         $collection = new Collection($return);
 
         if (!empty($this->_eagers)) {
             foreach ($this->_eagers as $relationName) {
+
+                if (stripos($relationName, '.') > 0) {
+                    continue;
+                }
+
                 $values = array();
                 switch ($this->_relations[$relationName][0]) {
                     case self::HAS_MANY:
@@ -356,6 +395,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             }
         }
 
+        $this->_applyDotEagersAfterLoadedNormalOnes($collection);
+
         return $collection;
     }
 
@@ -391,13 +432,18 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $sql->conditions($conditions);
         $this->_applyEagers($sql);
         $result = $sql->execute();
-        return (!empty($result[0])) ? (int) $result[0]->tikori_total : 0;
+        return (!empty($result[0])) ? (int)$result[0]->tikori_total : 0;
     }
 
     protected function _applyEagers(DbQuery $sql)
     {
         if (!empty($this->_eagers)) {
             foreach ($this->_eagers as $k => $relationName) {
+
+                if (stripos($relationName, '.') > 0) {
+                    continue;
+                }
+
                 switch ($this->_relations[$relationName][0]) {
                     case self::BELONGS_TO:
 
@@ -423,6 +469,92 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         }
     }
 
+    protected function _applyDotEagersAfterLoadedNormalOnes($collection)
+    {
+        $subqueries = array();
+        foreach ($this->_eagers as $relation) {
+            if (stripos($relation, '.') > 0) {
+                $classes = explode('.', $relation);
+                $s = &$subqueries;
+                foreach ($classes as $class) {
+                    if (!in_array($class, $s)) {
+                        $s[$class] = array();
+                    }
+
+                    $s = &$s[$class];
+                }
+            }
+        }
+
+        foreach($subqueries as $subRelName => $subRelations) {
+
+            $ids = array();
+
+            $_relData = self::$_oop_relations[get_class($this)][$subRelName];
+            /* @var $_relData TModelRelation */
+
+            /*switch ($_relData->relationType) {
+                case self::BELONGS_TO:
+                    $ids = $collection->getColumnValues($_relData->byField);
+                    //var_dump($_relData, $ids);
+
+                    $model = $this::model($_relData->class);
+                    $result = static::model($_relData->class)->findWhere(array($model->getPK(), 'in', $ids));
+
+                    foreach($collection as $row){
+                        /* @var $row TModel * /
+                        $row->populateRelation($_relData->relationName, $result->getRowsByColumnValue($model->getPK(), $row->{$_relData->byField})->getFirst());
+                    }
+
+                    if (Core::app()->hasLoadedModule('toolbar')) {
+                        Core::app()->toolbar->putValueToTab('SQL', '---populated---' . implode(',', $this->_eagers));
+                    }
+                    break;
+                default:
+                    var_dump('not yet implemented sub-eager for ' . $_relData->relationType);
+            }*/
+            //var_dump($ids, self::$_oop_relations[get_class($this)][$subRelName]);
+
+            $this->__applyEagerForSpecificSubRelation($_relData, $subRelations, $collection);
+        }
+    }
+
+    protected function __applyEagerForSpecificSubRelation($relData, $data, $related) {
+        /* @var $relData TModelRelation */
+        /* @var $_relData TModelRelation */
+        $class = ucfirst($relData->class);
+        var_dump('', 'nnn' . $relData->relationName, $class);
+        foreach($data as $subRelName => $subRelations) {
+
+            $_relData = self::$_oop_relations[$class][$subRelName];
+
+            var_dump($relData, $subRelName, $_relData);
+
+            switch ($_relData->relationType) {
+                case self::HAS_MANY:
+
+                    $data = array();
+
+                    foreach($related as $row) {
+                        var_dump($row->title);
+                        $data = $row->{$relData->relationName};
+
+                        if ($data->{$data->getPK()}) {
+                            var_dump(true);
+                        } else {
+                            var_dump(false);
+                            // this row is empty
+                        }
+                        //var_dump($row->{$relData->relationName});
+                    }
+
+                    //$result = $this->model($class)->findWhere(array($_relData->byField, '=', ));
+                    break;
+            }
+            //$this->__applyEagerForSpecificSubRelation($subRelName, $subRelations, null);
+        }
+    }
+
     // eager
     /**
      * @param $with
@@ -437,10 +569,35 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             }
         } else {
             if (!in_array($with, $this->_eagers)) {
-                if (array_key_exists($with, $this->_relations)) {
-                    $this->_eagers[] = $with;
+
+                if (stripos($with, '.') > 0) {
+                    $classes = explode('.', $with);
+
+                    $searchedClass = $this;
+
+                    // todo: switch to self::$__oop_relations
+                    for ($i = 0; $i < count($classes) - 1; $i++) {
+                        if ($searchedClass->haveRelation($classes[$i])) {
+                            $class = $searchedClass->getRelationClass($classes[$i]);
+                            $searchedClass = self::model($class);
+                        } else {
+                            throw new Exception("Relation {$classes[$i]} ({$with}) not found in model " . get_class($searchedClass));
+                        }
+                    }
+
+                    /* @var $searchedClass TModel */
+                    if ($searchedClass->haveRelation($classes[$i])) {
+                        $this->_eagers[] = $with;
+                    } else {
+                        throw new Exception("Relation {$classes[$i]} ({$with}) not found in model " . get_class($searchedClass));
+                    }
+
                 } else {
-                    throw new Exception("Relation $with not found in model " . get_class($this));
+                    if ($this->haveRelation($with)) {
+                        $this->_eagers[] = $with;
+                    } else {
+                        throw new Exception("Relation $with not found in model " . get_class($this));
+                    }
                 }
             }
         }
@@ -950,6 +1107,37 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     public function populateRelation($relationName, $records)
     {
         $this->_related[$relationName] = $records;
+    }
+
+    public static function haveRelationForClass($class) {
+        if (array_key_exists($class, self::$_oop_relations)) {
+            return count(self::$_oop_relations[$class]) > 0;
+        } else {
+            self::model($class);
+            return self::haveRelationForClass($class);
+        }
+        return false;
+    }
+
+    /**
+     * @param $class
+     * @param $relation
+     * @return TModelRelation|null
+     */
+    public static function getRelationForClass($class, $relation)
+    {
+        if (self::haveRelationForClass($class)) {
+            if (array_key_exists($relation, self::$_oop_relations[$class])) {
+                return self::$_oop_relations[$class][$relation];
+            }
+        }
+
+        return null;
+    }
+
+    public function haveRelation($name)
+    {
+        return (array_key_exists($name, $this->_relations));
     }
 
     public function getRelated($relationName)

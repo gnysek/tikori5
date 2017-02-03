@@ -70,6 +70,7 @@ class DbMySqli extends DBAbstract
         Profiler::addLog(__CLASS__ . ' connected');
     }
 
+    protected $_last_debug_src = '';
     /**
      * @param        $sql
      * @param string $skip
@@ -83,8 +84,32 @@ class DbMySqli extends DBAbstract
         $this->_queries++;
         $this->_queryList[] = $sql;
 
-        if (Core::app()->hasLoadedModule('toolbar')) {
-            Core::app()->toolbar->putValueToTab('SQL', '<code>' . $sql . '</code><br/>');
+        if (Core::app()->getMode() != Core::MODE_PROD) {
+            $b = array_reverse(debug_backtrace(~DEBUG_BACKTRACE_PROVIDE_OBJECT));
+
+            $db = array();
+
+            foreach ($b as $_b) {
+                if (empty($_b['file'])) {
+                    $db[] = ' > ' . $_b['class'] . '::' . $_b['function'];
+                } else {
+                    if (preg_match('#(?:\\\\|\/)app(?:\\\\|\/)#', $_b['file'])) {
+                        $db[] = ' > ' . (!empty($_b['file']) ? $_b['file'] : '--') . ':' . (!empty($_b['line']) ? $_b['line'] : '0');
+                    }
+                }
+            }
+
+            $str = '';
+            if ($db[count($db) - 1] != $this->_last_debug_src) {
+                $str = '<br/><code>' . str_repeat('-', 30) . '</code><br/><code>' . implode('<br/>', $db) . '</code><br/><br/>';
+                $this->_last_debug_src = $db[count($db) - 1];
+            }
+
+            $str .= sprintf('<code>%s</code><br/>', $sql);
+
+            if (Core::app()->hasLoadedModule('toolbar')) {
+                Core::app()->toolbar->putValueToTab('SQL', $str);
+            }
         }
 
         if (preg_match('/^(create|drop|insert|update|delete|replace|alter|set|truncate)/i', trim($sql))) {
