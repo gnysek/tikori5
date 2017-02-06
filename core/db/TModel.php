@@ -486,9 +486,12 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             }
         }
 
+
         foreach($subqueries as $subRelName => $subRelations) {
 
-            $ids = array();
+            //$ids = array();
+
+            $relationDepthString = $subRelName;
 
             $_relData = self::$_oop_relations[get_class($this)][$subRelName];
             /* @var $_relData TModelRelation */
@@ -515,41 +518,111 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             }*/
             //var_dump($ids, self::$_oop_relations[get_class($this)][$subRelName]);
 
-            $this->__applyEagerForSpecificSubRelation($_relData, $subRelations, $collection);
+            #var_dump('', 'szukam dla : ' . $subRelName);
+            #var_dump('', 'current relation finding stage : ' . $relationDepthString . '.....' );
+
+            $this->__applyEagerForSpecificSubRelation($_relData, $subRelations, $relationDepthString, $collection);
         }
     }
 
-    protected function __applyEagerForSpecificSubRelation($relData, $data, $related) {
-        /* @var $relData TModelRelation */
-        /* @var $_relData TModelRelation */
-        $class = ucfirst($relData->class);
-        var_dump('', 'nnn' . $relData->relationName, $class);
-        foreach($data as $subRelName => $subRelations) {
+    protected function __applyEagerForSpecificSubRelation($parentRelationData, $curRelArray, $relationDepthString, $collection) {
+        /* @var $parentRelationData TModelRelation */
+        /* @var $currentRelation TModelRelation */
+        $class = ucfirst($parentRelationData->class);
+        #var_dump($parentRelationData->relationName, get_class($this), $class);
+        foreach($curRelArray as $subRelName => $subRelations) {
+            #var_dump('--------------------------' . $relationDepthString);
+            #var_dump($relationDepthString, $subRelName, $subRelations);
 
-            $_relData = self::$_oop_relations[$class][$subRelName];
+            $currentRelation = self::$_oop_relations[$class][$subRelName];
 
-            var_dump($relData, $subRelName, $_relData);
+            #var_dump($parentRelationData, 'połączonych: ' . $subRelName, $currentRelation);
 
-            switch ($_relData->relationType) {
+            switch ($currentRelation->relationType) {
                 case self::HAS_MANY:
+                case self::BELONGS_TO:
 
-                    $data = array();
+                    $values = array();
 
-                    foreach($related as $row) {
-                        var_dump($row->title);
-                        $data = $row->{$relData->relationName};
+                    $innerGet = explode('.', $relationDepthString);
+                    #var_dump($innerGet);
 
-                        if ($data->{$data->getPK()}) {
-                            var_dump(true);
+                    foreach($collection as $row) {
+                        #var_dump($row->title);
+
+                        //$_related = $row->{$parentRelationData->relationName};
+                        $_related = $row;
+                        foreach($innerGet as $deeperRelationName) {
+                            $_related = $_related->{$deeperRelationName};
+                        }
+                        //$_related = $row->{$relationDepthString};
+
+                        if (is_array($_related) or $_related instanceof Collection) {
+                            foreach($_related as $_rr) {
+                                if ($_rr->{$_rr->getPK()}) { //related->relationName
+                                    //$values->$related
+                                    $values[] = $_rr->{$_rr->getPK()};
+                                    #var_dump(true, $_related->{$_related->getPK()});
+                                }
+                            }
                         } else {
-                            var_dump(false);
-                            // this row is empty
+                            if ($_related->{$_related->getPK()}) { //related->relationName
+                                //$values->$related
+                                $values[] = $_related->{$_related->getPK()};
+                                #var_dump(true, $_related->{$_related->getPK()});
+                            }
                         }
                         //var_dump($row->{$relData->relationName});
                     }
 
-                    //$result = $this->model($class)->findWhere(array($_relData->byField, '=', ));
+                    $values = array_unique($values);
+
+                    if (count($values)) {
+
+                        #var_dump(count($values));
+
+                        $result = $this->model($currentRelation->class)->findWhere(array($currentRelation->byField, 'IN', $values));
+                        foreach($collection as $row) {
+                            /* @var $row TModel */
+                            /* @var $result Collection */
+                            //$_related = $row->{$parentRelationData->relationName};
+                            $_related = $row;
+                            foreach($innerGet as $deeperRelationName) {
+                                $_related = $_related->{$deeperRelationName};
+                            }
+                            if ($currentRelation->relationType == self::HAS_MANY) {
+                                $_related->populateRelation($subRelName, $result->getRowsByColumnValue($currentRelation->byField, $_related->{$_related->getPK()}));
+                            } else {
+                                //var_dump(count($_related));
+                                #var_dump('has one gluing');
+                                #var_dump($currentRelation->byField, $subRelName);
+                                foreach($_related as $_rr) {
+                                    /* @var $_rr TModel */
+                                    $_one = $result->getRowsByColumnValue($currentRelation->byField, $_rr->{$_rr->getPK()})->getFirst();
+                                    if ($_one !== null ) {
+                                        $_rr->populateRelation($subRelName, $_one);
+                                    }
+                                    //var_dump($_rr->{$_rr->getPK()});
+                                }
+                            }
+                        }
+                    }
                     break;
+                    default:
+                        #var_dump('unknown relation ' . $currentRelation->relationType);
+                        throw new Exception('Unknown relation [__applyEagerForSpecificSubRelation] ' . $currentRelation->relationType);
+                    break;
+            }
+
+            #var_dump('--------------------------');
+//            foreach($subRelations as $subRelName2 => $subRelations2) {
+//                var_dump($relationDepthString . '.' . $subRelName, $subRelName2, $subRelations2);
+//                $this->__applyEagerForSpecificSubRelation($currentRelation, $subRelations2, $relationDepthString . '.' . $subRelName, $collection);
+//            }
+            if (count($subRelations)) {
+                #var_dump('have subrelations', $subRelations);
+                $this->__applyEagerForSpecificSubRelation($currentRelation, $subRelations, $relationDepthString . '.' . $subRelName, $collection);
+
             }
             //$this->__applyEagerForSpecificSubRelation($subRelName, $subRelations, null);
         }
