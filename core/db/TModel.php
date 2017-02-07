@@ -21,7 +21,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     protected $_values = array();
     protected $_original = array();
     protected $_rules = array();
-    protected $_related = null;
+    protected $_related = array();
     protected static $_oop_relations = array();
     protected $_primaryKey = 'id';
     protected $_scopes = array();
@@ -477,12 +477,13 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 $classes = explode('.', $relation);
                 $s = &$subqueries;
                 foreach ($classes as $class) {
-                    if (!in_array($class, $s)) {
+                    if (!array_key_exists($class, $s)) {
                         $s[$class] = array();
                     }
 
                     $s = &$s[$class];
                 }
+                unset($s);
             }
         }
 
@@ -535,6 +536,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             #var_dump($relationDepthString, $subRelName, $subRelations);
 
             $currentRelation = self::$_oop_relations[$class][$subRelName];
+
+            #var_dump('', 'searching for: ' . $relationDepthString . '...' .$subRelName);
 
             #var_dump($parentRelationData, 'połączonych: ' . $subRelName, $currentRelation);
 
@@ -591,7 +594,16 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                                 $_related = $_related->{$deeperRelationName};
                             }
                             if ($currentRelation->relationType == self::HAS_MANY) {
-                                $_related->populateRelation($subRelName, $result->getRowsByColumnValue($currentRelation->byField, $_related->{$_related->getPK()}));
+                                if ($_related instanceof Collection) {
+                                    foreach($_related as $_rr) {
+                                        $_one = $result->getRowsByColumnValue($currentRelation->byField, $_rr->{$_rr->getPK()});
+                                        if ($_one !== null ) {
+                                            $_rr->populateRelation($subRelName, $_one);
+                                        }
+                                    }
+                                } else {
+                                    $_related->populateRelation($subRelName, $result->getRowsByColumnValue($currentRelation->byField, $_related->{$_related->getPK()}));
+                                }
                             } else {
                                 //var_dump(count($_related));
                                 #var_dump('has one gluing');
@@ -636,7 +648,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      */
     public function with($with)
     {
-        if (is_array($with)) {
+        if (empty($with)) {
+            return $this;
+        } if (is_array($with)) {
             foreach ($with as $relationName) {
                 $this->with($relationName);
             }
@@ -1218,6 +1232,14 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return $this->_getRelated($relationName);
     }
 
+    public function getRealatedCached($relationName) {
+        if (array_key_exists($relationName, $this->_related)) {
+            return $this->_related[$relationName];
+        } else {
+            return $this->getRelated($relationName);
+        }
+    }
+
     public function getRelationClass($relationName)
     {
         return $this->_getRelatedData($relationName, 1);
@@ -1235,6 +1257,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     protected function _getRelated($relationName, $populate = true, $customValues = null)
     {
+        // todo: if called again, will load again! should be fixed
         $result = null;
         switch ($this->_relations[$relationName][0]) {
             case self::HAS_MANY:
@@ -1246,7 +1269,14 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 if (empty($customValues)) {
                     $customValues = $this->_values[$this->getPK()];
                 }
-                $result = $rel->findWhere(array(array($this->_relations[$relationName][2], 'IN', $customValues)), -1, 0, $conditions);
+
+                $with = array();
+                if (array_key_exists('with', $conditions)) {
+                    $with = $conditions['with'];
+                    unset($conditions['with']);
+                }
+
+                $result = $rel->with($with)->findWhere(array(array($this->_relations[$relationName][2], 'IN', $customValues)), -1, 0, $conditions);
                 break;
             case self::BELONGS_TO:
                 $rel = self::model($this->_relations[$relationName][1]);
