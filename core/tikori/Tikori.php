@@ -7,7 +7,7 @@ use Core\User\NullSession;
  * @property Route $route
  * @property int $mode           Core::MODE_XXX
  * @property DbAbstract $db
- * @property Cache $cache          Cache module
+ * @property TCache|Cache $cache          Cache module
  * @property SessionModule|Session|AbstractSession $session        Session module
  * @property array $autoloadPaths  Array of autoload paths
  * @property Observer $observer
@@ -132,6 +132,11 @@ class Tikori extends Application
         Profiler::addLog('Request created');
         $this->response = new Response();
         Profiler::addLog('Response created');
+
+        if ($this->request->isHardRefresh()) {
+            //clear table schema
+            $this->db->getSchema()->clearSchemaCache();
+        }
 
         // load languages
         $this->lang = new Lang();

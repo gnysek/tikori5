@@ -564,14 +564,23 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                             foreach($_related as $_rr) {
                                 if ($_rr->{$_rr->getPK()}) { //related->relationName
                                     //$values->$related
-                                    $values[] = $_rr->{$_rr->getPK()};
+                                    if ($currentRelation->relationType == self::BELONGS_TO) {
+                                        $values[] = $_rr->{$currentRelation->byField};
+                                    } else {
+                                        $values[] = $_rr->{$_rr->getPK()};
+                                    }
+
                                     #var_dump(true, $_related->{$_related->getPK()});
                                 }
                             }
                         } else {
                             if ($_related->{$_related->getPK()}) { //related->relationName
                                 //$values->$related
-                                $values[] = $_related->{$_related->getPK()};
+                                if ($currentRelation->relationType == self::BELONGS_TO) {
+                                    $values[] = $_related->{$currentRelation->byField};
+                                } else {
+                                    $values[] = $_related->{$_related->getPK()};
+                                }
                                 #var_dump(true, $_related->{$_related->getPK()});
                             }
                         }
@@ -580,11 +589,15 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
                     $values = array_unique($values);
 
+                    #var_dump('', $deeperRelationName . '.' . $subRelName, $values);
+
                     if (count($values)) {
 
                         #var_dump(count($values));
 
-                        $result = $this->model($currentRelation->class)->findWhere(array($currentRelation->byField, 'IN', $values));
+                        $_model = $this->model($currentRelation->class);
+                        $_byFields = $currentRelation->relationType == self::BELONGS_TO ? $_model->getPK() : $currentRelation->byField;
+                        $result = $_model->findWhere(array($_byFields, 'IN', $values));
                         foreach($collection as $row) {
                             /* @var $row TModel */
                             /* @var $result Collection */
@@ -608,9 +621,20 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                                 //var_dump(count($_related));
                                 #var_dump('has one gluing');
                                 #var_dump($currentRelation->byField, $subRelName);
+                                if (!$_related instanceof Collection) {
+                                    $_related = array($_related);
+                                }
+
                                 foreach($_related as $_rr) {
                                     /* @var $_rr TModel */
-                                    $_one = $result->getRowsByColumnValue($currentRelation->byField, $_rr->{$_rr->getPK()})->getFirst();
+
+                                    if (!$_rr instanceof TModel) {
+                                        throw new Exception('Collection value is not from proper class ' . var_export($_rr, true));
+                                    }
+
+                                    $_byValue = $currentRelation->relationType == self::BELONGS_TO ? $_rr->{$currentRelation->byField} : $_rr->{$_rr->getPK()};
+
+                                    $_one = $result->getRowsByColumnValue($_byFields, $_byValue)->getFirst();
                                     if ($_one !== null ) {
                                         $_rr->populateRelation($subRelName, $_one);
                                     }
@@ -1229,14 +1253,15 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     public function getRelated($relationName)
     {
-        return $this->_getRelated($relationName);
+        return $this->getRealatedCached($relationName);
+        //return $this->_getRelated($relationName);
     }
 
     public function getRealatedCached($relationName) {
         if (array_key_exists($relationName, $this->_related)) {
             return $this->_related[$relationName];
         } else {
-            return $this->getRelated($relationName);
+            return $this->_getRelated($relationName);
         }
     }
 

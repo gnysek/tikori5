@@ -83,12 +83,38 @@ class TDbSchema
         $table = new TDbTableSchema();
         $this->_resolveTableNames($table, $name);
 
-        if ($this->findColumns($table)) {
-            $this->findConstraints($table);
+        $cached = Core::app()->cache->loadCache('__TBSCHEMA__' . $table->name, array());
+        if (!empty($cached)) {
+            list($columns, $pk, $foreign) = unserialize($cached);
+            $table->columns = $columns;
+            $table->primaryKey = $pk;
+            $table->foreignKeys = $foreign;
             return $this->_tables[$name] = $table;
+        } else {
+            if ($this->findColumns($table)) {
+                $this->findConstraints($table);
+                $this->_cacheSchema($table);
+                return $this->_tables[$name] = $table;
+            }
         }
 
         return NULL;
+    }
+
+    /**
+     * @param $table TdbTableSchema
+     */
+    private function _cacheSchema($table) {
+        Core::app()->cache->saveCache('__TBSCHEMA__' . $table->name, serialize(array(
+            $table->columns,
+            $table->primaryKey,
+            $table->foreignKeys
+        )));
+    }
+
+    public function clearSchemaCache() {
+        CacheableBlock::clearByTags(array('__TBSCHEMA__'));
+        $this->_tables = array();
     }
 
     public function getTableNames()
