@@ -167,6 +167,8 @@ class Request extends DefaultObject
             return true;
         } elseif (getenv('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest') {
             return true;
+        } elseif (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) and $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') { // FastCGI fix
+            return true;
         } else {
             return false;
         }
