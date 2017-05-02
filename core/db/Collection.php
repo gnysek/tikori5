@@ -327,8 +327,14 @@ class Collection implements ArrayAccess, Iterator, Countable
     public function getWhereNotEmpty($column) {
         $values = array();
         foreach ($this->_data as $record) {
-            if (!empty($record[$column])) {
-                $values[] = $record;
+            if ($value = $record->$column) {
+                if ($value instanceof Collection) {
+                    if ($value->count() > 0) {
+                        $values[] = $record;
+                    }
+                } else {
+                    $values[] = $record;
+                }
             }
         }
 
