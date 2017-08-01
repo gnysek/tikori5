@@ -85,29 +85,29 @@ class DbMySqli extends DBAbstract
         $this->_queryList[] = $sql;
 
         if (Core::app()->getMode() != Core::MODE_PROD) {
-            $b = array_reverse(debug_backtrace(~DEBUG_BACKTRACE_PROVIDE_OBJECT));
+            if (Core::app()->hasLoadedModule('toolbar')) {
+                $b = array_reverse(debug_backtrace(~DEBUG_BACKTRACE_PROVIDE_OBJECT));
 
-            $db = array();
+                $db = array();
 
-            foreach ($b as $_b) {
-                if (empty($_b['file'])) {
-                    $db[] = ' > ' . $_b['class'] . '::' . $_b['function'];
-                } else {
-                    if (preg_match('#(?:\\\\|\/)app(?:\\\\|\/)#', $_b['file'])) {
-                        $db[] = ' > ' . (!empty($_b['file']) ? $_b['file'] : '--') . ':' . (!empty($_b['line']) ? $_b['line'] : '0');
+                foreach ($b as $_b) {
+                    if (empty($_b['file'])) {
+                        $db[] = ' > ' . $_b['class'] . '::' . $_b['function'];
+                    } else {
+                        if (preg_match('#(?:\\\\|\/)app(?:\\\\|\/)#', $_b['file'])) {
+                            $db[] = ' > ' . (!empty($_b['file']) ? $_b['file'] : '--') . ':' . (!empty($_b['line']) ? $_b['line'] : '0');
+                        }
                     }
                 }
-            }
 
-            $str = '';
-            if ($db[count($db) - 1] != $this->_last_debug_src) {
-                $str = '<br/><code>' . str_repeat('-', 30) . '</code><br/><code>' . implode('<br/>', $db) . '</code><br/><br/>';
-                $this->_last_debug_src = $db[count($db) - 1];
-            }
+                $str = '';
+                if ($db[count($db) - 1] != $this->_last_debug_src) {
+                    $str = '<div style="border-top: 1px solid black; margin: 10px 0;"></div><tt>' . implode('<br/>', $db) . '</tt>';
+                    $this->_last_debug_src = $db[count($db) - 1];
+                }
 
-            $str .= sprintf('<code>%s</code><br/>', $sql);
+                $str .= sprintf('<code>%s</code>', $sql);
 
-            if (Core::app()->hasLoadedModule('toolbar')) {
                 Core::app()->toolbar->putValueToTab('SQL', $str);
             }
         }

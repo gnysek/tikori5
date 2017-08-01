@@ -1363,7 +1363,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $head = '<th colspan="' . $headerCount . '">' . get_called_class() . '</th></tr><tr>' . $head;
 
         return /* 'Data in ' . get_called_class() . ' model instance:<br/>' . */
-            '<table><tr>' . $head . '</tr><tr>' . $row . '</tr></table>';
+            '<table border="1" cellspacing="0"><tr>' . $head . '</tr><tr>' . $row . '</tr></table>';
     }
 
     /**

@@ -78,11 +78,12 @@ class Asset
             if (!file_exists(TIKORI_ROOT . '/media/assets/' . $mergedFilename)) {
                 $css = '';
                 foreach ($filesToMergeThatExists as $file) {
-                    $css .= '/* ' . basename($file) . ' */' . "\r\n";
-                    $css .= file_get_contents($file) . "\r\n\r\n";
+                    $css .= '/* * ' . basename($file) . ' * */ ';
+                    $css .= file_get_contents($file) . "\r\n";
                 }
 
                 $css = CssMin::minify($css, array('RemoveComments' => false));
+                $css = str_replace(array('/* *', '* */'), array("\r\n/* *", "* */\r\n"), $css);
 
                 file_put_contents(TIKORI_ROOT . '/media/assets/' . $mergedFilename, $css);
             }
