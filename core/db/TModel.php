@@ -248,6 +248,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      */
     public function findWhere($where = null, $limit = -1, $offset = 0, $conditions = array())
     {
+        Profiler::addLog('FIND WHERE STARTED');
         $sql = DbQuery::sql()->select()->from($this->_table);
         if (!empty($where)) {
             $sql->where($where);
@@ -354,7 +355,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 //                        var_dump($this->getPK());
 //                        var_dump($collection->getColumnValues($this->getPK()));
                         $byField = $this->getPK();
+                        Profiler::addLog('FIND WHERE - getting related');
                         $related = $this->_getRelated($relationName, false, $collection->getColumnValues($byField));
+                        Profiler::addLog('FIND WHERE - related got, will assign ' . count($related) . ' to ' . count($return) . ' records');
                         /* @var Collection $related */
 //                        var_dump(count($related));
                         foreach ($return as $row) {
@@ -364,6 +367,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                             /* @var TModel $row */
                             $row->populateRelation($relationName, $toAssign);
                         }
+                        Profiler::addLog('FIND WHERE - related populated');
                         break;
                     case self::BELONGS_TO:
                         break;
@@ -395,8 +399,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             }
         }
 
+        Profiler::addLog('FIND WHERE apply dot eagers');
+
         $this->_applyDotEagersAfterLoadedNormalOnes($collection);
 
+        Profiler::addLog('FIND WHERE FINISHED');
         return $collection;
     }
 
@@ -521,8 +528,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
             #var_dump('', 'szukam dla : ' . $subRelName);
             #var_dump('', 'current relation finding stage : ' . $relationDepthString . '.....' );
-
             $this->__applyEagerForSpecificSubRelation($_relData, $subRelations, $relationDepthString, $collection);
+            Profiler::addLog('Subrelation ' . $subRelName);
         }
     }
 

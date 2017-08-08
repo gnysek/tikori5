@@ -142,7 +142,7 @@ class DbMySqli extends DBAbstract
                         }
                         $return[] = $row;
                     }
-                    Profiler::addLog('Fetch finished');
+                    Profiler::addLog('Fetch & records creating finished');
                     return $return;
                 } else {
                     return new Record();
