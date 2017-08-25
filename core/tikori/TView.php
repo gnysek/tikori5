@@ -7,6 +7,7 @@ class TView
     protected $_cssFiles = array();
     protected $_themes = array();
     protected $_usedTheme = 'default';
+    public $area = null;
 
     public function __construct()
     {
@@ -125,8 +126,8 @@ class TView
             }
         }
 
-        if (array_key_exists($file, self::$_viewFiles)) {
-            return self::$_viewFiles[$file];
+        if (array_key_exists($this->area . $file, self::$_viewFiles)) {
+            return self::$_viewFiles[$this->area . $file];
         }
 
         $paths = array();
@@ -194,7 +195,7 @@ class TView
                 }
 
                 if (!in_array($file, self::$_viewFiles)) {
-                    self::$_viewFiles[$file] = str_replace('\\', '/', $filename);
+                    self::$_viewFiles[$this->area . $file] = str_replace('\\', '/', $filename);
                     self::$_viewFilesChanged = true;
                 }
 

@@ -304,6 +304,18 @@ class Collection implements ArrayAccess, Iterator, Countable
         return new Collection($values);
     }
 
+    public function getFirstRowByColumnValue($column, $value)
+    {
+        $values = array();
+        foreach ($this->_data as $record) {
+            if (($record[$column] == $value)) {
+                return $record;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Gets value for field $relationField from related record $relationName, by this collection $column and $value
      * like for item with category_id == 8: $model->category->name == $this->getRelatedValueByColumnValue('category_id', 8, 'category', 'name');

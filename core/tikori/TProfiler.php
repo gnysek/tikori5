@@ -31,6 +31,7 @@ class TProfiler
         $logs = array();
 
         $logs[] = 'Profiler:<br/>';
+        $logs[] = '<style>.tikori-profiler-table tr:hover td{background-color: #00bfa8; color: white; border-bottom: 1px solid red;}</style>';
         $logs[] = '<table style="width: 98%; margin: 5px auto; background: white; font-size: 11px; font-family: Arial, sans-serif;" class="tikori-profiler-table">';
         $logs[] = '<tr style="border-bottom: 1px solid black; background: gray; color: white;">';
         $logs[] = '<th>ID</th>';
