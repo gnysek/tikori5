@@ -1308,7 +1308,15 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     unset($conditions['with']);
                 }
 
-                $result = $rel->with($with)->findWhere(array(array($this->_relations[$relationName][2], 'IN', $customValues)), -1, 0, $conditions);
+                if (is_array($customValues)) {
+                    sort($customValues);
+                }
+                if (is_array($customValues) and $this->_isOrdered($customValues)) {
+                    reset($customValues);
+                    $result = $rel->with($with)->findWhere(array(array($this->_relations[$relationName][2], 'BETWEEN', array(current($customValues), end($customValues)))), -1, 0, $conditions);
+                } else {
+                    $result = $rel->with($with)->findWhere(array(array($this->_relations[$relationName][2], 'IN', $customValues)), -1, 0, $conditions);
+                }
                 break;
             case self::BELONGS_TO:
                 $rel = self::model($this->_relations[$relationName][1]);
@@ -1330,6 +1338,26 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         } else {
             return $result;
         }
+    }
+
+    protected function _isOrdered($array)
+    {
+        $i = 0;
+        $total_elements = count($array);
+
+        //if($sort_order == ORDER_ASC)
+        //{
+        //Check for ascending order
+        while ($total_elements > 1) {
+            if ($array[$i] < $array[$i + 1]) {
+                $i++;
+                $total_elements--;
+            } else {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function __toString()

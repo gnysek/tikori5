@@ -9,7 +9,7 @@
 
 defined('TIKORI_STARTED') or define('TIKORI_STARTED', microtime());
 defined('TIKORI_DEBUG') or define('TIKORI_DEBUG', false);
-defined('TIKORI_FPATH') or define('TIKORI_FPATH', dirname(__FILE__));
+defined('TIKORI_FPATH') or define('TIKORI_FPATH', str_replace('\\', '/', dirname(__FILE__)));
 
 /**
  * @author  Piotr Gnys <gnysek@gnysek.pl>
@@ -165,6 +165,8 @@ class Core
     }
 
     public static $namespacesEnabled = false;
+    public static $foundClasses = array();
+    protected static $foundClassesUpdated = false;
 
     /**
      * Autoloader method
@@ -193,6 +195,16 @@ class Core
             $class = substr($class, $ns_pos + 1);
         }
 
+        if (array_key_exists($class, self::$foundClasses)) {
+            $result = self::_tryToAutoloadClass($class, self::$foundClasses[$class], $namespace, $throw);
+            if ($result == true) {
+                if (Core::app()->hasLoadedModule('toolbar')) {
+                    Core::app()->toolbar->putValueToTab('loadedClasses', $class . ' preloaded<br>');
+                }
+                return true;
+            }
+        }
+
         $search = strtolower(str_replace('_', '/', (($namespace and self::$namespacesEnabled) ? ($namespace . '/') : '') . $class));
 
         preg_match('#(.*)/(.*)#i', $search, $match);
@@ -212,19 +224,11 @@ class Core
         );
 
         foreach ($pathes as $dir) {
-            $filename = $dir . $search;
+            $filename = str_replace('\\', '/', rtrim($dir, '\\/') . $search);
             $filenames[] = $filename;
-            if (file_exists($filename)) {
-                if (class_exists('Profiler')) {
-                    Profiler::addLog(
-                        sprintf('<div style="padding-left: 20px;"><i>Loading <code>%s%s</code> from <kbd>%s<kbd></i></div>', $namespace, $class, $filename)
-                    );
-                }
-                require_once $filename;
-                if (!class_exists($namespace.$class) && $throw) {
-                    throw new Exception(sprintf('Class %s not found inside autoloaded file [%s]', $namespace.$class, $filename . $search));
-                }
-                #class_alias($class, '\Tikori\\' . $class);
+
+            $result = self::_tryToAutoloadClass($class, $filename, $namespace, $throw);
+            if ($result == true) {
                 return true;
             }
         }
@@ -233,6 +237,44 @@ class Core
             throw new Exception(sprintf('Cannot autoload class %s [namespace: %s] [search: %s] [filenames: %s]', $class, $namespace, $search, implode(', ' . PHP_EOL, $filenames)));
         }
         return false;
+    }
+
+    protected static function _tryToAutoloadClass($class, $filename, $namespace = '', $throw = false)
+    {
+        if (file_exists($filename)) {
+            if (class_exists('Profiler')) {
+                Profiler::addLog(
+                    sprintf('<div style="padding-left: 20px;"><i>Loading <code>%s%s</code> from <kbd>%s<kbd></i></div>', $namespace, $class, $filename)
+                );
+            }
+            require_once $filename;
+            if (!class_exists($namespace . $class) && $throw) {
+                throw new Exception(sprintf('Class %s not found inside autoloaded file [%s]', $namespace . $class, $filename));
+            }
+
+            if (!array_key_exists($class, self::$foundClasses) or self::$foundClasses[$class] != $filename) {
+                self::$foundClasses[$class] = $filename;
+                self::$foundClassesUpdated = true;
+            }
+
+            #class_alias($class, '\Tikori\\' . $class);
+            return true;
+        }
+        return false;
+    }
+
+    public static function saveAutoloadCache()
+    {
+        if (self::$foundClassesUpdated) {
+            Core::app()->cache->saveCache('__AUTOLOAD__', json_encode(self::$foundClasses));
+        }
+    }
+
+    public static function getAutoloadCache()
+    {
+        if (Core::app()->cache->findCache('__AUTOLOAD__')) {
+            self::$foundClasses = json_decode(Core::app()->cache->loadCache('__AUTOLOAD__'), true);
+        }
     }
 
     /**

@@ -419,6 +419,12 @@ class DbQuery
                         $afterCondition = '(' . $afterCondition . ')';
                     }
 
+                    if (strtoupper($w[1]) == 'BETWEEN' and is_array($w[2])) {
+                        $afterCondition = $this->_formatAgainstType($_fromTable, $w[0], $w[2][0]);
+                        $afterCondition .= ' AND ';
+                        $afterCondition .= $this->_formatAgainstType($_fromTable, $w[0], $w[2][1]);
+                    }
+
                     if (count($w) == 5) {
                         $bld = sprintf($w[4], $bld . '`' . $w[0] . '` ');
                     } else {

@@ -94,6 +94,12 @@ class TProfiler
         if (Core::app()->hasLoadedModule('toolbar')) {
             Core::app()->toolbar->putValueToTab('profiler', implode(PHP_EOL, $logs));
 
+            $classes = array();
+            foreach(Core::$foundClasses as $class => $filename) {
+                $classes[] = sprintf('<code style="display: inline-block; min-width: 200px;">%s</code> <code>%s</code>', $class, $filename);
+            }
+            Core::app()->toolbar->putValueToTab('loadedClasses', implode('<br>', $classes));
+
             Core::app()->toolbar->addStatus(sprintf('Zapytań do bazy: %s.', Core::app()->db->queries()));
             Core::app()->toolbar->addStatus(sprintf('Czas generowania strony: %ss.', Core::genTimeNow()));
 

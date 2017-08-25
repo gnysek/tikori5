@@ -201,14 +201,14 @@ class Route
 
         // get area
         $area = null;
-        $test = Core::app()->cfg('areas');
-        if ($test !== null && is_array($test)) {
-            $test = Core::app()->cfg('areas'); // prevent to cause E_STRICT
-            $test = end($test);
+        $areaList = Core::app()->cfg('areas');
+        if ($areaList !== null && is_array($areaList)) {
+            $areaList = Core::app()->cfg('areas'); // prevent to cause E_STRICT
+            $areaList = end($areaList);
 
-            if (preg_match('#^(' . $test . ')(?:/*).*#', $uri)) {
-                $area = $test;
-                $uri = preg_replace('#^(' . $test . ')(?:/*)(.*)#', '$2', $uri);
+            if (preg_match('#^(' . $areaList . ')(?:/*).*#', $uri)) {
+                $area = $areaList;
+                $uri = preg_replace('#^(' . $areaList . ')(?:/*)(.*)#', '$2', $uri);
             }
         }
 
@@ -259,6 +259,9 @@ class Route
 
         #var_dump($scope);
 
+        if (Core::app()->hasLoadedModule('toolbar')) {
+            Core::app()->toolbar->putValueToTab('Request', 'Processing URI <kbd>/' . $uri . '</kbd> against ' . count($routes) . ' routes' . (empty($area) ? '' : ' using route <kbd>' . $area . '</kbd><br>'));
+        }
         Profiler::addLog(
             'Processing URI <kbd>/' . $uri . '</kbd> against ' . count($routes) . ' routes' . (empty($area) ? '' : ' using route <kbd>' . $area . '</kbd>')
         );
@@ -302,7 +305,10 @@ class Route
 
                 $route->params = $params;
 
-                Profiler::addLog('Found router with params: <code>' . var_export($params, true) . '</code>');
+                Profiler::addLog('Found router ' . $name . ' with params: <code>' . var_export($params, true) . '</code>');
+                if (Core::app()->hasLoadedModule('toolbar')) {
+                    Core::app()->toolbar->putValueToTab('Request', 'Found router ' . $name . ' with params: <code>' . var_export($params, true) . '</code><br>');
+                }
 
                 return $route;
 //				return array(
@@ -459,6 +465,11 @@ class Route
                 return false;
             }
         } else {
+
+            if (Core::app()->hasLoadedModule('toolbar')) {
+                Core::app()->toolbar->putValueToTab('Request', sprintf('REGEX: <code>%s</code><br>URI:<code>%s</code><br>', $this->_route_regex, $uri));
+            }
+
             if (!preg_match($this->_route_regex, $uri, $matches)) {
                 return false;
             }

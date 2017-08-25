@@ -18,8 +18,21 @@ class BBCode
         $text = preg_replace('#\[size=(.*?)\](.*?)\[/size\]#si', '<font size="$1">$2</font>', $text);
         $text = preg_replace('#\[color=(.*?)\](.*?)\[/color\]#si', '<span style="color: $1">$2</span>', $text);
         $text = preg_replace('#\[h1\](.*?)\[/h1\]#si', '<h1>$1</h1>', $text);
-        $text = nl2br($text, true);
+        $text = self::nl2p($text);
         return $text;
+    }
+
+    public static function nl2p($string)
+    {
+        $paragraphs = '';
+
+        foreach (explode("\n", $string) as $line) {
+            if (trim($line)) {
+                $paragraphs .= '<p>' . $line . '</p>';
+            }
+        }
+
+        return $paragraphs;
     }
 
     public static function unformat($text)

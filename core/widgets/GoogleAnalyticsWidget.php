@@ -6,6 +6,8 @@ class GoogleAnalyticsWidget extends Widget
 
     public function onCall()
     {
+        if (Core::app()->cfg('widgets/adsense/debug') == true) return;
+
         echo <<<HTML
 <script type="text/javascript">
 	var analyticsFileTypes = [''];

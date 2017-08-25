@@ -107,6 +107,10 @@ class TView
         return ($this->_findViewFile($view, $context) !== false);
     }
 
+    protected static $_viewFiles = null;
+    protected static $_viewFilesChanged = false;
+    const TEMPLATE_CACHE = '__TEMPLATES__';
+
     /**
      * @param string      $file
      * @param null|object $context
@@ -114,6 +118,17 @@ class TView
      */
     protected function _findViewFile($file, $context = null)
     {
+        if (self::$_viewFiles == null) {
+            self::$_viewFiles = array();
+            if (Core::app()->cache->findCache(self::TEMPLATE_CACHE)) {
+                self::$_viewFiles = json_decode(Core::app()->cache->loadCache(self::TEMPLATE_CACHE), true);
+            }
+        }
+
+        if (array_key_exists($file, self::$_viewFiles)) {
+            return self::$_viewFiles[$file];
+        }
+
         $paths = array();
 
         // TODO: cache this in variable at least
@@ -177,11 +192,26 @@ class TView
                 if (preg_match('/\/themes\/(.*?)\//i', $filename, $matches)) {
                     $this->_usedTheme = $matches[1];
                 }
+
+                if (!in_array($file, self::$_viewFiles)) {
+                    self::$_viewFiles[$file] = str_replace('\\', '/', $filename);
+                    self::$_viewFilesChanged = true;
+                }
+
                 return $filename;
             }
         }
 
         return false;
+    }
+
+    public function __destruct()
+    {
+        if (self::$_viewFilesChanged) {
+            ksort(self::$_viewFiles);
+            Core::app()->cache->saveCache(self::TEMPLATE_CACHE, json_encode(self::$_viewFiles));
+            self::$_viewFilesChanged = false;
+        }
     }
 
     public function pageTitle() {

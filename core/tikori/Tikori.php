@@ -83,6 +83,8 @@ class Tikori extends Application
 
         }
 
+        Core::getAutoloadCache();
+
         // route
         Route::reconfigure();
 
@@ -147,6 +149,10 @@ class Tikori extends Application
 
         Profiler::addLog('Route processed and is ' . (($this->route == NULL) ? 'not found' : 'found'));
 
+        if (Core::app()->hasLoadedModule('toolbar')) {
+            Core::app()->toolbar->putValueToTab('Request', 'Route processed and is ' . (($this->route == NULL) ? 'not found' : 'found'));
+        }
+
         Core::event(self::EVENT_BEFORE_DISPATCH);
 
         $this->_runController($this->route);
@@ -156,6 +162,8 @@ class Tikori extends Application
         Profiler::addLog('Route handled');
 
         $this->response->send();
+
+        Core::saveAutoloadCache();
 
         Profiler::addLog('Finishing application');
         if ($this->mode != Core::MODE_PROD and $this->cfg('debug/profiler') == 'enabled') {
