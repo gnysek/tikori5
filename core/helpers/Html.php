@@ -5,6 +5,8 @@ class Html
 
     public static $sidAddon = '';
     public static $hrefActiveClass = 'active';
+    public static $labelClass = 'col-sm-2 control-label';
+    public static $formClass = 'form-control';
 
     public static function link($text, $url, $options = array())
     {
@@ -102,6 +104,7 @@ class Html
         }
         $addon = '';
         $path = '';
+        $get = '';
 
         if (Core::app()->route) {
             if (Core::app()->route->area != NULL) {
@@ -130,7 +133,9 @@ class Html
                     }
                 } else {
                     foreach (array_slice($url, 1) as $key => $entry) {
-                        if ($entry !== null) {
+                        if (substr($key, 0, 1) == '?') {
+                            $get .= (empty($get) ? '?' : '&') . substr($key, 1) . '=' . $entry;
+                        } else if ($entry !== null) {
                             $path .= '/' . $key . '/' . $entry;
                         }
                     }
@@ -143,7 +148,7 @@ class Html
             $path .= 'sid=' . self::$sidAddon;
         }
 
-        return Core::app()->baseUrl() . $script . $addon . $url[0] . $path;
+        return Core::app()->baseUrl() . $script . $addon . $url[0] . $path . $get;
     }
 
     public static function shortenUrl($url)
@@ -241,9 +246,9 @@ class Html
     {
         return self::htmlTag(
             'label', array(
-                          'for' => get_class($model) . '[' . $field . ']',
-                          #'id'  => get_class($model) . '_' . $field,
-                     ),
+                'for'   => get_class($model) . '[' . $field . ']',
+                'class' => self::$labelClass,
+            ),
             empty($text) ? ucfirst(str_replace('_', ' ', $field)) : $text
         );
     }
@@ -255,6 +260,7 @@ class Html
             'input', $options + $value + array(
                 'type' => $type,
                 'name' => get_class($model) . '[' . $field . ']',
+                'class' => self::$formClass,
             )
         );
 
@@ -287,7 +293,7 @@ class Html
                 $opt['checked'] = 'checked';
             }
 
-            $html .= self::htmlTag(
+            $radio = self::htmlTag(
                 'input',
                 $opt
             );
@@ -298,7 +304,7 @@ class Html
                     'class' => 'radio-label'
                     #'id'  => get_class($model) . '_' . $field,
                 ),
-                $v
+                $radio . $v
             );
 
             $html .= $divider;
@@ -329,6 +335,10 @@ class Html
     public static function selectOptionModel($model, $field, $values = array(), $options = array())
     {
         $html = '';
+
+        if (empty($options['class'])){
+            $options['class'] = self::$formClass;
+        }
 
         $html .= self::htmlOpenTag('select', array('name' => get_class($model) . '[' . $field . ']') + $options);
         foreach ($values as $key => $value) {

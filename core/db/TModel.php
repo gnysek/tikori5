@@ -4,7 +4,7 @@
  * Class Model
  *
  * @property string $tableName  Table Name
- * @property array  $attributes Attribute values
+ * @property array $attributes Attribute values
  */
 abstract class TModel implements IteratorAggregate, ArrayAccess
 {
@@ -195,11 +195,13 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         }
 
         if (count($result) == 1) {
+            $populate = array();
             foreach ($this->_fields as $field) {
                 if ($result[0]->offsetExists($field)) {
-                    $this->_values[$field] = $this->_original[$field] = $result[0]->$field;
+                    $populate[$field] = $result[0]->$field;
                 }
             }
+            $this->_populate($populate);
             $this->_isNewRecord = false;
         } else {
             return null;
@@ -239,9 +241,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     }
 
     /**
-     * @param null  $where
+     * @param null $where
      * @param       $limit
-     * @param int   $offset
+     * @param int $offset
      * @param array $conditions
      * @return Collection
      * @throws Exception
@@ -409,7 +411,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     /**
      * @param       $limit
-     * @param int   $offset
+     * @param int $offset
      * @param array $conditions
      * @return Collection|$this|Collection[]|$this[]
      */
@@ -495,7 +497,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         }
 
 
-        foreach($subqueries as $subRelName => $subRelations) {
+        foreach ($subqueries as $subRelName => $subRelations) {
 
             //$ids = array();
 
@@ -533,12 +535,13 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         }
     }
 
-    protected function __applyEagerForSpecificSubRelation($parentRelationData, $curRelArray, $relationDepthString, $collection) {
+    protected function __applyEagerForSpecificSubRelation($parentRelationData, $curRelArray, $relationDepthString, $collection)
+    {
         /* @var $parentRelationData TModelRelation */
         /* @var $currentRelation TModelRelation */
         $class = ucfirst($parentRelationData->class);
         #var_dump($parentRelationData->relationName, get_class($this), $class);
-        foreach($curRelArray as $subRelName => $subRelations) {
+        foreach ($curRelArray as $subRelName => $subRelations) {
             #var_dump('--------------------------' . $relationDepthString);
             #var_dump($relationDepthString, $subRelName, $subRelations);
 
@@ -557,18 +560,18 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     $innerGet = explode('.', $relationDepthString);
                     #var_dump($innerGet);
 
-                    foreach($collection as $row) {
+                    foreach ($collection as $row) {
                         #var_dump($row->title);
 
                         //$_related = $row->{$parentRelationData->relationName};
                         $_related = $row;
-                        foreach($innerGet as $deeperRelationName) {
+                        foreach ($innerGet as $deeperRelationName) {
                             $_related = $_related->{$deeperRelationName};
                         }
                         //$_related = $row->{$relationDepthString};
 
                         if (is_array($_related) or $_related instanceof Collection) {
-                            foreach($_related as $_rr) {
+                            foreach ($_related as $_rr) {
                                 if ($_rr->{$_rr->getPK()}) { //related->relationName
                                     //$values->$related
                                     if ($currentRelation->relationType == self::BELONGS_TO) {
@@ -605,19 +608,19 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                         $_model = $this->model($currentRelation->class);
                         $_byFields = $currentRelation->relationType == self::BELONGS_TO ? $_model->getPK() : $currentRelation->byField;
                         $result = $_model->findWhere(array($_byFields, 'IN', $values));
-                        foreach($collection as $row) {
+                        foreach ($collection as $row) {
                             /* @var $row TModel */
                             /* @var $result Collection */
                             //$_related = $row->{$parentRelationData->relationName};
                             $_related = $row;
-                            foreach($innerGet as $deeperRelationName) {
+                            foreach ($innerGet as $deeperRelationName) {
                                 $_related = $_related->{$deeperRelationName};
                             }
                             if ($currentRelation->relationType == self::HAS_MANY) {
                                 if ($_related instanceof Collection) {
-                                    foreach($_related as $_rr) {
+                                    foreach ($_related as $_rr) {
                                         $_one = $result->getRowsByColumnValue($currentRelation->byField, $_rr->{$_rr->getPK()});
-                                        if ($_one !== null ) {
+                                        if ($_one !== null) {
                                             $_rr->populateRelation($subRelName, $_one);
                                         }
                                     }
@@ -632,7 +635,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                                     $_related = array($_related);
                                 }
 
-                                foreach($_related as $_rr) {
+                                foreach ($_related as $_rr) {
                                     /* @var $_rr TModel */
 
                                     if (!$_rr instanceof TModel) {
@@ -642,7 +645,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                                     $_byValue = $currentRelation->relationType == self::BELONGS_TO ? $_rr->{$currentRelation->byField} : $_rr->{$_rr->getPK()};
 
                                     $_one = $result->getRowsByColumnValue($_byFields, $_byValue)->getFirst();
-                                    if ($_one !== null ) {
+                                    if ($_one !== null) {
                                         $_rr->populateRelation($subRelName, $_one);
                                     }
                                     //var_dump($_rr->{$_rr->getPK()});
@@ -651,9 +654,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                         }
                     }
                     break;
-                    default:
-                        #var_dump('unknown relation ' . $currentRelation->relationType);
-                        throw new Exception('Unknown relation [__applyEagerForSpecificSubRelation] ' . $currentRelation->relationType);
+                default:
+                    #var_dump('unknown relation ' . $currentRelation->relationType);
+                    throw new Exception('Unknown relation [__applyEagerForSpecificSubRelation] ' . $currentRelation->relationType);
                     break;
             }
 
@@ -672,6 +675,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     }
 
     // eager
+
     /**
      * @param $with
      * @return $this
@@ -681,7 +685,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     {
         if (empty($with)) {
             return $this;
-        } if (is_array($with)) {
+        }
+        if (is_array($with)) {
             foreach ($with as $relationName) {
                 $this->with($relationName);
             }
@@ -802,6 +807,15 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     public function isModified()
     {
         return count($this->_modified) > 0;
+    }
+
+    public function getModified()
+    {
+        $diff = array();
+        foreach ($this->_modified as $field) {
+            $diff[$field] = array($this->_original[$field], $this->_values[$field]);
+        }
+        return $diff;
     }
 
     public function isNewRecord()
@@ -1215,7 +1229,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
         foreach ($this->_fields as $fieldName) {
             if (array_key_exists($fieldName, $attributes)) {
-                $this->_values[$fieldName] = $this->_original[$fieldName] = $attributes[$fieldName];
+                $this->_values[$fieldName] = $this->_original[$fieldName] = $value = $this->_schema->columns[$fieldName]->typecast($attributes[$fieldName]);
             } else {
                 $this->_values[$fieldName] = $this->_original[$fieldName] = $this->_schema->columns[$fieldName]->defaultValue;
             }
@@ -1227,7 +1241,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $this->_related[$relationName] = $records;
     }
 
-    public static function haveRelationForClass($class) {
+    public static function haveRelationForClass($class)
+    {
         if (array_key_exists($class, self::$_oop_relations)) {
             return count(self::$_oop_relations[$class]) > 0;
         } else {
@@ -1264,7 +1279,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         //return $this->_getRelated($relationName);
     }
 
-    public function getRealatedCached($relationName) {
+    public function getRealatedCached($relationName)
+    {
         if (array_key_exists($relationName, $this->_related)) {
             return $this->_related[$relationName];
         } else {
@@ -1366,7 +1382,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $row = '';
         foreach ($this->_values as $k => $v) {
             $head .= ($k == $this->getPK()) ? '<th><u>' . $k . '</u></th>' : '<th>' . $k . '</th>';
-            $row .= '<td>' . $v . '</td>';
+            $row .= '<td>' . (($v === null) ? ('<em>null</em>') : $v) . '</td>';
         }
 
         $headerCount = count($this->_values);
@@ -1449,7 +1465,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * This method is required by the interface ArrayAccess.
      *
      * @param integer $offset the offset to set element
-     * @param mixed   $item   the element value
+     * @param mixed $item the element value
      */
     public function offsetSet($offset, $item)
     {

@@ -64,6 +64,14 @@ class TView
         return $this->renderPartialInContext($file, null, $data, $return);
     }
 
+    public function renderIfAjax($file, $data = NULL, $return = false) {
+        if (Core::app()->request->isAjax()) {
+            $this->renderPartial($file, $data , $return);
+        } else {
+            $this->render($file, $data, $return);
+        }
+    }
+
     public function renderPartialInContext($file, $context = null, $data = null, $return = true)
     {
         if ($filename = $this->_findViewFile($file, $context)) {
@@ -121,7 +129,7 @@ class TView
     {
         if (self::$_viewFiles == null) {
             self::$_viewFiles = array();
-            if (Core::app()->cache->findCache(self::TEMPLATE_CACHE)) {
+            if (Core::app()->cache && Core::app()->cache->findCache(self::TEMPLATE_CACHE)) {
                 self::$_viewFiles = json_decode(Core::app()->cache->loadCache(self::TEMPLATE_CACHE), true);
             }
         }
