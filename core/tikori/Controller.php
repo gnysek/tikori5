@@ -286,6 +286,9 @@ class Controller extends ControllerView
         $this->render('http404', array('status' => $status, 'message' => Response::getMessageForCode($status)));
     }
 
+    /**
+     * @param string|array $where
+     */
     public function redirect($where = '/')
     {
         $where = Html::url($where);

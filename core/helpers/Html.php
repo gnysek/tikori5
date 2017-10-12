@@ -80,6 +80,10 @@ class Html
         return (array_key_exists('class', $result));
     }
 
+    /**
+     * @param string|array $url
+     * @return string
+     */
     public static function url($url = array())
     {
         if (!is_array($url)) {
@@ -160,6 +164,10 @@ class Html
         return $sliced;
     }
 
+    public static function isPrintable($v) {
+        return is_scalar($v);
+    }
+
     public static function beginForm($action = '/', $method = 'post', $upload = false, $class = NULL)
     {
         return '<form' . ((!empty($class)) ? (' class="' . $class . '"') : '') . ' action="' . self::url($action) . '" method="' . $method . '"'
@@ -230,7 +238,7 @@ class Html
     /**
      * @param $model TModel
      *
-*@return string
+     * @return string
      */
     public static function errorsInModel($model)
     {
@@ -255,7 +263,7 @@ class Html
 
     public static function textFieldModel($model, $field, $options = array(), $type = 'text')
     {
-        $value = ($type === 'file') ? array() : array('value' => $model->$field);
+        $value = ($type === 'file') ? array() : array('value' => (is_scalar($model->$field) ? $model->$field : ''));
         return self::htmlTag(
             'input', $options + $value + array(
                 'type' => $type,

@@ -273,7 +273,8 @@ class Core
     public static function getAutoloadCache()
     {
         if (Core::app()->cache->findCache('__AUTOLOAD__')) {
-            self::$foundClasses = json_decode(Core::app()->cache->loadCache('__AUTOLOAD__'), true);
+            $result = json_decode(Core::app()->cache->loadCache('__AUTOLOAD__'), true);
+            self::$foundClasses = is_array($result) ? $result : array();
         }
     }
 
