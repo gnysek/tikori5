@@ -260,7 +260,7 @@ class Route
         #var_dump($scope);
 
         if (Core::app()->hasLoadedModule('toolbar')) {
-            Core::app()->toolbar->putValueToTab('Request', 'Processing URI <kbd>/' . $uri . '</kbd> against ' . count($routes) . ' routes' . (empty($area) ? '' : ' using route <kbd>' . $area . '</kbd><br>'));
+            Core::app()->toolbar->putValueToTab('Request', 'Processing URI <kbd>/' . $uri . '</kbd> against ' . count($routes) . ' routes' . (empty($area) ? '' : ' using route <kbd>' . $area . '</kbd>') . '<br>');
         }
         Profiler::addLog(
             'Processing URI <kbd>/' . $uri . '</kbd> against ' . count($routes) . ' routes' . (empty($area) ? '' : ' using route <kbd>' . $area . '</kbd>')
@@ -307,7 +307,9 @@ class Route
 
                 Profiler::addLog('Found router ' . $name . ' with params: <code>' . var_export($params, true) . '</code>');
                 if (Core::app()->hasLoadedModule('toolbar')) {
-                    Core::app()->toolbar->putValueToTab('Request', 'Found router ' . $name . ' with params: <code>' . var_export($params, true) . '</code><br>');
+                    Core::app()->toolbar->putValueToTab('Request', 'Area <code>' . $area . '</code><br>');
+                    Core::app()->toolbar->putValueToTab('Request', 'Scope <code>' . $scope . '</code><br>');
+                    Core::app()->toolbar->putValueToTab('Request', 'Found router <code>' . $name . '</code> with params: <code>' . var_export($params, true) . '</code><br>');
                 }
 
                 return $route;
