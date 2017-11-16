@@ -4435,7 +4435,7 @@ class CssAtKeyframesStartToken extends aCssAtBlockStartToken
 	 */
 	public function __toString()
 		{
-		return "@" . $this->AtRuleName . " \"" . $this->Name . "\"{";
+		return "@" . $this->AtRuleName . " " . $this->Name . "{";
 		}
 	}
 
