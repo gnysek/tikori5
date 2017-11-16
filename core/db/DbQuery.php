@@ -152,6 +152,10 @@ class DbQuery
             }
         }
 
+        if (count($where) == 0) {
+            return $this;
+        }
+
         if (is_array($where[0])) {
             // multiarrays
             foreach ($where as $subWhere) {

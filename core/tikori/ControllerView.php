@@ -29,9 +29,10 @@ class ControllerView extends TView
     }
 
     /**
-     * @param       $template Template name
-     * @param int   $time Time in seconds to look back. Set 0 to give infinity
+     * @param $template Template name
+     * @param int $time Time in seconds to look back. Set 0 to give infinity
      * @param array $tags Unique tags by which it will be cleared/stored
+     * @return bool|string
      */
     public function cachedBlock($uniquename, $template, $data, $time = 0, $tags = array())
     {
