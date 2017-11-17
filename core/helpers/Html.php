@@ -12,7 +12,7 @@ class Html
     {
         $_url = self::url($url);
         self::_linkCheckActiveClass($options, $_url);
-        return html::htmlTag('a', $options + array('href' => $_url, 'title' => htmlspecialchars($text)), $text);
+        return html::htmlTag('a', $options + array('href' => $_url, 'title' => htmlspecialchars(trim(strip_tags($text)))), $text);
 //        return '<a href="' . self::url($url) . '"' . implode(' ', $opt) . '>' . $text . '</a>';
     }
 
@@ -268,7 +268,8 @@ class Html
             'input', $options + $value + array(
                 'type' => $type,
                 'name' => get_class($model) . '[' . $field . ']',
-                'class' => self::$formClass,
+                'autocomplete' => 'off',
+                'class' => self::$formClass . ' pure-u-1-3',
             )
         );
 

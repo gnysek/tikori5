@@ -1382,7 +1382,17 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $row = '';
         foreach ($this->_values as $k => $v) {
             $head .= ($k == $this->getPK()) ? '<th><u>' . $k . '</u></th>' : '<th>' . $k . '</th>';
-            $row .= '<td>' . (($v === null) ? ('<em>null</em>') : $v) . '</td>';
+
+            $modified = (!$this->isNewRecord() and in_array($k, $this->_modified));
+
+            $row .= '<td' . ($modified ? ' style="background: pink;"' : '') . '>';
+            if ($modified) {
+                $row .= '<span style="color:red;">';
+                $row .= (($this->_original[$k] === null) ? ('<em>null</em>') : wordwrap($this->_original[$k], 50, '<br>', true));
+                $row .= '</span><br>';
+            }
+            $row .= (($v === null) ? ('<em>null</em>') : wordwrap($v, 50, '<br>', true));
+            $row .= '</td>';
         }
 
         $headerCount = count($this->_values);
@@ -1411,10 +1421,10 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             }
         }
 
-        $head = '<th colspan="' . $headerCount . '">' . get_called_class() . '</th></tr><tr>' . $head;
+        $head = '<th colspan="' . $headerCount . '">' . get_called_class() . ($this->isNewRecord() ? ' - NEW' : '') . '</th></tr><tr>' . $head;
 
         return /* 'Data in ' . get_called_class() . ' model instance:<br/>' . */
-            '<table border="1" cellspacing="0"><tr>' . $head . '</tr><tr>' . $row . '</tr></table>';
+            '<table border="1" cellspacing="0"><tr>' . $head . '</tr><tr valign="top">' . $row . '</tr></table>';
     }
 
     /**
