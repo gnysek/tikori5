@@ -72,12 +72,14 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 if (array_key_exists($fieldName, $this->_relations)) {
                     throw new DbError('Model ' . get_class($this) . ' have field named same as relation: ' . $fieldName);
                 }
-                $this->_values[$fieldName] = $this->_original[$fieldName] = ($fieldName == $this->getPk()) ? null : ($this->_schema->getColumn($fieldName)->defaultValue);
+                $this->_values[$fieldName] = $this->_original[$fieldName] = ($fieldName == $this->getFirstPK()) ? null : ($this->_schema->getColumn($fieldName)->defaultValue);
             }
         }
         $this->_rules = $this->_prepareRules();
         $this->_table = $this->getTable();
-        $this->_primaryKey = $this->getPK();
+        if (!is_array($this->_primaryKey)) {
+            $this->_primaryKey = array($this->_primaryKey);
+        }
         $this->_isNewRecord = $isNew;
 
         $this->_populate($attributes);
@@ -103,6 +105,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     public function getPK()
     {
         return $this->_primaryKey;
+    }
+
+    public function getFirstPK() // TODO: fix all functions which may use this, so original getPK is better resolved in case of two PK
+    {
+        return $this->_primaryKey[0];
     }
 
     /**
@@ -179,14 +186,25 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     public function find($id)
     {
-        if (!is_numeric($id)) {
-            //$id = DB::protect($id);
-        }
+        // if (!is_numeric($id)) {
+        //$id = DB::protect($id);
+        // }
 
         if (is_array($id)) {
-            $sql = DbQuery::sql()->select()->from($this->_table)->where(array($this->_primaryKey, 'IN', $id));
+            if (!array_key_exists($this->_primaryKey[0], $id)) {
+                $id = array($this->_primaryKey[0] => $id);
+            }
+            $w = array();
+            foreach ($this->_primaryKey as $pk) {
+                $w[] = array($pk, 'IN', $id[$pk]);
+            }
+            $sql = DbQuery::sql()->select()->from($this->_table)->where(array($w));
         } else {
-            $sql = DbQuery::sql()->select()->from($this->_table)->where(array($this->_primaryKey, '=', $id));
+            $w = array();
+            foreach ($this->_primaryKey as $pk) {
+                $w = array($pk, '=', $id);
+            }
+            $sql = DbQuery::sql()->select()->from($this->_table)->where($w);
         }
         $result = $sql->execute();
 
@@ -356,7 +374,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     case self::HAS_MANY:
 //                        var_dump($this->getPK());
 //                        var_dump($collection->getColumnValues($this->getPK()));
-                        $byField = $this->getPK();
+                        $byField = $this->getFirstPK();
                         Profiler::addLog('FIND WHERE - getting related');
                         $related = $this->_getRelated($relationName, false, $collection->getColumnValues($byField));
                         Profiler::addLog('FIND WHERE - related got, will assign ' . count($related) . ' to ' . count($return) . ' records');
@@ -458,7 +476,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
                         $model = TModel::model($this->_relations[$relationName][1]);
                         /* @var $model TModel */
-                        $sql->joinOn(array($k + 1, $model->getTable()), array($model->getPK(), '=', $this->_relations[$relationName][2]));
+                        $sql->joinOn(array($k + 1, $model->getTable()), array($model->getFirstPK(), '=', $this->_relations[$relationName][2]));
 
                         break;
                     /*case self::HAS_MANY:
@@ -572,24 +590,24 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
                         if (is_array($_related) or $_related instanceof Collection) {
                             foreach ($_related as $_rr) {
-                                if ($_rr->{$_rr->getPK()}) { //related->relationName
+                                if ($_rr->{$_rr->getFirstPK()}) { //related->relationName
                                     //$values->$related
                                     if ($currentRelation->relationType == self::BELONGS_TO) {
                                         $values[] = $_rr->{$currentRelation->byField};
                                     } else {
-                                        $values[] = $_rr->{$_rr->getPK()};
+                                        $values[] = $_rr->{$_rr->getFirstPK()};
                                     }
 
                                     #var_dump(true, $_related->{$_related->getPK()});
                                 }
                             }
                         } else {
-                            if ($_related->{$_related->getPK()}) { //related->relationName
+                            if ($_related->{$_related->getFirstPK()}) { //related->relationName
                                 //$values->$related
                                 if ($currentRelation->relationType == self::BELONGS_TO) {
                                     $values[] = $_related->{$currentRelation->byField};
                                 } else {
-                                    $values[] = $_related->{$_related->getPK()};
+                                    $values[] = $_related->{$_related->getFirstPK()};
                                 }
                                 #var_dump(true, $_related->{$_related->getPK()});
                             }
@@ -606,7 +624,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                         #var_dump(count($values));
 
                         $_model = $this->model($currentRelation->class);
-                        $_byFields = $currentRelation->relationType == self::BELONGS_TO ? $_model->getPK() : $currentRelation->byField;
+                        $_byFields = $currentRelation->relationType == self::BELONGS_TO ? $_model->getFirstPK() : $currentRelation->byField;
                         $result = $_model->findWhere(array($_byFields, 'IN', $values));
                         foreach ($collection as $row) {
                             /* @var $row TModel */
@@ -619,13 +637,13 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                             if ($currentRelation->relationType == self::HAS_MANY) {
                                 if ($_related instanceof Collection) {
                                     foreach ($_related as $_rr) {
-                                        $_one = $result->getRowsByColumnValue($currentRelation->byField, $_rr->{$_rr->getPK()});
+                                        $_one = $result->getRowsByColumnValue($currentRelation->byField, $_rr->{$_rr->getFirstPK()});
                                         if ($_one !== null) {
                                             $_rr->populateRelation($subRelName, $_one);
                                         }
                                     }
                                 } else {
-                                    $_related->populateRelation($subRelName, $result->getRowsByColumnValue($currentRelation->byField, $_related->{$_related->getPK()}));
+                                    $_related->populateRelation($subRelName, $result->getRowsByColumnValue($currentRelation->byField, $_related->{$_related->getFirstPK()}));
                                 }
                             } else {
                                 //var_dump(count($_related));
@@ -642,7 +660,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                                         throw new Exception('Collection value is not from proper class ' . var_export($_rr, true));
                                     }
 
-                                    $_byValue = $currentRelation->relationType == self::BELONGS_TO ? $_rr->{$currentRelation->byField} : $_rr->{$_rr->getPK()};
+                                    $_byValue = $currentRelation->relationType == self::BELONGS_TO ? $_rr->{$currentRelation->byField} : $_rr->{$_rr->getFirstPK()};
 
                                     $_one = $result->getRowsByColumnValue($_byFields, $_byValue)->getFirst();
                                     if ($_one !== null) {
@@ -728,6 +746,15 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return $this;
     }
 
+    protected function _getWhereByPK()
+    {
+        $r = array();
+        foreach ($this->_primaryKey as $pk) {
+            $r[] = array($pk, '=', $this->_values[$pk]);
+        }
+        return $r;
+    }
+
     /**
      * Delete that record from database
      *
@@ -738,7 +765,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         DbQuery::sql()
             ->delete()
             ->from($this->_table)
-            ->where(array($this->_primaryKey, '=', $this->_values[$this->_primaryKey]))
+            ->where($this->_getWhereByPK())
             ->execute();
 
         return true; //TODO: change code that no more operations will be possible on that model
@@ -772,7 +799,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             ->into($this->_table)
             ->fields($this->_getModifiedFields())
             ->execute();
-        $this->_values[$this->getPK()] = Core::app()->db->lastId();
+
+        // TODO fix so autoincrement value is used instead of first PK - especially for tables which doesn't have PK!
+        $this->_values[$this->getFirstPK()] = Core::app()->db->lastId();
 
         return true;
     }
@@ -786,8 +815,10 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     protected function _update($force = false)
     {
         $values = $this->_getModifiedFields($force);
-        if (array_key_exists($this->_primaryKey, $values)) {
-            unset($values[$this->_primaryKey]);
+        foreach($this->_primaryKey as $pk) {
+            if (array_key_exists($pk, $values)) {
+                unset($values[$pk]);
+            }
         }
 
         if (!empty($values)) {
@@ -796,7 +827,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 ->update()
                 ->from($this->_table)
                 ->fields($values)
-                ->where(array($this->_primaryKey, '=', $this->_values[$this->_primaryKey]))
+                ->where($this->_getWhereByPK())
                 ->execute();
 
         }
@@ -828,7 +859,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $modified = array();
         if ($force) {
             foreach ($this->_fields as $field) {
-                if ($field != $this->_primaryKey) {
+                if (!in_array($field, $this->_primaryKey)) {
                     $modified[$field] = $this->_values[$field];
                 }
             }
@@ -1315,7 +1346,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     $conditions = $this->_relations[$relationName][3];
                 }
                 if (empty($customValues)) {
-                    $customValues = $this->_values[$this->getPK()];
+                    $customValues = $this->_values[$this->getFirstPK()];
                 }
 
                 $with = array();
@@ -1339,7 +1370,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 if (empty($customValues)) {
                     $customValues = $this->_values[$this->_relations[$relationName][2]];
                 }
-                $result = $rel->findWhere(array($rel->getPK(), 'IN', $customValues));
+                $result = $rel->findWhere(array($rel->getFirstPK(), 'IN', $customValues));
                 if ($populate) {
                     $result = $result->getFirst();
                 }
@@ -1381,7 +1412,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $head = '';
         $row = '';
         foreach ($this->_values as $k => $v) {
-            $head .= ($k == $this->getPK()) ? '<th><u>' . $k . '</u></th>' : '<th>' . $k . '</th>';
+            $head .= ($k == $this->getFirstPK()) ? '<th><u>' . $k . '</u></th>' : '<th>' . $k . '</th>';
 
             $modified = (!$this->isNewRecord() and in_array($k, $this->_modified));
 
