@@ -52,6 +52,21 @@ Route::set('default', '(&lt;controller&gt;(/&lt;something&gt;))',
 Now if you provide path like: <code>http://myapp.com/path/to/here/and/there</code>, route will match
 controller <kbd>path</kbd>, action <kbd>index</kbd>, and param something will be <kbd>to/here/and/there</kbd>.
 </p>
+<h5>Wildcard</h5>
+<p>It's possible to set a wildcard, which converts rest of path in pairs to key=value from key/value.</p>
+
+<pre class="prettyprint lang-php">
+Route::set('default', '(&lt;controller&gt;(/&lt;tparams&gt;))',
+	array('tparams' => '[a-zA-Z0-9/]+'))
+->defaults(array(
+    'controller' => 'Default',
+    'action'     => 'index',
+));
+</pre>
+
+<p>Remember to include <kbd>/</kbd> character in regex for tparam possible characters so whole string will be taken. Also <kbd>+</kbd> may be need to take length into account</p>
+
+<blockquote>Important note: <kbd>controller</kbd> and <kbd>action</kbd> params cannot be overriden this way.</blockquote>
 
 <h5>Defaults</h5>
 

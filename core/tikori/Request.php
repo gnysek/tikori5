@@ -424,6 +424,24 @@ class Request extends DefaultObject
         return (array_key_exists($key, $this->_get)) ? $this->_get[$key] : $this->getPost($key, $default);
     }
 
+    public function forceParam($key, $value, $isGet = true)
+    {
+        if ($isGet) {
+            $this->_get[$key] = $value;
+        } else {
+            $this->_post[$key] = $value;
+        }
+        return true;
+    }
+
+    public function clearParams($get = true) {
+        if ($get) {
+            $this->_get = array();
+        } else {
+            $this->_post = array();
+        }
+    }
+
     public function getBaseUrl($absolute = false)
     {
         if ($this->_baseUrl === NULL) {

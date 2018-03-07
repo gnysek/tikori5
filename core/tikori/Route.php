@@ -23,13 +23,13 @@ class Route
      */
     protected static $_routes = array();
 
-    public static function reconfigure()
+    public static function reconfigure($newRoutes = null)
     {
         Route::reset();
         // cfg route registers
-        $routes = Core::app()->cfg('routes');
+        $routes = ($newRoutes === null) ? Core::app()->cfg('routes') : $newRoutes;
         if (!empty($routes)) {
-            foreach (Core::app()->cfg('routes') as $key => $route) {
+            foreach ($routes as $key => $route) {
                 Route::set($key, $route['expr'], (!empty($route['params'])) ? $route['params'] : array())->defaults(
                     $route['defaults']
                 );
@@ -71,7 +71,7 @@ class Route
     public static function get($name)
     {
         if (!isset(Route::$_routes[$name])) {
-            throw new Exception('The requested route does not exist: ' . $name);
+            throw new Exception('The requested route does not exist: ' . $name . '. Only ' . implode(', ', array_keys(self::$_routes)));
         }
 
         return Route::$_routes[$name];
@@ -295,12 +295,20 @@ class Route
                         if ($key === NULL) {
                             $key = $v; // set temporary key name
                         } else {
-                            $params[$key] = $v; // if we already have key, we can set value
+                            if (!array_key_exists($key, $params)) { // prevent duplicates / overrides!
+                                $params[$key] = $v; // if we already have key, we can set value
+                            }
                             $key = NULL;
                         }
                     }
 
                     unset($params['tparams']);
+                }
+
+                foreach(Core::app()->request->getParam() as $key => $v) {
+                    if (!array_key_exists($key, $params)) { // prevent duplicates / overrides!
+                        $params[$key] = $v; // if we already have key, we can set value
+                    }
                 }
 
                 $route->params = $params;

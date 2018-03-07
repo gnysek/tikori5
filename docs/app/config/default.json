@@ -17,5 +17,8 @@
                 "path": "none"
             }
         }
+    },
+    "url": {
+        "addScriptName": true
     }
 }

@@ -17,7 +17,7 @@
             style="width: 224px; margin-right: 10px; float: left; display: inline; border-right: 1px solid #333;"><?php echo $this->renderPartial(
                 'static/_menu'
             ); ?></div>
-        <div style="width: auto; display: block; float: left;">
+        <div style="width: auto; display: block; float: left; width: 935px;">
             <?php
             if (!empty($this->breadcrumbs)) {
                 $breadcrumbs = $this->widget(

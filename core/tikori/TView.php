@@ -129,13 +129,22 @@ class TView
     {
         if (self::$_viewFiles == null) {
             self::$_viewFiles = array();
-            if (Core::app()->cache && Core::app()->cache->findCache(self::TEMPLATE_CACHE)) {
+            if (Core::app()->cache && Core::app()->cache->findCache(self::TEMPLATE_CACHE) && !Core::app()->request->isHardRefresh()) {
+                Profiler::addLog('Loaded templates cache');
                 self::$_viewFiles = json_decode(Core::app()->cache->loadCache(self::TEMPLATE_CACHE), true);
             }
         }
 
-        if (array_key_exists($this->area . $file, self::$_viewFiles)) {
-            return self::$_viewFiles[$this->area . $file];
+        $cacheList = array('');
+
+        if (isset($this->controller) and !empty($this->_themes)) {
+            $cacheList = $this->_themes + array('');
+        }
+
+        foreach ($cacheList as $theme) {
+            if (array_key_exists($this->area . $theme . $file, self::$_viewFiles)) {
+                return self::$_viewFiles[$this->area . $theme . $file];
+            }
         }
 
         $paths = array();
@@ -203,7 +212,7 @@ class TView
                 }
 
                 if (!in_array($file, self::$_viewFiles)) {
-                    self::$_viewFiles[$this->area . $file] = str_replace('\\', '/', $filename);
+                    self::$_viewFiles[$this->area . ($this->_usedTheme != 'default' ? $this->_usedTheme : '') . $file] = str_replace('\\', '/', $filename);
                     self::$_viewFilesChanged = true;
                 }
 
