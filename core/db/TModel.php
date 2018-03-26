@@ -908,6 +908,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         //return date('Y-m-d H:i:s', time());
     }
 
+    /**
+     * @param bool $forceToSave
+     * @return bool
+     * @throws DbError
+     */
     public function save($forceToSave = false)
     {
         if ($this->timestamps) {

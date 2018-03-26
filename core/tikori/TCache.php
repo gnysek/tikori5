@@ -58,7 +58,7 @@ class TCache extends TModule
     /**
      * Loads cache
      *
-     * @param type $filemane       filename to load
+     * @param type $filemane filename to load
      * @param type $defaultContent default content returned
      *
      * @return type
@@ -135,11 +135,11 @@ class TCache extends TModule
         return false;
     }
 
-    /**
-     * Creates cache dir
-     *
-     * @param string $dir
-     */
+    // /**
+    //  * Creates cache dir
+    //  *
+    //  * @param string $dir
+    //  */
 //    public function createCacheDir($dir)
 //    {
 //        if (!file_exists($this->cachePath . str_replace('/', '', $dir))) {
@@ -148,4 +148,12 @@ class TCache extends TModule
 //        return TRUE;
 //    }
 
+    public function purgeCache()
+    {
+        foreach (new DirectoryIterator($this->cachePath) as $fileInfo) {
+            if (!$fileInfo->isDot()) {
+                unlink($fileInfo->getPathname());
+            }
+        }
+    }
 }

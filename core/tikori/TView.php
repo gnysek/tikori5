@@ -129,11 +129,16 @@ class TView
     {
         if (self::$_viewFiles == null) {
             self::$_viewFiles = array();
-            if (Core::app()->cache && Core::app()->cache->findCache(self::TEMPLATE_CACHE) && !Core::app()->request->isHardRefresh()) {
+            if (Core::app()->cache && Core::app()->cache->findCache(self::TEMPLATE_CACHE) && (Core::app()->request && !Core::app()->request->isHardRefresh())) {
                 Profiler::addLog('Loaded templates cache');
                 self::$_viewFiles = json_decode(Core::app()->cache->loadCache(self::TEMPLATE_CACHE), true);
             }
         }
+
+        // if (!is_array(self::$_viewFiles)) {
+        //     var_dump(self::$_viewFiles);
+        //     die();
+        // }
 
         $cacheList = array('');
 

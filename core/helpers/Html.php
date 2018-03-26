@@ -80,18 +80,27 @@ class Html
         return (array_key_exists('class', $result));
     }
 
+    const SCOPE_KEY = '_scope';
+
     /**
      * @param string|array $url
      * @return string
      */
     public static function url($url = array())
     {
+
         if (!is_array($url)) {
             return self::url(array($url));
         } else {
             if (count($url) == 0) {
                 $url[0] = '';
             }
+        }
+
+        $scope = null;
+        if (array_key_exists(self::SCOPE_KEY, $url)) {
+            $scope = $url[self::SCOPE_KEY];
+            unset($url[self::SCOPE_KEY]);
         }
 
         // external
@@ -152,7 +161,7 @@ class Html
             $path .= 'sid=' . self::$sidAddon;
         }
 
-        return Core::app()->baseUrl() . $script . $addon . $url[0] . $path . $get;
+        return ($scope !== null ? UrlTranslator::getUrlToScope($scope) : Core::app()->baseUrl()) . $script . $addon . $url[0] . $path . $get;
     }
 
     public static function shortenUrl($url)

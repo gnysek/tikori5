@@ -128,4 +128,13 @@ class Asset
             return (file_exists($filename)) ? sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholderContent : self::$_jsPlaceholderContent, file_get_contents($filename)) : '';
         }
     }
+
+    public static function purgeAssets()
+    {
+        foreach (new DirectoryIterator(TIKORI_ROOT . '/media/assets') as $fileInfo) {
+            if (!$fileInfo->isDot()) {
+                unlink($fileInfo->getPathname());
+            }
+        }
+    }
 }
