@@ -172,3 +172,6 @@ pip-log.txt
 # Tikori
 microframeworks
 microframeworks/*
+app/cache/*
+docs/app/cache/*
+tests/app/cache/*
