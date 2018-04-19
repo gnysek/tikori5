@@ -160,7 +160,7 @@ ol li:hover {
 }
 
 .err, .highlight:hover {
-	display: block;
+	display: inline-block;
 	background-color: #391414;
 }
 

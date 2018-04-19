@@ -158,7 +158,7 @@ class Controller extends ControllerView
 
                         if ($paramObject->isOptional() === false and !array_key_exists($paramObject->name, $this->params)) {
                             //throw new RouteNotFoundException('Not enough arguments or wrong argument name [' . $paramObject->name . ']');
-                            throw new ErrorException(
+                            throw new Exception(
                                 'Not enough arguments for method ' . $this->getActionMethodName()
                                 . '() or wrong argument name, (expected [' . $paramObject->name . ']) - should be one of <code>'
                                 . implode(', ', array_keys($this->params)) . '</code>'
@@ -194,10 +194,10 @@ class Controller extends ControllerView
             } catch (DbError $e) {
                 //TODO: shouldn't be like that...
                 ob_get_clean();
-                Error::exch($e);
+                \Tikori\Error::exch($e);
             } catch (Exception $e) {
                 if (Core::app()->getMode() !== Core::MODE_PROD) {
-                    Error::exch($e);
+                    \Tikori\Error::exch($e);
                 }
                 //				if (($this instanceof ErrorController)==false)
                 Profiler::addLog('Exception when performing action: ' . $e->getMessage());

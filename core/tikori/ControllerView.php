@@ -44,12 +44,12 @@ class ControllerView extends TView
         $exists = $block->checkCacheExists($time == 0 ? 0 : (time() - $time));
 
         if (!$exists) {
-            Profiler::addLog('Cache [' . $uniquename .'] not found, or too old', Profiler::LEVEL_DEBUG);
+            Profiler::addNotice('Cache [' . $uniquename .'] not found, or too old');
             $__cacheContent = $this->renderPartial($template, $data, true);
             $block->save($__cacheContent);
             return $__cacheContent;
         } else {
-            Profiler::addLog('Cache [' . $uniquename .'] found', Profiler::LEVEL_DEBUG);
+            Profiler::addNotice('Cache [' . $uniquename .'] found');
             return $block->load();
         }
     }

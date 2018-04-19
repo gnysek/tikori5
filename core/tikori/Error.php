@@ -5,6 +5,8 @@
  *
  * @author Piotr Gnys <gnysek@gnysek.pl>
  */
+namespace Tikori;
+
 class Error
 {
     public static $renderStarted = false;
@@ -13,8 +15,8 @@ class Error
     /* register all handlers */
     public static function registerErrors()
     {
-        set_exception_handler(array('Error', 'exch'));
-        set_error_handler(array('Error', 'errh'), E_ALL);
+        set_exception_handler(array('\Tikori\Error', 'exch'));
+        set_error_handler(array('\Tikori\Error', 'errh'), E_ALL);
     }
 
     public static function shutdown_handler() {
@@ -22,9 +24,11 @@ class Error
             if (ob_get_level()) {
                 ob_clean();
                 ob_end_clean();
+
             }
 
-            $exception = new ErrorException($error['message'], $error['type'], 1, $error['file'], $error['line']);
+            $exception = new \ErrorException($error['message'], $error['type'], 1, $error['file'], $error['line']);
+
             if (function_exists('xdebug_get_function_stack')) {
                 $stack = array();
                 foreach (array_slice(array_reverse(xdebug_get_function_stack()), 2, -1) as $row) {
@@ -40,11 +44,11 @@ class Error
                     }
                     $stack[] = $frame;
                 }
-                $ref = new \ReflectionProperty('Exception', 'trace');
+                $ref = new \ReflectionProperty('\Tikori\Exception', 'trace');
                 $ref->setAccessible(TRUE);
                 $ref->setValue($exception, $stack);
             }
-            Error::exch($exception);
+            self::exch($exception);
 
             exit(1); // prevent infinity-loop
         }
@@ -55,9 +59,9 @@ class Error
      *
      * @param Exception $exception catched Exception
      */
-    public static function exch(Exception $exception)
+    public static function exch(\Exception $exception)
     {
-        echo Error::display($exception);
+        echo self::display($exception);
     }
 
     /**
@@ -76,7 +80,7 @@ class Error
         if (self::$enableStrict === false and in_array($errno, array(E_NOTICE, E_STRICT))) {
             return false;
         }
-        echo Error::display(new ErrorException($errstr, $errno, 1, $errfile, $errline), true);
+        echo self::display(new \ErrorException($errstr, $errno, 1, $errfile, $errline), true);
         return true;
     }
 
@@ -99,13 +103,13 @@ class Error
     /**
      * Displays error using error.fatal.php view
      *
-     * @param Exception $exception
+     * @param \Exception|\Throwable $exception
      * @param bool $isErrorHandler if it's called by error handler we need to skip $excetpion->getFile to avoid duplicates on trace
      * @param bool $dontExit
      *
      * @return string
      */
-    public static function display(Exception $exception, $isErrorHandler = false, $dontExit = false)
+    public static function display(\Exception $exception, $isErrorHandler = false, $dontExit = false)
     {
 
         for ($i = 0, $obLevel = ob_get_level(); $i < $obLevel; ++$i) {
@@ -163,8 +167,8 @@ class Error
 
         } while ($current = $current->getPrevious());
 
-        $view = new Controller();
-        $e = Core::app()->cfg('request');
+        $view = new \Controller();
+        $e = \Core::app()->cfg('request');
 
         // TODO: check that its needed since erh have ErrorException used
         if ($isErrorHandler === false) {
@@ -172,7 +176,7 @@ class Error
                 'file' => str_replace(TIKORI_ROOT, '...', $exception->getFile()),
                 'line' => $exception->getLine(),
                 'info' => '',
-                'html' => self::getFile($exception->getFile(), $exception->getLine(), array('class' => 'Error::display()')
+                'html' => self::getFile($exception->getFile(), $exception->getLine(), array('class' => 'self::display()')
             ));*/
         }
 
@@ -207,7 +211,7 @@ class Error
             self::$renderStarted = true;
 
             $body = $view->renderPartial(
-                (Core::app()->getMode() == Core::MODE_PROD) ? 'error.fatal' : 'core.exception',
+                (\Core::app()->getMode() == \Core::MODE_PROD) ? 'error.fatal' : 'core.exception',
                 array(
                     'errorType' => $code,
                     'errorId' => $codeInt,
@@ -216,14 +220,14 @@ class Error
                     #'messages'  => $messages,
                     'file' => $exception->getFile(),
                     'line' => $exception->getLine(),
-                    'reqMethod' => (empty($e[Request::REQUEST_METHOD])) ? '' : $e[Request::REQUEST_METHOD],
-                    'reqPath' => (empty($e[Request::PATH_INFO])) ? '' : $e[Request::PATH_INFO],
+                    'reqMethod' => (empty($e[\Request::REQUEST_METHOD])) ? '' : $e[\Request::REQUEST_METHOD],
+                    'reqPath' => (empty($e[\Request::PATH_INFO])) ? '' : $e[\Request::PATH_INFO],
                     #'files'     => $files,
                     'view' => $view,
                 ), true
             );
         } else {
-            if (Core::app()->getMode() == Core::MODE_PROD) {
+            if (\Core::app()->getMode() == \Core::MODE_PROD) {
                 $body = '<p>There was fatal error during rendering page, sorry.</p>';
             } else {
                 $body = '<p>There was an error and probably it occurs also when rendering error page:</p>';
@@ -237,7 +241,7 @@ class Error
             return $body;
         } else {
             if (!headers_sent()) {
-                header('HTTP/1.1 500 ' . Response::$messages['500']);
+                header('HTTP/1.1 500 ' . \Response::$messages['500']);
             }
             //var_dump($exception->getPrevious());
             echo $body;
@@ -260,7 +264,7 @@ class Error
 
         if ($file = @file($filename)) {
 
-            $dispName = str_replace(Core::app()->appDir . DIRECTORY_SEPARATOR, '', $filename);
+            $dispName = str_replace(\Core::app()->appDir . DIRECTORY_SEPARATOR, '', $filename);
             $dispName = str_replace('\\', '/', $dispName);
 
             $index

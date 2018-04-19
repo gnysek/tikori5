@@ -1,5 +1,5 @@
 <?php
-use Core\User\NullSession;
+//use Core\User\NullSession;
 
 /**
  * @property Request $request
@@ -168,6 +168,7 @@ class Tikori extends Application
         Profiler::addLog('Finishing application');
         if ($this->mode != Core::MODE_PROD and $this->cfg('debug/profiler') == 'enabled') {
             echo Profiler::getLogs();
+            echo Profiler::getNotices();
         }
         return true;
     }
@@ -240,8 +241,8 @@ class Tikori extends Application
                     //TODO: better list of folders created by module initializer
                     foreach($areas as $area) {
                         $file = $source . ($module == 'core' ? '' : '/' . $module) . $path . 'controllers/' . $area . $className . '.php';
-                        Profiler::addLog($file . ' <kbd>' . __FILE__ . ':' . __LINE__.'</kbd>', Profiler::LEVEL_DEBUG);
-                        Profiler::addLog((int) file_exists($file), Profiler::LEVEL_IMPORTANT);
+                        Profiler::addNotice($file . ' <kbd>' . __FILE__ . ':' . __LINE__.'</kbd>');
+                        Profiler::addNotice((int) file_exists($file));
                         if (file_exists($file)) {
                             try {
                                 // TODO: autload should be used here I think...

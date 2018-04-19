@@ -47,10 +47,10 @@ class TConfig
             }
         }
 
-        Profiler::addLog('Cannot find cfg for ' . $fullPath, Profiler::LEVEL_DEBUG);
+        Profiler::addNotice('Cannot find cfg for ' . $fullPath);
 
         if ($this->setOnNotFound) {
-            Profiler::addLog('> Setting ' . $fullPath . ' to null for future queries.', Profiler::LEVEL_DEBUG);
+            Profiler::addNotice('> Setting ' . $fullPath . ' to null for future queries.');
             $this->set($fullPath, $default);
         }
 

@@ -63,9 +63,9 @@ abstract class Application
 
         // register error handlers
         if (!Core::isConsoleApplication()) {
-            Error::registerErrors();
+            \Tikori\Error::registerErrors();
             ob_start();
-            register_shutdown_function(array('Error', 'shutdown_handler'));
+            register_shutdown_function(array('\Tikori\Error', 'shutdown_handler'));
             Profiler::addLog('Registered errors');
         }
 

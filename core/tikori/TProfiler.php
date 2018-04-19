@@ -10,6 +10,7 @@ class TProfiler
     const LEVEL_AUTOLOAD = 4;
 
     private static $_log = array();
+    private static $_notices = array();
     public static $enabledTimer = false;
     public static $skipLevelAbove = 99;
 
@@ -24,6 +25,40 @@ class TProfiler
                 (count(self::$_log) > 1) ? sprintf('%0.4f', $tn - self::$_log[count(self::$_log) - 1][2]) : 0,
             );
         }
+    }
+
+    public static function addNotice($message)
+    {
+        self::$_notices[] = array(
+            $message, Core::genTimeNow(),
+        );
+    }
+
+    public static function getNotices()
+    {
+        $logs = array();
+
+        $logs[] = 'Notices:<br/>';
+        $logs[] = '<style>.tikori-notices-table tr:hover td{background-color: #00bfa8; color: white; border-bottom: 1px solid red;}</style>';
+        $logs[] = '<table style="width: 98%; margin: 5px auto; background: white; font-size: 11px; font-family: Arial, sans-serif;" class="tikori-notices-table">';
+        $logs[] = '<tr style="border-bottom: 1px solid black; background: gray; color: white;">';
+        $logs[] = '<th>ID</th>';
+        $logs[] = '<th>Action</th>';
+        $logs[] = '<th>Time</th>';
+        $logs[] = '</tr>';
+
+        foreach (self::$_notices as $i => $notice) {
+            $logs[] = sprintf('<tr><td></td><td>%s</td><td>%s</td></tr>', $i + 1, $notice[0], $notice[1]);
+        }
+
+        $logs[] = '</table>';
+
+        if (Core::app()->hasLoadedModule('toolbar')) {
+            Core::app()->toolbar->putValueToTab('notices', implode(PHP_EOL, $logs));
+            return '';
+        }
+
+        return implode(PHP_EOL, $logs);
     }
 
     public static function getLogs()
@@ -43,13 +78,13 @@ class TProfiler
         $logs[] = '</tr>';
 
         $styles = array(
-            self::LEVEL_SQL => ' style="background-color: darkcyan; color: white;"',
-            self::LEVEL_DEBUG => ' style="background-color: black; color: white;"',
+            self::LEVEL_SQL       => ' style="background-color: darkcyan; color: white;"',
+            self::LEVEL_DEBUG     => ' style="background-color: black; color: white;"',
             self::LEVEL_IMPORTANT => ' style="background-color: orange;"',
         );
 
         $types = array(
-            self::LEVEL_SQL => 'SQL',
+            self::LEVEL_SQL   => 'SQL',
             self::LEVEL_DEBUG => 'DBG',
         );
 
@@ -96,7 +131,7 @@ class TProfiler
             Core::app()->toolbar->putValueToTab('profiler', implode(PHP_EOL, $logs));
 
             $classes = array();
-            foreach(Core::$foundClasses as $class => $filename) {
+            foreach (Core::$foundClasses as $class => $filename) {
                 $classes[] = sprintf('<code style="display: inline-block; min-width: 200px;">%s</code> <code>%s</code>', $class, $filename);
             }
             Core::app()->toolbar->putValueToTab('loadedClasses', implode('<br>', $classes));
@@ -126,8 +161,6 @@ class TProfiler
         if ($percentage >= 10) {
             return sprintf($style, 'red');
         }
-
-
     }
 
 }
