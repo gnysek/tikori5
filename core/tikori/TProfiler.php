@@ -55,6 +55,7 @@ class TProfiler
 
         if (Core::app()->hasLoadedModule('toolbar')) {
             Core::app()->toolbar->putValueToTab('notices', implode(PHP_EOL, $logs));
+            Core::app()->toolbar->setNotificationsNumberOnTab('notices', count(self::$_notices));
             return '';
         }
 
@@ -101,14 +102,12 @@ class TProfiler
                 $type = ($log[0] > 0 and array_key_exists($log[0], $types)) ? $types[$log[0]] : '&ndash;';
 
                 $logs[] = '<tr style="border-bottom: 1px solid black;">';
-                $logs[] = '<td>' . $id . '</td>';
+                $logs[] = '<td>' . ($id + 1) . '</td>';
                 $logs[] = '<td' . $style . '>' . $type . '</td>';
                 $logs[] = '<td' . $style . '>' . $log[1] . '</td>';
                 $logs[] = '<td>+' . $log[3] . 's.</td>';
                 $logs[] = '<td>=' . $log[2] . 's.</td>';
-                $logs[]
-                    = '<td' . self::percentageColor($currentPercentage) . '>+' . sprintf('%0.2f', $currentPercentage)
-                    . '%</td>';
+                $logs[] = '<td' . self::percentageColor($currentPercentage) . '>+' . sprintf('%0.2f', $currentPercentage) . '%</td>';
                 $logs[] = '<td>=' . sprintf('%0.2f', $percentage) . '%</td>';
                 $logs[] = '</tr>';
             }
@@ -129,12 +128,14 @@ class TProfiler
 
         if (Core::app()->hasLoadedModule('toolbar')) {
             Core::app()->toolbar->putValueToTab('profiler', implode(PHP_EOL, $logs));
+            Core::app()->toolbar->setNotificationsNumberOnTab('profiler', count(self::$_log));
 
             $classes = array();
             foreach (Core::$foundClasses as $class => $filename) {
                 $classes[] = sprintf('<code style="display: inline-block; min-width: 200px;">%s</code> <code>%s</code>', $class, $filename);
             }
             Core::app()->toolbar->putValueToTab('loadedClasses', implode('<br>', $classes));
+            Core::app()->toolbar->setNotificationsNumberOnTab('loadedClasses', count($classes));
 
             Core::app()->toolbar->addStatus(sprintf('Zapytań do bazy: %s.', Core::app()->db->queries()));
             Core::app()->toolbar->addStatus(sprintf('Czas generowania strony: %ss.', Core::genTimeNow()));

@@ -108,7 +108,10 @@ class DbMySqli extends DBAbstract
 
                 $str .= sprintf('<code>%s</code>', $sql);
 
-                Core::app()->toolbar->putValueToTab('SQL', $str);
+                if (Core::app()->hasLoadedModule('toolbar')) {
+                    Core::app()->toolbar->putValueToTab('SQL', $str);
+                    Core::app()->toolbar->setNotificationsNumberOnTab('SQL', count($str));
+                }
             }
         }
 
