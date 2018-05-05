@@ -110,7 +110,7 @@ class DbMySqli extends DBAbstract
 
                 if (Core::app()->hasLoadedModule('toolbar')) {
                     Core::app()->toolbar->putValueToTab('SQL', $str);
-                    Core::app()->toolbar->setNotificationsNumberOnTab('SQL', count($str));
+                    Core::app()->toolbar->setNotificationsNumberOnTab('SQL', $this->_queries);
                 }
             }
         }

@@ -174,6 +174,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * @param $id
      *
      * @return $this|TModel
+     * @throws DbError
      */
     public function load($id)
     {
@@ -186,10 +187,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     public function find($id)
     {
-        // if (!is_numeric($id)) {
-        //$id = DB::protect($id);
-        // }
-
+        // TODO - this is a weird hack
         if (is_array($id)) {
             if (!array_key_exists($this->_primaryKey[0], $id)) {
                 $id = array($this->_primaryKey[0] => $id);
@@ -198,33 +196,37 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             foreach ($this->_primaryKey as $pk) {
                 $w[] = array($pk, 'IN', $id[$pk]);
             }
-            $sql = DbQuery::sql()->select()->from($this->_table)->where(array($w));
+            $collection = $this->findWhere(array($w));
+            //$sql = DbQuery::sql()->select()->from($this->_table)->where(array($w));
         } else {
             $w = array();
             foreach ($this->_primaryKey as $pk) {
                 $w = array($pk, '=', $id);
             }
-            $sql = DbQuery::sql()->select()->from($this->_table)->where($w);
-        }
-        $result = $sql->execute();
 
-        if (!is_array($id) && count($result) > 1) {
+            $collection = $this->findWhere($w);
+            //$sql = DbQuery::sql()->select()->from($this->_table)->where($w);
+        }
+
+        if ($collection && $collection->count() == 0) {
+            return null;
+        } elseif ($collection && $collection->count() == 1) {
+            // todo: make it so it doesn't need to use collection - make applying eagers more universal
+            // for now it's just a hack to copy values from collection to current model, as when ->load() we don't need to assign into new value
+
+            $record = $collection->getFirst();
+
+            $this->_isNewRecord = false;
+            $this->_populate($record->getValues());
+
+            foreach ($record->getAlreadyLoadedRelations() as $relName) {
+                $this->populateRelation($relName, $record->$relName);
+            }
+
+            return $this;
+        } else {
             throw new DbError('Returned more than 1 record - PK wrongly defined?');
         }
-
-        if (count($result) == 1) {
-            $populate = array();
-            foreach ($this->_fields as $field) {
-                if ($result[0]->offsetExists($field)) {
-                    $populate[$field] = $result[0]->$field;
-                }
-            }
-            $this->_populate($populate);
-            $this->_isNewRecord = false;
-        } else {
-            return null;
-        }
-        return $this;
     }
 
     // duplicate of load in fact...
@@ -432,6 +434,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * @param int $offset
      * @param array $conditions
      * @return Collection|$this|Collection[]|$this[]
+     * @throws Exception
      */
     public function findAll($limit = -1, $offset = 0, $conditions = array())
     {
@@ -625,7 +628,21 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
                         $_model = $this->model($currentRelation->class);
                         $_byFields = $currentRelation->relationType == self::BELONGS_TO ? $_model->getFirstPK() : $currentRelation->byField;
-                        $result = $_model->findWhere(array($_byFields, 'IN', $values));
+                        ToolbarModule::debug($values);
+
+                        if (is_array($values)) {
+                            sort($values);
+                        }
+
+                        if (is_array($values) and count($values) == 1) {
+                            $result = $_model->findWhere(array($_byFields, '=', $values));
+                        } elseif (is_array($values) and $this->_isOrdered($values)) {
+                            reset($values);
+                            $result = $_model->findWhere(array($_byFields, 'BETWEEN', array(current($values), end($values))));
+                        } else {
+                            $result = $_model->findWhere(array($_byFields, 'IN', $values));
+                        }
+
                         foreach ($collection as $row) {
                             /* @var $row TModel */
                             /* @var $result Collection */
@@ -1363,7 +1380,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 if (is_array($customValues)) {
                     sort($customValues);
                 }
-                if (is_array($customValues) and $this->_isOrdered($customValues)) {
+                if (is_array($customValues) and count($customValues) == 1) {
+                    $result = $rel->with($with)->findWhere(array($this->_relations[$relationName][2], '=', $customValues[0]), -1, 0, $conditions);
+                } elseif (is_array($customValues) and $this->_isOrdered($customValues)) {
                     reset($customValues);
                     $result = $rel->with($with)->findWhere(array(array($this->_relations[$relationName][2], 'BETWEEN', array(current($customValues), end($customValues)))), -1, 0, $conditions);
                 } else {
@@ -1390,6 +1409,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         } else {
             return $result;
         }
+    }
+
+    public function getAlreadyLoadedRelations()
+    {
+        return array_keys($this->_related);
     }
 
     protected function _isOrdered($array)

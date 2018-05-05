@@ -57,9 +57,9 @@ class Error
     /**
      * Handler for set_exception_handler
      *
-     * @param Exception $exception catched Exception
+     * @param \Exception|\Throwable $exception catched Exception
      */
-    public static function exch(\Exception $exception)
+    public static function exch($exception)
     {
         echo self::display($exception);
     }
@@ -109,7 +109,7 @@ class Error
      *
      * @return string
      */
-    public static function display(\Exception $exception, $isErrorHandler = false, $dontExit = false)
+    public static function display($exception, $isErrorHandler = false, $dontExit = false)
     {
 
         for ($i = 0, $obLevel = ob_get_level(); $i < $obLevel; ++$i) {
