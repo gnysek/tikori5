@@ -125,13 +125,6 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return new $model();
     }
 
-    public function setValues($values)
-    {
-        if (is_array($values)) {
-            $this->_values = $values;
-        }
-    }
-
     public function getValues()
     {
         return $this->_values;
@@ -638,6 +631,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                             $result = $_model->findWhere(array($_byFields, '=', $values));
                         } elseif (is_array($values) and $this->_isOrdered($values)) {
                             reset($values);
+                            var_dump('1', $this->_isOrdered($values), $values);
                             $result = $_model->findWhere(array($_byFields, 'BETWEEN', array(current($values), end($values))));
                         } else {
                             $result = $_model->findWhere(array($_byFields, 'IN', $values));
@@ -776,6 +770,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * Delete that record from database
      *
      * @return null
+     * @throws DbError
      */
     public function delete()
     {
@@ -827,6 +822,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * Updates current model values in database under same primary key
      *
      * @return bool
+     * @throws DbError
      */
     // TODO: check that where() automatically will be always good - it should be...
     protected function _update($force = false)
@@ -1420,12 +1416,15 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     {
         $i = 0;
         $total_elements = count($array);
+        $way = 0;
 
-        //if($sort_order == ORDER_ASC)
-        //{
-        //Check for ascending order
+        if ($total_elements > 1) {
+            $way = $array[0] - $array[1];
+            $way = ($way > 0) - ($way < 0);
+        }
+
         while ($total_elements > 1) {
-            if ($array[$i] < $array[$i + 1]) {
+            if (($array[$i] - $array[$i + 1]) == $way) {
                 $i++;
                 $total_elements--;
             } else {

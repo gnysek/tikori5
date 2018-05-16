@@ -292,6 +292,11 @@ class Collection implements ArrayAccess, Iterator, Countable
         return $values;
     }
 
+    /**
+     * @param $column
+     * @param $value
+     * @return Collection|TModel[]|$this[]|self[]
+     */
     public function getRowsByColumnValue($column, $value)
     {
         $values = array();

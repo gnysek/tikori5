@@ -423,6 +423,11 @@ class DbQuery
                         $afterCondition = '(' . $afterCondition . ')';
                     }
 
+                    if (strtoupper($w[1]) == 'RAW') {
+                        $w[1] = '';
+                        $afterCondition = $w[2];
+                    }
+
                     if (strtoupper($w[1]) == 'BETWEEN' and is_array($w[2])) {
                         $afterCondition = $this->_formatAgainstType($_fromTable, $w[0], $w[2][0]);
                         $afterCondition .= ' AND ';
