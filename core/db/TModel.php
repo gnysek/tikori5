@@ -631,7 +631,6 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                             $result = $_model->findWhere(array($_byFields, '=', $values));
                         } elseif (is_array($values) and $this->_isOrdered($values)) {
                             reset($values);
-                            var_dump('1', $this->_isOrdered($values), $values);
                             $result = $_model->findWhere(array($_byFields, 'BETWEEN', array(current($values), end($values))));
                         } else {
                             $result = $_model->findWhere(array($_byFields, 'IN', $values));

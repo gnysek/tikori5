@@ -175,3 +175,6 @@ microframeworks/*
 app/cache/*
 docs/app/cache/*
 tests/app/cache/*
+
+log/*
+tests/log/*

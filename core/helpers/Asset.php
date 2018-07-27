@@ -44,7 +44,7 @@ class Asset
         $filesToMerge = array();
 
         foreach ($listOfCssFiles as $cssFile) {
-            if (stripos('http', $cssFile) === 0) {
+            if (stripos($cssFile, 'http') === 0) {
                 $externalFiles[] = self::cssAsset($cssFile);
             } else {
                 $filesToMerge[] = ltrim($cssFile, '/\\');
@@ -118,7 +118,7 @@ class Asset
         }
         $filename = TIKORI_FPATH . '/../' . $relativeFilePath;
 
-        if (stripos('http', $relativeFilePath) === 0) { //http / https
+        if (stripos($relativeFilePath, 'http') === 0) { //http / https
             return sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholder : self::$_jsPlaceholder, $filepath);
         }
 

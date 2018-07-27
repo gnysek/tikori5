@@ -24,7 +24,6 @@ class Error
             if (ob_get_level()) {
                 ob_clean();
                 ob_end_clean();
-
             }
 
             $exception = new \ErrorException($error['message'], $error['type'], 1, $error['file'], $error['line']);
