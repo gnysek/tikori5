@@ -137,8 +137,11 @@ class TProfiler
             Core::app()->toolbar->putValueToTab('loadedClasses', implode('<br>', $classes));
             Core::app()->toolbar->setNotificationsNumberOnTab('loadedClasses', count($classes));
 
-            Core::app()->toolbar->addStatus(sprintf('Zapytań do bazy: %s.', Core::app()->db->queries()));
-            Core::app()->toolbar->addStatus(sprintf('Czas generowania strony: %ss.', Core::genTimeNow()));
+            Core::app()->toolbar->addStatus(sprintf('Zużycie pamięci: <kbd>%s MB</kbd>', round(memory_get_peak_usage(false) / 1024 / 1024, 4)));
+            Core::app()->toolbar->addStatus(sprintf('(~<kbd>%s MB</kbd>)', round(memory_get_peak_usage(true) / 1024 / 1024, 4)));
+
+            Core::app()->toolbar->addStatus(sprintf('Zapytań do bazy: <kbd>%s</kbd>.', Core::app()->db->queries()));
+            Core::app()->toolbar->addStatus(sprintf('Czas generowania strony: <kbd>%ss</kbd>.', Core::genTimeNow()));
 
             return '';
         }
