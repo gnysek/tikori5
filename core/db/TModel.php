@@ -1254,10 +1254,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     {
         if (is_array($values)) {
             // TODO: default value setting by column type//probablu moved now to populate
-            foreach (array_keys($values) as $field) {
-                if (isset($values[$field])) {
-                    $this->__set($field, $values[$field]);
-                }
+            foreach ($values as $field => $value) {
+                $this->__set($field, $value);
             }
         } else {
             //TODO: throw error or no?

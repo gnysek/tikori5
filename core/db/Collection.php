@@ -362,11 +362,20 @@ class Collection implements ArrayAccess, Iterator, Countable
      * @param $function
      * @return Collection
      */
-    public function getWhere($function) {
+    public function getWhere($function, $additionalParams = array()) {
         $values = array();
+
         foreach ($this->_data as $record) {
-            if ($function($record) == true) {
-                $values[] = $record;
+
+            if (count($additionalParams)) {
+                $result = call_user_func_array($function, array($record) + $additionalParams);
+                if ($result == true) {
+                    $values[] = $record;
+                }
+            } else {
+                if ($function($record) == true) {
+                    $values[] = $record;
+                }
             }
         }
 
