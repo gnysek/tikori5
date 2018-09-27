@@ -272,9 +272,9 @@ class Error
 
             $html[] = '<p class="pink">' . $dispName . ':' . $line . '</p>' . PHP_EOL;
             $html[] = '<p><code class="prettyprint lang-php highlight linenums:' . $line . '">'; #onclick="$(\'#' . $index . '\').toggle();"
-            $html[] = '<span class="num nocode">' . sprintf('%04d', $line) . '.</span>';
-            $html[] = ltrim(substr($file[min(count($file), $line) - 1], 0, 85)) . '<br/>';
-            $html[] = '<span class="num nocode">   &raquo;</span>';
+            #$html[] = '<span class="num nocode">' . sprintf('%04d', $line) . '.</span>';
+            $html[] = ltrim(self::shortify($file[min(count($file), $line) - 1])) . '<br/>';
+            #$html[] = '<span class="num nocode">   &raquo;</span>';
             if (!empty($trace['class'])) {
                 $html[] = $trace['class'];
             }
@@ -344,6 +344,15 @@ class Error
         }
 
         return implode('', $html);
+    }
+
+    private static function shortify($text)
+    {
+        if (strlen($text) > 85) {
+            return htmlspecialchars(substr($text, 0, 85)) . '&hellip;';
+        }
+
+        return htmlspecialchars($text);
     }
 
 }

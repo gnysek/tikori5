@@ -20,37 +20,38 @@ class TDbSchema
     const TYPE_BOOLEAN = 'boolean';
     const TYPE_MONEY = 'money';
 
+    const CACHE_SCHEMA = '__TBSCHEMA__';
+
     /**
      * @var array mapping from physical column types (keys) to abstract column types (values)
      */
-    public $typeMap
-        = array(
-            'tinyint'    => self::TYPE_SMALLINT,
-            'bit'        => self::TYPE_SMALLINT,
-            'smallint'   => self::TYPE_SMALLINT,
-            'mediumint'  => self::TYPE_INTEGER,
-            'int'        => self::TYPE_INTEGER,
-            'integer'    => self::TYPE_INTEGER,
-            'bigint'     => self::TYPE_BIGINT,
-            'float'      => self::TYPE_FLOAT,
-            'double'     => self::TYPE_FLOAT,
-            'real'       => self::TYPE_FLOAT,
-            'decimal'    => self::TYPE_DECIMAL,
-            'numeric'    => self::TYPE_DECIMAL,
-            'tinytext'   => self::TYPE_TEXT,
-            'mediumtext' => self::TYPE_TEXT,
-            'longtext'   => self::TYPE_TEXT,
-            'text'       => self::TYPE_TEXT,
-            'varchar'    => self::TYPE_STRING,
-            'string'     => self::TYPE_STRING,
-            'char'       => self::TYPE_STRING,
-            'datetime'   => self::TYPE_DATETIME,
-            'year'       => self::TYPE_DATE,
-            'date'       => self::TYPE_DATE,
-            'time'       => self::TYPE_TIME,
-            'timestamp'  => self::TYPE_TIMESTAMP,
-            'enum'       => self::TYPE_STRING,
-        );
+    public $typeMap = array(
+        'tinyint'    => self::TYPE_SMALLINT,
+        'bit'        => self::TYPE_SMALLINT,
+        'smallint'   => self::TYPE_SMALLINT,
+        'mediumint'  => self::TYPE_INTEGER,
+        'int'        => self::TYPE_INTEGER,
+        'integer'    => self::TYPE_INTEGER,
+        'bigint'     => self::TYPE_BIGINT,
+        'float'      => self::TYPE_FLOAT,
+        'double'     => self::TYPE_FLOAT,
+        'real'       => self::TYPE_FLOAT,
+        'decimal'    => self::TYPE_DECIMAL,
+        'numeric'    => self::TYPE_DECIMAL,
+        'tinytext'   => self::TYPE_TEXT,
+        'mediumtext' => self::TYPE_TEXT,
+        'longtext'   => self::TYPE_TEXT,
+        'text'       => self::TYPE_TEXT,
+        'varchar'    => self::TYPE_STRING,
+        'string'     => self::TYPE_STRING,
+        'char'       => self::TYPE_STRING,
+        'datetime'   => self::TYPE_DATETIME,
+        'year'       => self::TYPE_DATE,
+        'date'       => self::TYPE_DATE,
+        'time'       => self::TYPE_TIME,
+        'timestamp'  => self::TYPE_TIMESTAMP,
+        'enum'       => self::TYPE_STRING,
+    );
 
     /**
      * @var TDbTableSchema[]
@@ -61,6 +62,7 @@ class TDbSchema
      * @param $name
      * @param bool $refresh
      * @return null|TDbTableSchema
+     * @throws Exception
      */
     public function getTableSchema($name, $refresh = false)
     {
@@ -69,22 +71,25 @@ class TDbSchema
             return $this->_tables[$name];
         }
 
-        return $this->loadTableSchema($name);
+        return $this->loadTableSchema($name, $refresh === true);
     }
 
     /**
      * @param $name
+     * @param bool $forceRefresh
      * @return null|TDbTableSchema
+     * @throws DbError
      */
-    public function loadTableSchema($name)
+    public function loadTableSchema($name, $forceRefresh = false)
     {
         Profiler::addLog('GETTING TABLE INFO v2 ' . $name, 1);
 
         $table = new TDbTableSchema();
         $this->_resolveTableNames($table, $name);
 
-        $cached = Core::app()->cache->loadCache('__TBSCHEMA__' . $table->name, array());
-        if (!empty($cached)) {
+        $cached = Core::app()->cache->loadCacheIfFresh(self::CACHE_SCHEMA . $table->name, CACHE::HOUR, array()); // one hour
+        if (!empty($cached) and $forceRefresh === false) {
+            Profiler::addNotice('Loaded ' . $name . ' schema');
             list($columns, $pk, $foreign) = unserialize($cached);
             $table->columns = $columns;
             $table->primaryKey = $pk;
@@ -92,20 +97,21 @@ class TDbSchema
             return $this->_tables[$name] = $table;
         } else {
             if ($this->findColumns($table)) {
+                Profiler::addNotice('Refreshed ' . $name . ' schema');
                 $this->findConstraints($table);
                 $this->_cacheSchema($table);
                 return $this->_tables[$name] = $table;
             }
-        }
 
-        return NULL;
+            throw new \DbError(sprintf('Can\'t load <kbd>`%s`</kbd> table schema info. Table not exists.', $name));
+        }
     }
 
     /**
      * @param $table TdbTableSchema
      */
     private function _cacheSchema($table) {
-        Core::app()->cache->saveCache('__TBSCHEMA__' . $table->name, serialize(array(
+        Core::app()->cache->saveCache(self::CACHE_SCHEMA . $table->name, serialize(array(
             $table->columns,
             $table->primaryKey,
             $table->foreignKeys
@@ -113,7 +119,7 @@ class TDbSchema
     }
 
     public function clearSchemaCache() {
-        CacheableBlock::clearByTags(array('__TBSCHEMA__'));
+        CacheableBlock::clearByTags(array(self::CACHE_SCHEMA));
         $this->_tables = array();
     }
 
@@ -122,6 +128,11 @@ class TDbSchema
         return array_keys($this->_tables);
     }
 
+    /**
+     * @param $table
+     * @return bool
+     * @throws Exception
+     */
     public function hasTable($table) {
         return $this->getTableSchema($table) === null ? false : true;
     }
@@ -299,6 +310,15 @@ class TDbSchema
         } else {
             return 'string';
         }
+    }
+
+    public function getColumnSimplifiedType($type)
+    {
+        if (isset($this->typeMap[$type])) {
+            return $this->typeMap[$type];
+        }
+
+        return $type;
     }
 
     /**

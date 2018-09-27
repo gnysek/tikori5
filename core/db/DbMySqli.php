@@ -94,14 +94,16 @@ class DbMySqli extends DBAbstract
                     if (empty($_b['file'])) {
                         $db[] = ' > ' . $_b['class'] . '::' . $_b['function'];
                     } else {
-                        if (preg_match('#(?:\\\\|\/)app(?:\\\\|\/)#', $_b['file'])) {
+                        // eliminate /core/tikori, but keep core modules/views
+                        if (preg_match('#(?:\\\\|\/)(app|modules|view|theme)(?:\\\\|\/)#', $_b['file'])) {
                             $db[] = ' > ' . (!empty($_b['file']) ? $_b['file'] : '--') . ':' . (!empty($_b['line']) ? $_b['line'] : '0');
                         }
                     }
                 }
 
                 $str = '';
-                if ($db[count($db) - 1] != $this->_last_debug_src) {
+                // dont add path if it's same line as previously - usually it's a eager/lazy load
+                if (count($db) > 0 and $db[count($db) - 1] != $this->_last_debug_src) {
                     $str = '<div style="border-top: 1px solid black; margin: 10px 0;"></div><tt>' . implode('<br/>', $db) . '</tt>';
                     $this->_last_debug_src = $db[count($db) - 1];
                 }

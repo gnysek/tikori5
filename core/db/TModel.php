@@ -820,6 +820,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     /**
      * Updates current model values in database under same primary key
      *
+     * @param bool $force
      * @return bool
      * @throws DbError
      */
@@ -1098,6 +1099,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return (!empty($this->_errors));
     }
 
+    /**
+     * TODO: empty body
+     */
     public function clearErrors()
     {
 
@@ -1113,6 +1117,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return $this->_schema->getColumnNames();
     }
 
+    /**
+     * TODO: empty body
+     */
     public function attributeLabels()
     {
 
@@ -1151,6 +1158,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return $this->_isNewRecord;
     }
 
+    /**
+     * TODO empty body
+     */
     public function scopes()
     {
 
@@ -1548,10 +1558,5 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     {
         unset($this->$offset);
     }
-
-}
-
-class ModelData
-{
 
 }

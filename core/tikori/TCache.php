@@ -40,10 +40,10 @@ class TCache extends TModule
     /**
      * Saves to cache
      *
-     * @param type $filename
-     * @param type $content
+     * @param string $filename
+     * @param string $content
      *
-     * @return type
+     * @return bool
      */
     public function saveCache($filename, $content)
     {
@@ -58,29 +58,49 @@ class TCache extends TModule
     /**
      * Loads cache
      *
-     * @param type $filemane filename to load
-     * @param type $defaultContent default content returned
+     * @param string $filename filename to load
+     * @param mixed $defaultContent default content returned
      *
-     * @return type
+     * @param bool $dontReturnMsg
+     * @return bool|string
      */
-    public function loadCache($filemane, $defaultContent = null, $dontReturnMsg = false)
+    public function loadCache($filename, $defaultContent = null, $dontReturnMsg = false)
     {
-        if ($this->findCache($filemane)) {
-            return file_get_contents($this->cachePath . $filemane);
+        if ($this->findCache($filename)) {
+            return file_get_contents($this->cachePath . $filename);
         } else {
-            return ($defaultContent === null) ? (($dontReturnMsg === false) ? '[Cache is empty]' : $defaultContent)
+            return ($defaultContent === null)
+                ? (($dontReturnMsg === false) ? '[Cache is empty]' : $defaultContent)
                 : $defaultContent;
+        }
+    }
+
+    /**
+     * @param $filename
+     * @param $maxage
+     * @param null $defaultContent
+     * @param bool $dontReturnMsg
+     * @return bool|null|string
+     */
+    public function loadCacheIfFresh($filename, $maxage, $defaultContent = null, $dontReturnMsg = false)
+    {
+        if (!$this->isFresh($filename, $maxage)) {
+            return ($defaultContent === null)
+                ? (($dontReturnMsg === false) ? '[Cache is empty]' : $defaultContent)
+                : $defaultContent;
+        } else {
+            return $this->loadCache($filename, $defaultContent, $dontReturnMsg);
         }
     }
 
     /**
      * Gets last modification time
      *
-     * @param type $filename
-     * @param type $check
-     * @param type $distance
+     * @param string $filename
+     * @param bool $check
+     * @param int $distance
      *
-     * @return type
+     * @return mixed|bool
      */
     public function lastMtime($filename, $check = false, $distance = 0)
     {
