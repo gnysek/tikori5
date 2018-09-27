@@ -12,7 +12,7 @@
 				#echo $e->getMessage();
 				$exists = false;
 			}; ?>
-			<?php echo Html::link($table[0], array('rad/modelCreate', 'model' => $table[0]), array('style'=>($exists) ? 'background-color: yellowgreen;' : '')); ?> <kbd><?php echo $modelName; ?></kbd>
+			<?php echo Html::link($table[0], array('rad/modelCreate', 'model' => $table[0]), array('style'=>($exists) ? 'background-color: yellowgreen;' : '')); ?> <kbd>class <?php echo $modelName; ?></kbd>
 		</li>
     <?php endforeach; ?>
 </ol>
