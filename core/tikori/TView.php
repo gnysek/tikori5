@@ -7,6 +7,7 @@ class TView
     protected $_cssFiles = array();
     protected $_themes = array();
     protected $_usedTheme = 'default';
+    public $context = null;
     public $area = null;
 
     public function __construct()
@@ -34,6 +35,13 @@ class TView
         }
     }
 
+    /**
+     * @param null $file
+     * @param null $data
+     * @param bool $return
+     * @return string
+     * @throws Exception
+     */
     public function render($file = NULL, $data = NULL, $return = false)
     {
         //TODO: no error when file not found?
@@ -59,11 +67,24 @@ class TView
         }
     }
 
+    /**
+     * @param $file
+     * @param null $data
+     * @param bool $return
+     * @return string
+     * @throws Exception
+     */
     public function renderPartial($file, $data = NULL, $return = true)
     {
         return $this->renderPartialInContext($file, null, $data, $return);
     }
 
+    /**
+     * @param $file
+     * @param null $data
+     * @param bool $return
+     * @throws Exception
+     */
     public function renderIfAjax($file, $data = NULL, $return = false) {
         if (Core::app()->request->isAjax()) {
             $this->renderPartial($file, $data , $return);
@@ -72,6 +93,14 @@ class TView
         }
     }
 
+    /**
+     * @param $file
+     * @param null $context
+     * @param null $data
+     * @param bool $return
+     * @return string
+     * @throws Exception
+     */
     public function renderPartialInContext($file, $context = null, $data = null, $return = true)
     {
         if ($filename = $this->_findViewFile($file, $context)) {
@@ -107,9 +136,10 @@ class TView
     }
 
     /**
-     * @param string      $view
+     * @param string $view
      * @param null|object $context
      * @return bool
+     * @throws ReflectionException
      */
     public function viewExists($view, $context = null)
     {
@@ -121,9 +151,10 @@ class TView
     const TEMPLATE_CACHE = '__TEMPLATES__';
 
     /**
-     * @param string      $file
+     * @param string $file
      * @param null|object $context
      * @return bool|string
+     * @throws ReflectionException
      */
     protected function _findViewFile($file, $context = null)
     {
@@ -140,7 +171,7 @@ class TView
         //     die();
         // }
 
-        $cacheList = array('');
+        $cacheList = array();
 
         if (isset($this->controller) and !empty($this->_themes)) {
             $cacheList = $this->_themes + array('');
@@ -170,10 +201,18 @@ class TView
 
             $modules = Core::app()->cfg('modules');
             if (!empty($modules)) {
+
+                if ($context == null and $this->context !== null) {
+                    $context = $this->context;
+                }
+
                 $reflection = new ReflectionClass(($context !== null && is_object($context)) ? $context : $this);
-                $currentModule = strtolower(
-                    preg_replace('#(?:.*?)modules(?:\\\|/)([a-zA-Z0-9_]*)(?:.*)#i', '$1', $reflection->getFilename())
-                );
+                $currentModule = null;
+                if (preg_match('/(?:\/|\\\)modules(?:\/|\\\)/', $reflection->getFileName())) {
+                    $currentModule = strtolower(
+                        preg_replace('#(?:.*?)modules(?:\\\|/)([a-zA-Z0-9_]*)(?:.*)#i', '$1', $reflection->getFilename())
+                    );
+                }
 
                 if (!empty($currentModule)) {
                     foreach ($modules as $module => $config) {

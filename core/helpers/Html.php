@@ -13,7 +13,6 @@ class Html
         $_url = self::url($url);
         self::_linkCheckActiveClass($options, $_url);
         return html::htmlTag('a', $options + array('href' => $_url, 'title' => htmlspecialchars(trim(strip_tags($text)))), $text);
-//        return '<a href="' . self::url($url) . '"' . implode(' ', $opt) . '>' . $text . '</a>';
     }
 
     public static function linkTagWrapped($wrap = 'li', $text, $url, $wrapOptions = array(), $options = array())
@@ -32,6 +31,7 @@ class Html
 
     protected static function _linkCheckActiveClass(& $options, $url)
     {
+        $url = str_replace(Core::app()->baseUrl(), '', $url); // as $url comes with http(s)
         $current = Core::app()->request != NULL ? trim(Core::app()->request->getRouterPath(), '/') : '';
 
         if (Core::app()->route) {

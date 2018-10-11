@@ -12,6 +12,7 @@
  * @property array $autoloadPaths  Array of autoload paths
  * @property Observer $observer
  * @property Cookie $cookie
+ * @property ToolbarModule $toolbar
  */
 class Tikori extends Application
 {
@@ -290,4 +291,9 @@ function __()
     if (Core::app()->lang != NULL) {
         return Core::app()->lang->translate($args);
     }
+}
+
+function clamp($min, $current, $max)
+{
+    return max($min, min($max, $current));
 }

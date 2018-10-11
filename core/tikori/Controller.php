@@ -27,7 +27,9 @@ class Controller extends ControllerView
         Profiler::addLog('&bull; New controller <code>' . get_called_class() . '</code> Created');
         $this->area = $area;
         $this->scope = $scope;
-        $this->pageTitle = Core::app()->cfg('appName');
+        if ($this->pageTitle === '') { // only if not changed in child class
+            $this->pageTitle = Core::app()->cfg('appName');
+        }
         $this->afterConstruct();
         // if HMVC will come some day, this need to be changed
         $this->request = Core::app()->request;
@@ -280,10 +282,17 @@ class Controller extends ControllerView
         $this->params = array_merge($this->params, $params);
     }
 
+    /**
+     * @param int $status
+     * @throws Exception
+     * @return null
+     */
     public function httpStatusAction($status = 404)
     {
         Core::app()->response->status($status);
         $this->render('http404', array('status' => $status, 'message' => Response::getMessageForCode($status)));
+
+        return null;
     }
 
     /**

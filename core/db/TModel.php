@@ -1260,6 +1260,10 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         }
     }
 
+    /**
+     * @param $values
+     * @return $this
+     */
     public function setAttributes($values)
     {
         if (is_array($values)) {
@@ -1270,6 +1274,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         } else {
             //TODO: throw error or no?
         }
+
+        return $this;
     }
 
     protected function _populateOnNewRecord()
@@ -1450,8 +1456,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             $head .= ($k == $this->getFirstPK()) ? '<th><u>' . $k . '</u></th>' : '<th>' . $k . '</th>';
 
             $modified = (!$this->isNewRecord() and in_array($k, $this->_modified));
+            $new = ($this->isNewRecord());
 
-            $row .= '<td' . ($modified ? ' style="background: pink;"' : '') . '>';
+            $row .= '<td' . ($modified ? ' style="background: pink;"' : ($new ? ' style="background: greenyellow;"' : '')) . '>';
             if ($modified) {
                 $row .= '<span style="color:red;">';
                 $row .= (($this->_original[$k] === null) ? ('<em>null</em>') : wordwrap($this->_original[$k], 50, '<br>', true));
