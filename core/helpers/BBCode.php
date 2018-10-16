@@ -18,7 +18,7 @@ class BBCode
         $text = preg_replace('#\[size=(.*?)\](.*?)\[/size\]#si', '<font size="$1">$2</font>', $text);
         $text = preg_replace('#\[color=(.*?)\](.*?)\[/color\]#si', '<span style="color: $1">$2</span>', $text);
         $text = preg_replace('#\[h1\](.*?)\[/h1\]#si', '<h1>$1</h1>', $text);
-        $text = self::nl2p($text);
+        $text = static::nl2p($text);
         return $text;
     }
 

@@ -468,7 +468,12 @@ class DbQuery
 
             // limit
             if ($this->_limit > -1) {
-                $sql[] = 'LIMIT ' . $this->_offset . ', ' . $this->_limit;
+
+                if ($this->_offset === null) {
+                    $sql[] = 'LIMIT ' . $this->_limit;
+                } else {
+                    $sql[] = 'LIMIT ' . $this->_offset . ', ' . $this->_limit;
+                }
             }
         }
 

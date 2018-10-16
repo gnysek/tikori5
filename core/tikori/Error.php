@@ -43,7 +43,7 @@ class Error
                     }
                     $stack[] = $frame;
                 }
-                $ref = new \ReflectionProperty('\Tikori\Exception', 'trace');
+                $ref = new \ReflectionProperty('\Exception', 'trace');
                 $ref->setAccessible(TRUE);
                 $ref->setValue($exception, $stack);
             }

@@ -40,6 +40,10 @@ class ControllerView extends TView
             $uniquename .= '_' . Core::app()->lang->currentLanguage;
         }
 
+        if (Core::app()->route->scope !== null) {
+            $uniquename .= '_' . Core::app()->route->scope;
+        }
+
         $block = new CacheableBlock($this, $uniquename, $tags);
         $exists = $block->checkCacheExists($time == 0 ? 0 : (time() - $time));
 
