@@ -47,6 +47,10 @@ class CacheableBlock
         $this->view = ($tview instanceof TView) ? $tview : new TView();
     }
 
+    /**
+     * @param int $time Set to 0 to be infinity
+     * @return bool
+     */
     public function checkCacheExists($time = 0)
     {
         if (Core::app()->mode !== Core::MODE_PROD && Core::app()->request->isHardRefresh()) return false;
