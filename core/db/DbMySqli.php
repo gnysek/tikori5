@@ -122,7 +122,7 @@ class DbMySqli extends DBAbstract
             Profiler::addLog('Exec finished');
             if ($result === false) {
                 $errNum = mysqli_errno($this->conn());
-                throw new DbError($errNum . ': ' . $this->conn()->error . '<br/><br/>' . $sql, $errNum);
+                throw new DbError($errNum . ': ' . $this->conn()->error . '<br/><br/><code>' . $sql . '</code>', $errNum);
             }
             return true;
         } else {

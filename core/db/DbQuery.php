@@ -40,7 +40,8 @@ class DbQuery
     }
 
     /**
-     * @return array|bool|Record
+     * @return array|bool|Collection|Record
+     * @throws DbError
      */
     public function execute()
     {
@@ -254,6 +255,11 @@ class DbQuery
         return (bool)count(array_filter(array_keys($array), 'is_string'));
     }
 
+    /**
+     * @param bool $lock
+     * @return string
+     * @throws DbError
+     */
     private function _parseSql($lock = false)
     {
         if ($this->_locked) {
@@ -524,7 +530,7 @@ class DbQuery
             return preg_replace('[^0-9\.]', '', str_replace(',', '.', $value));
         }
 
-        return Core::app()->db->protect($value);
+        return Core::app()->db->protect((string) $value);
     }
 
     private function _nullify($value = NULL)

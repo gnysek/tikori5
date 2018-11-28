@@ -72,10 +72,15 @@ class Error
      * @param int $errline
      * @param mixed $errcontext
      * @return bool
+     * @throws \Exception
      */
     public static function errh($errno, $errstr, $errfile, $errline, $errcontext)
     {
         //echo Error::display(new Exception($errstr, $errno), array('file' => $errfile, 'line' => $errline));
+        if (in_array($errno, array(E_WARNING))) {
+            self::log('[Muted Warning] ' . $errfile . ':' . $errline . ':: ' . $errstr);
+            return false;
+        }
         if (self::$enableStrict === false and in_array($errno, array(E_NOTICE, E_STRICT))) {
             return false;
         }
@@ -107,6 +112,7 @@ class Error
      * @param bool $dontExit
      *
      * @return string
+     * @throws \Exception
      */
     public static function display($exception, $isErrorHandler = false, $dontExit = false)
     {
