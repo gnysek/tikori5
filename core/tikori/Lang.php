@@ -11,6 +11,7 @@ class Lang
     public $usingLanguages = false;
     protected $_debug = false;
     protected $_debugMissingTranslations = array();
+    protected $_debugFilename = null;
 
     function __construct()
     {
@@ -56,6 +57,17 @@ class Lang
         }
 
         $this->_debug = Core::app()->cfg('languages/debug') == 'on';
+
+        if ($this->_debug) {
+            $this->_debugFilename = Log::logDir() . '/missing_lang__' . $this->currentLanguage . '.json';
+            if (file_exists($this->_debugFilename)) {
+                $this->_debugMissingTranslations = json_decode(file_get_contents($this->_debugFilename), true);
+
+                if (json_last_error()) {
+                    $this->_debugMissingTranslations = [];
+                }
+            }
+        }
 
         $this->loadLanguages($this->currentLanguage);
     }
@@ -146,7 +158,8 @@ class Lang
         }
     }
 
-    public function translateTo($lang, $args) {
+    public function translateTo($lang, $args)
+    {
         if (empty($args)) {
             throw new Exception('Trying to translate empty chain');
         }
@@ -174,6 +187,11 @@ class Lang
         return $text;
     }
 
+    /**
+     * @param $args
+     * @return null|string|string[]
+     * @throws \Exception
+     */
     public function translate($args)
     {
         return $this->translateTo($this->currentLanguage, $args);
@@ -181,8 +199,9 @@ class Lang
 
     function __destruct()
     {
-        if ($this->_debug && !empty($this->_debugMissingTranslations)) {
-            Log::write($this->_debugMissingTranslations, 'missing_langauges.log');
+        if ($this->_debug and count($this->_debugMissingTranslations)) {
+            natcasesort($this->_debugMissingTranslations);
+            file_put_contents($this->_debugFilename, json_encode(array_values($this->_debugMissingTranslations), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
         }
     }
 
