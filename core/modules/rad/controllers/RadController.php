@@ -159,6 +159,9 @@ class RadController extends Controller
                 mkdir($dir, 0755, true);
             }
             file_put_contents($src, implode(PHP_EOL, $buildFile));
+
+            Core::app()->cache->clearByTags(['TBSCHEMA']);
+
             $this->redirect('rad/model');
         } else {
             $this->render(

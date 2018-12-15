@@ -1,7 +1,8 @@
 <style>
     .dbg-close {
-        float: right;
-        margin-left: 2px;
+        position: absolute;
+        right: 10px;
+        top: 8px;
     }
 
     .dbg-close div {
@@ -91,6 +92,35 @@
         border-radius: 4px;
         padding: 0 4px;
     }
+
+    #unusedCssDbgTab code {
+        cursor: pointer;
+    }
+
+    #unusedCssDbgTab code:hover {
+        background: silver;
+    }
+
+    .debug-mark {
+        position: relative;
+    }
+
+    .debug-mark::after {
+        content: " ";
+        position: absolute;
+        display: block;
+        visibility: visible;
+        border: 2px dashed red;
+        border-radius: 0px;
+        z-index: 1000;
+        width: 100%;
+        height: 100%;
+
+        left: 0;
+        top: 0;
+
+        background-color: rgba(255, 0, 0, 0.5);
+    }
 </style>
 
 <?php $tabs[] = 'unusedCss';
@@ -111,9 +141,22 @@ $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>'); 
                 <span class="dbg-tab-close">&times;</span>
             </a>
         <?php endforeach; ?>
+
+        <div style="float: right; line-height: 27px;">
+            <?php echo $status; ?>
+        </div>
     </div>
 
-    <script>
+    <script type="text/javascript">
+
+        var toggleToolbarCookie = function(){};
+
+        if (Cookies) {
+            toggleToolbarCookie = function (hidden) {
+                Cookies.set('___debug_toolbar_mode', hidden ? '1' : '0', 365);
+            }
+        }
+
         function activateTab(tab, self) {
             //console.log($(self));
             $('[data-dbg-tab]:not(#tab-' + tab + ')').hide();
@@ -124,6 +167,7 @@ $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>'); 
 
         function showOrHide() {
             var show = !$('#tikori-dbg-inner').is(':visible');
+            toggleToolbarCookie(!show);
 
             if (!show) {
                 $('[data-dbg-tab]').hide();
@@ -137,18 +181,20 @@ $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>'); 
 
             $(this).blur();
         }
+
+        <?php if (Core::app()->cookie->getClean('___debug_toolbar_mode') == '1'): ?>
+        $().ready(function(){
+            showOrHide();
+        });
+        <?php endif; ?>
     </script>
 
-    <div class="dbg-close">
-        <div onclick="$('#tikori-dbg-toolbar , [data-dbg-tab]').remove();">&times;</div>
-    </div>
-
-    <div class="dbg-close" data-dbg-toggle>
+    <div class="dbg-close" data-dbg-toggle style="right: 43px;">
         <div onclick="showOrHide();">&raquo;</div>
     </div>
 
-    <div style="float: right; line-height: 27px;">
-        <?php echo $status; ?>
+    <div class="dbg-close">
+        <div onclick="$('#tikori-dbg-toolbar , [data-dbg-tab]').remove();">&times;</div>
     </div>
 
 </div>
@@ -163,6 +209,7 @@ $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>'); 
     </div>
 <?php endforeach; ?>
 
+<?php /* unused css */ ?>
 <script type="application/javascript">
     /*
     https://gist.github.com/kdzwinel/426a0f76f113643fa285
@@ -241,34 +288,3 @@ $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>'); 
         }, 100);
     }
 </script>
-
-<style>
-    #unusedCssDbgTab code {
-        cursor: pointer;
-    }
-
-    #unusedCssDbgTab code:hover {
-        background: silver;
-    }
-
-    .debug-mark {
-        position: relative;
-    }
-
-    .debug-mark::after {
-        content: " ";
-        position: absolute;
-        display: block;
-        visibility: visible;
-        border: 2px dashed red;
-        border-radius: 0px;
-        z-index: 1000;
-        width: 100%;
-        height: 100%;
-
-        left: 0;
-        top: 0;
-
-        background-color: rgba(255, 0, 0, 0.5);
-    }
-</style>

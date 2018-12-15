@@ -66,6 +66,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             }
         }
 
+        $this->_table = $this->getTable();
+        if (!is_array($this->_primaryKey)) {
+            $this->_primaryKey = array($this->_primaryKey);
+        }
+
         // set default values
         if (!empty($this->_fields)) {
             foreach ($this->_fields as $fieldName) {
@@ -76,10 +81,6 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             }
         }
         $this->_rules = $this->_prepareRules();
-        $this->_table = $this->getTable();
-        if (!is_array($this->_primaryKey)) {
-            $this->_primaryKey = array($this->_primaryKey);
-        }
         $this->_isNewRecord = $isNew;
 
         $this->_populate($attributes);
@@ -227,10 +228,17 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 //		return $this->findBy($this->_primaryKey, $value);
 //	}
 
+    /**
+     * @param $key
+     * @param $value
+     * @param bool $onlyFirst
+     * @return null|$this|TModel
+     * @throws Exception
+     */
     public function findBy($key, $value, $onlyFirst = false)
     {
         $results = $this->findWhere(array($key, '=', $value));
-        return ($onlyFirst && count($results) >= 1) ? $results[0] : null;
+        return ($onlyFirst && count($results) >= 1) ? $results[0] : $results;
         // it's now made in DbQuery
 //        if (!is_numeric($value)) {
 //            $value = Core::app()->db->protect($value);
@@ -258,7 +266,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * @param       $limit
      * @param int $offset
      * @param array $conditions
-     * @return Collection
+     * @return Collection|$this[]
      * @throws Exception
      */
     public function findWhere($where = null, $limit = -1, $offset = 0, $conditions = array())

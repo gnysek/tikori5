@@ -176,4 +176,13 @@ class TCache extends TModule
             }
         }
     }
+
+    /**
+     * @param array $tags
+     */
+    public function clearByTags($tags = array())
+    {
+        // todo body of function should be inside Cache class, not CacheableBlocks - swith it at some point
+        CacheableBlock::clearByTags($tags);
+    }
 }
