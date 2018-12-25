@@ -5,7 +5,7 @@
  *
  * @author   gnysek
  * @property int     $id
- * @property string  $name
+ * @property string  $title
  * @property boolean $enabled
  * @property string  $path
  * @property int     $parent

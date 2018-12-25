@@ -15,14 +15,16 @@ class ToolbarModule extends TModule
      */
     public function renderFinishedEvent($data)
     {
-        $view = new TView();
+        if (Core::app()->mode != Core::MODE_PROD) {
+            $view = new TView();
 
-        $output = $view->renderPartialInContext('toolbar', $this, array('tabs' => $this->_tabs, 'nf' => $this->_notificationNum, 'values' => $this->_tabValues, 'status' => implode(' | ', $this->_status)));
+            $output = $view->renderPartialInContext('toolbar', $this, array('tabs' => $this->_tabs, 'nf' => $this->_notificationNum, 'values' => $this->_tabValues, 'status' => implode(' | ', $this->_status)));
 
-        if (stripos($data['output'], '</body>') > 1) {
-            $data['output'] = str_replace('</body>', $output . '</body>', $data['output']);
-        } else {
-            $data['output'] .= $output;
+            if (stripos($data['output'], '</body>') > 1) {
+                $data['output'] = str_replace('</body>', $output . '</body>', $data['output']);
+            } else {
+                $data['output'] .= $output;
+            }
         }
     }
 

@@ -232,7 +232,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * @param $key
      * @param $value
      * @param bool $onlyFirst
-     * @return null|$this|TModel
+     * @return null|$this|TModel|Collection
      * @throws Exception
      */
     public function findBy($key, $value, $onlyFirst = false)
