@@ -351,7 +351,7 @@ class Request extends DefaultObject
 
         if (!empty($_GET)) {
             foreach ($_GET as $k => $v) {
-                $this->_get[$k] = trim(preg_replace('#[^a-z0-9/_\-%]#i', '', $v));
+                $this->_get[$k] = trim(preg_replace('#[^a-z0-9/_\-%\s]#i', '', $v));
             }
         }
 

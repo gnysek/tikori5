@@ -98,9 +98,15 @@ class Error
             file_put_contents(TIKORI_ROOT . '/log/' . $file, '');
         }
 
+        $url = ' [ url not known ]';
+
+        if (isset($_SERVER['HTTP_HOST'])) {
+            $url = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        }
+
         $f = fopen(TIKORI_ROOT . '/log/' . $file, 'a+');
         fwrite($f, str_repeat('-', 80) . PHP_EOL);
-        fwrite($f, date('d.m.Y H:i:s') . ': ' . PHP_EOL . var_export($data, true) . PHP_EOL);
+        fwrite($f, date('d.m.Y H:i:s') . ': ' . PHP_EOL . $url . PHP_EOL . var_export($data, true) . PHP_EOL);
         fclose($f);
     }
 

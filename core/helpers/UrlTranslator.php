@@ -2,7 +2,7 @@
 
 class UrlTranslator
 {
-    static function getUrlToScope($website, $lang = '')
+    public static function getUrlToScope($website, $lang = '')
     {
         $scopeList = Core::app()->cfg('scopes', array());
 
@@ -12,12 +12,12 @@ class UrlTranslator
             $domains = $scopeList[$scope]['domains'];
 
             if (is_array($domains)) {
-                $domain = Core::app()->getMode() != Core::MODE_PROD ? $domains[0] : $domains[1];
+                $domain = (Core::app()->getMode() == Core::MODE_PROD and count($domains) > 1) ? $domains[1] : $domains[0];
             } else {
                 $domain = $domains;
             }
 
-            return 'http://' . $domain . '/';
+            return 'http' . (Core::app()->request->isSecure() ? 's' : '') . '://' . $domain . '/';
         }
     }
 }
