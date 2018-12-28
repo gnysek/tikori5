@@ -22,7 +22,7 @@ class Core
     const MODE_DEBUG = -1;
     const MODE_PROD = 0;
     const MODE_DEV = 1;
-    const VERSION = '5.0.0&alpha;';
+    const VERSION = '5.18.0';
 
     /**
      * @var Core Main app class

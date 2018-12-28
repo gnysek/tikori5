@@ -60,6 +60,11 @@ class Tikori extends Application
         return 'DbPDO';
     }
 
+    /**
+     * @param $config
+     * @return bool
+     * @throws Exception
+     */
     public function run($config) {
 
         if (file_exists('.maintenance')) {
@@ -147,6 +152,15 @@ class Tikori extends Application
 
         // process route
         $this->route = Route::process_uri($this->request->getRouterPath());
+
+        if ($this->route == null) {
+            $this->route = Route::process_uri('');
+        }
+
+        if ($this->route == null) {
+            // if still
+            throw new Exception('No routers defined for empty path');
+        }
 
         Profiler::addLog('Route processed and is ' . (($this->route == NULL) ? 'not found' : 'found'));
 

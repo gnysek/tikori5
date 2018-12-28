@@ -57,6 +57,7 @@ class Error
      * Handler for set_exception_handler
      *
      * @param \Exception|\Throwable $exception catched Exception
+     * @throws \Exception
      */
     public static function exch($exception)
     {

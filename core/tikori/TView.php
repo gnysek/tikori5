@@ -166,6 +166,11 @@ class TView
             }
         }
 
+        if (!is_array(self::$_viewFiles)) {
+            // in case of json_decode fail
+            self::$_viewFiles = array();
+        }
+
         // if (!is_array(self::$_viewFiles)) {
         //     var_dump(self::$_viewFiles);
         //     die();
@@ -269,7 +274,7 @@ class TView
 
     public function __destruct()
     {
-        if (self::$_viewFilesChanged) {
+        if (self::$_viewFilesChanged and is_array(self::$_viewFiles)) {
             ksort(self::$_viewFiles);
             Core::app()->cache->saveCache(self::TEMPLATE_CACHE, json_encode(self::$_viewFiles));
             self::$_viewFilesChanged = false;
