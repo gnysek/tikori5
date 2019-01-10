@@ -224,6 +224,9 @@ class Collection implements ArrayAccess, Iterator, Countable
         $this->_data = array();
     }
 
+    /**
+     * @return mixed|null|TModel|$this
+     */
     public function getFirst()
     {
         if (!empty($this->_data)) {

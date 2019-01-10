@@ -131,10 +131,14 @@ class TDbSchema
     /**
      * @param $table
      * @return bool
-     * @throws Exception
      */
     public function hasTable($table) {
-        return $this->getTableSchema($table) === null ? false : true;
+        try {
+            // TODO in fact it never returns null if table exists - check why
+            return $this->getTableSchema($table) === null ? false : true;
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     public function quoteValue($str)
