@@ -97,15 +97,15 @@ class Html
             }
         }
 
+        // external
+        if (preg_match('/^(\/*)http.*/', $url[0])) { // in case / or // was added, include it here also
+            return $url[0];
+        }
+
         $scope = null;
         if (array_key_exists(self::SCOPE_KEY, $url)) {
             $scope = $url[self::SCOPE_KEY];
             unset($url[self::SCOPE_KEY]);
-        }
-
-        // external
-        if (preg_match('/^http.*/', $url[0])) {
-            return $url[0];
         }
 
         $script = '';
