@@ -186,7 +186,9 @@ class Controller extends ControllerView
                     call_user_func_array(array($this, $this->getActionMethodName()), $finalParams);
                     $this->_afterAction();
                 } else {
-                    $this->httpStatusAction(404);
+                    if (Core::app()->response->status() == 200) {
+                        $this->httpStatusAction(404);
+                    }
                 }
                 // end buffer
                 $response = ob_get_clean();
