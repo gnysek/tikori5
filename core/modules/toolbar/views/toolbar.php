@@ -147,6 +147,11 @@ $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>'); 
         </div>
     </div>
 
+    <div style="display: inline-block;">
+        &nbsp;<a class="dbg-tab-link" onclick="highlightTemplates();" style="padding: 5px 10px;">T</a>
+    </div>
+
+    <script>
     <script type="text/javascript">
 
         var toggleToolbarCookie = function(){};
@@ -187,6 +192,18 @@ $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>'); 
             showOrHide();
         });
         <?php endif; ?>
+
+        function highlightTemplates() {
+            $("*").contents().filter(function(){
+                return this.nodeType == 8;
+            }).each(function(i, e){
+                if (e.data.match(/START/g)) {$(e).replaceWith('<div class="xxx-comment-start"></div><div style="background:red; padding: 4px; border: 1px solid purple; border-width: 1px 1px 0 1px;">' + e.data + '</div>');}
+                if (e.data.match(/END/g)) {$(e).replaceWith('<div class="xxx-comment-end"></div>');}
+            });
+            $.each($('.xxx-comment-start'), function() {
+                $(this).nextUntil('.xxx-comment-end').wrapAll('<div style="border: 1px solid purple; border-width: 0 1px 1px 1px; margin: 2px;"></div>');
+            });
+        }
     </script>
 
     <div class="dbg-close" data-dbg-toggle style="right: 43px;">

@@ -97,6 +97,7 @@ class Error
 
         if (!file_exists(TIKORI_ROOT . '/log/' . $file)) {
             file_put_contents(TIKORI_ROOT . '/log/' . $file, '');
+            chmod(TIKORI_ROOT . '/log/' . $file, 0664);
         }
 
         $url = ' [ url not known ]';

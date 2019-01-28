@@ -249,7 +249,10 @@ class Core
             }
             require_once $filename;
             if (!class_exists($namespace . $class) && $throw) {
-                throw new Exception(sprintf('Class %s not found inside autoloaded file [%s]', $namespace . $class, $filename));
+                $_loaded_classes = get_declared_classes();
+                $f = array_search('Core', $_loaded_classes);
+                $_loaded_classes = implode(PHP_EOL, array_slice($_loaded_classes, $f));
+                throw new Exception(sprintf('Class <kbd>%s</kbd> not found inside autoloaded file [<kbd>%s</kbd>]. Loaded classes:<br><pre>%s</pre>', $namespace . $class, $filename, $_loaded_classes));
             }
 
             if (!array_key_exists($class, self::$foundClasses) or self::$foundClasses[$class] != $filename) {

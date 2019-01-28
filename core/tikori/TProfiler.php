@@ -141,7 +141,7 @@ class TProfiler
                 round(memory_get_peak_usage(false) / 1024 / 1024, 4),
                 round(memory_get_peak_usage(true) / 1024 / 1024, 4))
             );
-            Core::app()->toolbar->addStatus(sprintf('PHP %s', phpversion()));
+            Core::app()->toolbar->addStatus(sprintf('PHP %s', preg_replace('/((?:\+|-).*)/', '', phpversion())));
 
             Core::app()->toolbar->addStatus(sprintf('Zapytań do bazy: <kbd>%s</kbd>.', Core::app()->db->queries()));
             Core::app()->toolbar->addStatus(sprintf('Czas generowania strony: <kbd>%ss</kbd>.', Core::genTimeNow()));
