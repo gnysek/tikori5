@@ -151,7 +151,6 @@ $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>'); 
         &nbsp;<a class="dbg-tab-link" onclick="highlightTemplates();" style="padding: 5px 10px;">T</a>
     </div>
 
-    <script>
     <script type="text/javascript">
 
         var toggleToolbarCookie = function(){};
