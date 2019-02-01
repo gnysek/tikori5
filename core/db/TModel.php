@@ -713,12 +713,16 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     // eager
 
     /**
-     * @param $with
+     * @param array $with
      * @return $this
      * @throws Exception
      */
     public function with($with)
     {
+        if (func_num_args() > 1) {
+            throw new \Exception('->with() need to have only one param (single string of array of strings');
+        }
+
         if (empty($with)) {
             return $this;
         }

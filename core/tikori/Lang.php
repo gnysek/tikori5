@@ -158,6 +158,12 @@ class Lang
         }
     }
 
+    /**
+     * @param $lang
+     * @param array $args
+     * @return mixed|string|string[]|null
+     * @throws Exception
+     */
     public function translateTo($lang, $args)
     {
         if (empty($args)) {
