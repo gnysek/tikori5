@@ -1412,14 +1412,12 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 // VIA RELATION, eg 'field' => array(self::HAS_MANY, 'Model', ['Model_field', 'via' => ['ModelVia', 'self_id_field', 'model_id_fields']]),
                 if (is_array($_byField)) {
 
-                    $via_data = $_byField;
-
-                    if (!array_key_exists(self::RELATION_VIA, $via_data) or count($via_data[self::RELATION_VIA]) !== 3) {
+                    if (!array_key_exists(self::RELATION_VIA, $_byField) or count($_byField[self::RELATION_VIA]) !== 3) {
                         throw new DbError('Used VIA relation, but wrong number of parameters');
                     }
 
-                    $via_result = self::model($via_data[self::RELATION_VIA][0])->findWhere([$via_data[self::RELATION_VIA][1], 'IN', $customValues]);
-                    $linked = $via_result->getColumnValues($via_data[self::RELATION_VIA][2]);
+                    $via_result = self::model($_byField[self::RELATION_VIA][0])->findWhere([$_byField[self::RELATION_VIA][1], 'IN', $customValues]);
+                    $linked = $via_result->getColumnValues($_byField[self::RELATION_VIA][2]);
 
                     if (count($linked) == 0) {
                         return $this->_returnRelation($relationName, [], $populate);
@@ -1427,7 +1425,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
                     // fallback to default values, so proper ones will be used
                     $customValues = $linked;
-                    $_byField = $via_data[0];
+                    $_byField = $_byField[0];
                 }
                 // end of VIA relation
 
