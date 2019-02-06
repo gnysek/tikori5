@@ -1377,6 +1377,15 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return (array_key_exists($relationName, $this->_relations)) ? $this->_relations[$relationName][$field] : null;
     }
 
+    const RELATION_VIA = 'via';
+
+    /**
+     * @param $relationName
+     * @param bool $populate
+     * @param null $customValues
+     * @return Collection|mixed|TModel|TModel[]|null
+     * @throws DbError
+     */
     protected function _getRelated($relationName, $populate = true, $customValues = null)
     {
         // todo: if called again, will load again! should be fixed
@@ -1398,16 +1407,40 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     unset($conditions['with']);
                 }
 
+                $_byField = $this->_relations[$relationName][2];
+
+                // VIA RELATION, eg 'field' => array(self::HAS_MANY, 'Model', ['Model_field', 'via' => ['ModelVia', 'self_id_field', 'model_id_fields']]),
+                if (is_array($_byField)) {
+
+                    $via_data = $_byField;
+
+                    if (!array_key_exists(self::RELATION_VIA, $via_data) or count($via_data[self::RELATION_VIA]) !== 3) {
+                        throw new DbError('Used VIA relation, but wrong number of parameters');
+                    }
+
+                    $via_result = self::model($via_data[self::RELATION_VIA][0])->findWhere([$via_data[self::RELATION_VIA][1], 'IN', $customValues]);
+                    $linked = $via_result->getColumnValues($via_data[self::RELATION_VIA][2]);
+
+                    if (count($linked) == 0) {
+                        return $this->_returnRelation($relationName, [], $populate);
+                    }
+
+                    // fallback to default values, so proper ones will be used
+                    $customValues = $linked;
+                    $_byField = $via_data[0];
+                }
+                // end of VIA relation
+
                 if (is_array($customValues)) {
                     sort($customValues);
                 }
                 if (is_array($customValues) and count($customValues) == 1) {
-                    $result = $rel->with($with)->findWhere(array($this->_relations[$relationName][2], '=', $customValues[0]), -1, 0, $conditions);
+                    $result = $rel->with($with)->findWhere(array($_byField, '=', $customValues[0]), -1, 0, $conditions);
                 } elseif (is_array($customValues) and $this->_isOrdered($customValues)) {
                     reset($customValues);
-                    $result = $rel->with($with)->findWhere(array(array($this->_relations[$relationName][2], 'BETWEEN', array(current($customValues), end($customValues)))), -1, 0, $conditions);
+                    $result = $rel->with($with)->findWhere(array(array($_byField, 'BETWEEN', array(current($customValues), end($customValues)))), -1, 0, $conditions);
                 } else {
-                    $result = $rel->with($with)->findWhere(array(array($this->_relations[$relationName][2], 'IN', $customValues)), -1, 0, $conditions);
+                    $result = $rel->with($with)->findWhere(array(array($_byField, 'IN', $customValues)), -1, 0, $conditions);
                 }
                 break;
             case self::BELONGS_TO:
@@ -1424,6 +1457,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 throw new DbError('Unknown relation type ' . $this->_relations[$relationName][0]);
         }
 
+        return $this->_returnRelation($relationName, $result, $populate);
+    }
+
+    protected function _returnRelation($relationName, $result, $populate = true)
+    {
         if ($populate) {
             $this->_related[$relationName] = $result;
             return $this->_related[$relationName];

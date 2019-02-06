@@ -52,6 +52,7 @@ class TModelRelation implements ArrayAccess
      * @param mixed $value
      * @return void
      * @since 5.0.0
+     * @throws Exception
      */
     public function offsetSet($offset, $value)
     {
@@ -63,11 +64,11 @@ class TModelRelation implements ArrayAccess
      * @param mixed $offset
      * @return void
      * @since 5.0.0
+     * @throws Exception
      */
     public function offsetUnset($offset)
     {
         throw new Exception('Sorry, but relations cannot be changed this way!');
     }
-
 
 }
