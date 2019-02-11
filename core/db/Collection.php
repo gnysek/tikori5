@@ -312,6 +312,23 @@ class Collection implements ArrayAccess, Iterator, Countable
         return new Collection($values);
     }
 
+    /**
+     * @param $column
+     * @param array $values
+     * @return Collection|TModel[]|$this[]|self[]
+     */
+    public function getRowsWhereColumnValues($column, array $values = [])
+    {
+        $result = array();
+        foreach ($this->_data as $record) {
+            if (in_array($record[$column], $values)) {
+                $result[] = $record;
+            }
+        }
+
+        return new Collection($result);
+    }
+
     public function getFirstRowByColumnValue($column, $value)
     {
         $values = array();

@@ -384,8 +384,18 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                         /* @var Collection $related */
 //                        var_dump(count($related));
                         foreach ($return as $row) {
+                            if (count($related) == 0) {
+                                // because of VIA [eg.tags] can return just array
+                                // todo: fix this, it should be relation ?
+                                $toAssign = [];
+                            } elseif (array_key_exists($relationName, $this->_relationViaLinks)) {
+                                // relation VIA
+                                $toAssign = $related->getRowsWhereColumnValues($this->_relations[$relationName][2][0], $this->_relationViaLinks[$relationName][$row->$byField]);
+                            } else {
+                                $toAssign = $related->getRowsByColumnValue($this->_relations[$relationName][2], $row->$byField);
+                            }
+
 //                            var_dump($byField . ' ' . $row->$byField . ' ' . $this->_relations[$relationName][2]);
-                            $toAssign = $related->getRowsByColumnValue($this->_relations[$relationName][2], $row->$byField);
 //                            var_dump(count($toAssign));
                             /* @var TModel $row */
                             $row->populateRelation($relationName, $toAssign);
@@ -1379,6 +1389,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     const RELATION_VIA = 'via';
 
+    protected $_relationViaLinks = [];
+
     /**
      * @param $relationName
      * @param bool $populate
@@ -1422,6 +1434,18 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     if (count($linked) == 0) {
                         return $this->_returnRelation($relationName, [], $populate);
                     }
+
+                    // prepare data to collection assigments
+                    $__customLinks = [];
+                    foreach ($customValues as $val) {
+                        $__customLinks[$val] = [];
+                    }
+
+                    foreach ($via_result as $via_row) {
+                        $__customLinks[$via_row->{$_byField[self::RELATION_VIA][1]}][] = $via_row->{$_byField[self::RELATION_VIA][2]};
+                    }
+
+                    $this->_relationViaLinks[$relationName] = $__customLinks;//$via_result->toOptionArray($_byField[self::RELATION_VIA][1], $_byField[self::RELATION_VIA][2]);
 
                     // fallback to default values, so proper ones will be used
                     $customValues = $linked;
