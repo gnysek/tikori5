@@ -42,6 +42,7 @@ class Request extends DefaultObject
 
     private $_post = array();
     private $_get = array();
+    private $_getRaw = array();
 
     const UNKNOWN_BROWSER = 'Unknown';
 
@@ -351,7 +352,9 @@ class Request extends DefaultObject
 
         if (!empty($_GET)) {
             foreach ($_GET as $k => $v) {
+                //todo: allow utf-8 maybe ?
                 $this->_get[$k] = trim(preg_replace('#[^a-z0-9/_\-%\s]#i', '', $v));
+                $this->_getRaw[$k] = $v;
             }
         }
 
@@ -422,6 +425,15 @@ class Request extends DefaultObject
         }
 
         return (array_key_exists($key, $this->_get)) ? $this->_get[$key] : $this->getPost($key, $default);
+    }
+
+    public function getParamRaw($key = NULL, $default = NULL)
+    {
+        if (empty($key)) {
+            return $this->_getRaw;
+        }
+
+        return (array_key_exists($key, $this->_getRaw)) ? $this->_getRaw[$key] : $default;
     }
 
     public function forceParam($key, $value, $isGet = true)

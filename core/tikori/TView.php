@@ -3,8 +3,6 @@
 class TView
 {
 
-    protected $_jsFiles = array();
-    protected $_cssFiles = array();
     protected $_themes = array();
     protected $_usedTheme = 'default';
     public $context = null;
@@ -15,11 +13,15 @@ class TView
         // check that there are any defined layout media files
 
         if ($files = Core::app()->cfg('layout/css')) {
-            $this->_cssFiles = $files;
+            foreach($files as $css) {
+                Asset::requireCSS($css);
+            }
         }
 
         if ($files = Core::app()->cfg('layout/js')) {
-            $this->_jsFiles = $files;
+            foreach($files as $js) {
+                Asset::requireJS($js);
+            }
         }
 
         if ($themes = Core::app()->cfg('theme')) {
@@ -283,31 +285,6 @@ class TView
 
     public function pageTitle() {
         return (!empty($this->pageTitle)) ? $this->pageTitle : Core::app()->cfg('appName');
-    }
-
-    public function getCssForHead($prefix = '')
-    {
-        $return = array();
-
-        if (Core::app()->cfg('layout/cssmerge', false) == true) {
-            $return = Asset::mergeCssAssets($this->_cssFiles);
-        } else {
-            foreach ($this->_cssFiles as $cssSrc) {
-                $return[] = Asset::cssAsset($cssSrc);//'<link rel="stylesheet" href="' . $cssSrc . '">';
-            }
-        }
-
-        return implode(PHP_EOL . $prefix, $return);
-    }
-
-    public function getJsForHead($prefix = '')
-    {
-        $return = array();
-        foreach ($this->_jsFiles as $jsSrc) {
-            $return[] = '<script type="text/javascript" src="' . $jsSrc . '"></script>';
-        }
-
-        return implode(PHP_EOL . $prefix, $return);
     }
 
     public function __()

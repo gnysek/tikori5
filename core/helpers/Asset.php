@@ -12,6 +12,9 @@ class Asset
     protected static $_jsPlaceholder = '<script type="text/javascript" src="%s"></script>';
     protected static $_jsPlaceholderContent = '<script type="text/javascript">%s</script>';
 
+    protected static $_jsRequired = [];
+    protected static $_cssRequired = [];
+
     const TYPE_CSS = 1;
     const TYPE_JS = 2;
 
@@ -127,6 +130,42 @@ class Asset
         } else if (file_exists($filename)) {
             return (file_exists($filename)) ? sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholderContent : self::$_jsPlaceholderContent, file_get_contents($filename)) : '';
         }
+    }
+
+    public static function requireJS($relativeFilePath)
+    {
+        self::_requireAsset($relativeFilePath, self::TYPE_JS);
+    }
+
+    public static function requireCSS($relativeFilePath)
+    {
+        self::_requireAsset($relativeFilePath, self::TYPE_CSS);
+    }
+
+    protected static function _requireAsset($relativeFilePath, $type)
+    {
+        $varName = ($type == self::TYPE_CSS) ? '_cssRequired' : '_jsRequired';
+
+        if (!in_array($relativeFilePath, self::$$varName)) {
+            self::${$varName}[] = $relativeFilePath;
+        }
+    }
+
+    public static function getRequiredAssets($prefix = '')
+    {
+        if (Core::app()->cfg('layout/cssmerge', false) == true) {
+            $html = Asset::mergeCssAssets(self::$_cssRequired);
+        } else {
+            foreach (self::$_cssRequired as $css) {
+                $html[] = self::cssAsset($css);
+            }
+        }
+
+        foreach (self::$_jsRequired as $js) {
+            $html[] = self::jsAsset($js);
+        }
+
+        return implode(PHP_EOL . $prefix, $html);
     }
 
     public static function purgeAssets()
