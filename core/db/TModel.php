@@ -1431,7 +1431,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     $via_result = self::model($_byField[self::RELATION_VIA][0])->findWhere([$_byField[self::RELATION_VIA][1], 'IN', $customValues]);
                     $linked = $via_result->getColumnValues($_byField[self::RELATION_VIA][2]);
 
-                    if (count($linked) == 0) {
+                    if (count($linked) == 0 or !is_array($customValues)) {
                         return $this->_returnRelation($relationName, [], $populate);
                     }
 
