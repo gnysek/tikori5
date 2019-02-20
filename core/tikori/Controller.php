@@ -187,6 +187,7 @@ class Controller extends ControllerView
                     $this->_afterAction();
                 } else {
                     if (Core::app()->response->status() == 200) {
+                        ob_get_clean();
                         $this->httpStatusAction(404);
                     }
                 }
