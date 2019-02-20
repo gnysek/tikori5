@@ -45,4 +45,16 @@ class SingletonOptions
     {
         return self::create($table, $key, $value, $queryOptions, false);
     }
+
+    /**
+     * @param $table
+     * @param $key_column
+     * @param $value_column
+     * @param $values
+     */
+    public static function set($table, $key_column, $value_column, $values)
+    {
+        $arr_key = $table . '_' . $key_column . '_' . $value_column;
+        self::$_loaded[$arr_key] = $values;
+    }
 }
