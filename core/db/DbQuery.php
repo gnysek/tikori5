@@ -418,6 +418,13 @@ class DbQuery
 
                     $bld = '';
                     if (!in_array($this->_type, array(self::Q_UPDATE, self::Q_DELETE))) {
+                        if (!array_key_exists($_fromTable, $this->_fromAliases)) {
+                            throw new DbError(sprintf('Unknown table alias %s, only %s (for: %s) are found.',
+                                $_fromTable,
+                                implode(', ', array_keys($this->_fromAliases)),
+                                implode(', ', array_values($this->_fromAliases))
+                            ));
+                        }
                         $bld = '`' . $this->_fromAliases[$_fromTable] . '`.';
                     }
 
@@ -425,7 +432,7 @@ class DbQuery
                     //$afterCondition = ((is_string($w[2]) or is_array($w[2])) ? Core::app()->db->protect($w[2]) : $this->_nullify($w[2]));
                     $afterCondition = (is_string($w[2]) and preg_match('/\(SELECT/', $w[2])) ? $w[2] : $this->_formatAgainstType($_fromTable, $w[0], $w[2]);
 
-                    if (strtoupper($w[1]) == 'IN') {
+                    if (strtoupper($w[1]) == 'IN' or strtoupper($w[1]) == 'NOT IN') {
                         $afterCondition = '(' . $afterCondition . ')';
                     }
 

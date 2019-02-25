@@ -48,6 +48,11 @@ class ControllerView extends TView
         }
 
         $block = new CacheableBlock($this, $uniquename, $tags);
+
+        if ($time === false or $time === null) {
+            $time = -1;
+        }
+
         $exists = $block->checkCacheExists($time == 0 ? 0 : (time() - $time));
 
         if (!$exists) {
