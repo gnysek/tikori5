@@ -113,6 +113,7 @@ abstract class DbAbstract
     /**
      * @param $table
      * @return TDbTableSchema
+     * @throws Exception
      */
     public function getTableInfo($table)
     {
@@ -142,6 +143,15 @@ abstract class DbAbstract
             /* @var $table TDbColumnSchema */
             return $table->defaultValue;
         }
-        return null;
+        return false;
+    }
+
+    public function isTableColumnWithoutAnyDefaultValue($table, $column)
+    {
+        if ($table = $this->getTableInfo($table)->getColumn($column)) {
+            /* @var $table TDbColumnSchema */
+            return $table->defaultValue === null and $table->allowNull === false;
+        }
+        return false;
     }
 }

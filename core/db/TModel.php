@@ -386,8 +386,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                         foreach ($return as $row) {
                             if (count($related) == 0) {
                                 // because of VIA [eg.tags] can return just array
-                                // todo: fix this, it should be relation ?
-                                $toAssign = [];
+                                $toAssign = $related; //empty collection
                             } elseif (array_key_exists($relationName, $this->_relationViaLinks)) {
                                 // relation VIA
                                 $toAssign = $related->getRowsWhereColumnValues($this->_relations[$relationName][2][0], $this->_relationViaLinks[$relationName][$row->$byField]);
@@ -1410,7 +1409,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     $conditions = $this->_relations[$relationName][3];
                 }
                 if (empty($customValues)) {
-                    $customValues = $this->_values[$this->getFirstPK()];
+                    $customValues = [$this->_values[$this->getFirstPK()]];
                 }
 
                 $with = array();
@@ -1432,7 +1431,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     $linked = $via_result->getColumnValues($_byField[self::RELATION_VIA][2]);
 
                     if (count($linked) == 0 or !is_array($customValues)) {
-                        return $this->_returnRelation($relationName, [], $populate);
+                        return $this->_returnRelation($relationName, new Collection(), $populate);
                     }
 
                     // prepare data to collection assigments
