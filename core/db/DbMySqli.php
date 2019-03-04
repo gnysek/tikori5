@@ -85,6 +85,7 @@ class DbMySqli extends DBAbstract
         $this->_queryList[] = $sql;
 
         if (Core::app()->getMode() != Core::MODE_PROD) {
+            // add info about this query and it's location
             if (Core::app()->hasLoadedModule('toolbar')) {
                 $b = array_reverse(debug_backtrace(~DEBUG_BACKTRACE_PROVIDE_OBJECT));
 
@@ -110,12 +111,13 @@ class DbMySqli extends DBAbstract
 
                 $str .= sprintf('<code>%s</code>', $sql);
 
-                if (Core::app()->hasLoadedModule('toolbar')) {
-                    Core::app()->toolbar->putValueToTab('SQL', $str);
-                    Core::app()->toolbar->setNotificationsNumberOnTab('SQL', $this->_queries);
-                }
+                Core::app()->toolbar->putValueToTab('SQL', $str);
+                Core::app()->toolbar->setNotificationsNumberOnTab('SQL', $this->_queries);
+                Core::app()->toolbar->addCounter('SQL Query');
             }
         }
+
+        $time = Core::genTimeNow(10);
 
         if (preg_match('/^(create|drop|insert|update|delete|replace|alter|set|truncate)/i', trim($sql))) {
             $result = $this->conn()->query($sql);
@@ -130,6 +132,10 @@ class DbMySqli extends DBAbstract
             Profiler::addLog('Query finished');
         }
 
+        if (Core::app()->hasLoadedModule('toolbar')) {
+            Core::app()->toolbar->addTimer('SQL Query Time', Core::genTimeNow(10) - $time);
+        }
+
 
         if (!$result instanceof mysqli_result) {
 //            if (mysqli_error($this->conn())) {
@@ -140,6 +146,8 @@ class DbMySqli extends DBAbstract
             if ($result instanceof mysqli_result) {
                 $return = array();
                 if ($result->num_rows) {
+                    $time = Core::genTimeNow(10);
+
                     while ($row = $result->fetch_object('Record')) {
                         /* @var $row Record */
                         if ($assoc == false) {
@@ -148,6 +156,10 @@ class DbMySqli extends DBAbstract
                         $return[] = $row;
                     }
                     Profiler::addLog('Fetch & records creating finished');
+
+                    if (Core::app()->hasLoadedModule('toolbar')) {
+                        Core::app()->toolbar->addTimer('SQL Fetch Time', Core::genTimeNow(10) - $time);
+                    }
                     return $return;
                 } else {
                     return new Record();
@@ -188,7 +200,7 @@ class DbMySqli extends DBAbstract
     }
 
     /**
-     * @return mysqli
+     * @return mysqli|PDO
      */
     public function conn()
     {

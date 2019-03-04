@@ -59,7 +59,23 @@ class CacheableBlock
 
         if (file_exists($this->_cachedRealname)) {
             if ($time == 0 or filemtime($this->_cachedRealname) > $time) {
+                if (Core::app()->hasLoadedModule('Toolbar')) {
+                    Core::app()->toolbar->putValueToTab('Cache', sprintf(
+                            'Checked that <code>%s</code> cache is older than <kbd>%ss</kbd> and it exist, it will be purged in <kbd>%ss</kbd>.<br>',
+                            $this->_cachedRealname,
+                            time() - $time,
+                            $time == 0 ? 0 : ((time() - $time) - (time() - filemtime($this->_cachedRealname))))
+                    ,  Core::app()->toolbar->getNotificationsNumberOnTab('Cache') + 1);
+                }
                 return true;
+            } else {
+                if (Core::app()->hasLoadedModule('Toolbar')) {
+                    Core::app()->toolbar->putValueToTab('Cache', sprintf(
+                            'Checked that <code>%s</code> cache is older than <kbd>%ss</kbd> and it exist, it will be purged in <kbd>NOW</kbd>.<br>',
+                            $this->_cachedRealname,
+                            time() - $time)
+                    , Core::app()->toolbar->getNotificationsNumberOnTab('Cache') + 1);
+                }
             }
         }
 

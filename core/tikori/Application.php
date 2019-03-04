@@ -300,6 +300,7 @@ abstract class Application
      */
     public function setComponent($id, $module)
     {
+        $id = strtolower($id);
         if ($module === NULL) {
             unset($this->_loadedModules[$id]);
         } else {
@@ -330,14 +331,14 @@ abstract class Application
     }
 
     public function hasLoadedModule($moduleName) {
-        return array_key_exists($moduleName, $this->_loadedModules);
+        return array_key_exists(strtolower($moduleName), $this->_loadedModules);
     }
 
     public function component($componentName)
     {
         $module = $this->__get($componentName);
         if ($module === NULL) {
-            return $this->setComponent(strtolower($componentName), new $componentName . 'Module');
+            return $this->setComponent($componentName, new $componentName . 'Module');
         }
         return $this->__get($componentName);
     }

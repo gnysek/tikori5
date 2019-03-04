@@ -78,7 +78,7 @@ class Error
     public static function errh($errno, $errstr, $errfile, $errline, $errcontext)
     {
         //echo Error::display(new Exception($errstr, $errno), array('file' => $errfile, 'line' => $errline));
-        if (in_array($errno, array(E_WARNING))) {
+        if (in_array($errno, array(E_WARNING, E_DEPRECATED, E_USER_DEPRECATED))) {
             self::log('[Muted Warning] ' . $errfile . ':' . $errline . ':: ' . $errstr);
             return false;
         }

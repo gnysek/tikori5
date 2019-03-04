@@ -14,6 +14,11 @@ class TProfiler
     public static $enabledTimer = false;
     public static $skipLevelAbove = 99;
 
+    /**
+     * @param $message
+     * @param int $level
+     * @return float
+     */
     public static function addLog($message, $level = 0)
     {
         $tn = Core::genTimeNow();
@@ -25,6 +30,8 @@ class TProfiler
                 (count(self::$_log) > 1) ? sprintf('%0.4f', $tn - self::$_log[count(self::$_log) - 1][2]) : 0,
             );
         }
+
+        return $tn;
     }
 
     public static function addNotice($message)

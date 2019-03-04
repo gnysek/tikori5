@@ -113,7 +113,17 @@ class TCache extends TModule
         if ($check === false) {
             return $result;
         }
-        // retusn is it newer or not
+
+        if (Core::app()->hasLoadedModule('Toolbar')) {
+            Core::app()->toolbar->putValueToTab('Cache', sprintf(
+                    'Checked that <code>%s</code> cache is older than <kbd>%ss</kbd> and it exist, it will be purged in <kbd>%ss</kbd>.<br>',
+                    $filename,
+                    $distance,
+                    $distance == 0 ? 0 : ($distance - (time() - $result)))
+                ,  Core::app()->toolbar->getNotificationsNumberOnTab('Cache') + 1);
+        }
+
+        // return is it newer or not
         if ($result > ($this->cacheTime - $distance)) {
             return true;
         } else {
@@ -182,7 +192,7 @@ class TCache extends TModule
      */
     public function clearByTags($tags = array())
     {
-        // todo body of function should be inside Cache class, not CacheableBlocks - swith it at some point
+        // todo body of function should be inside Cache class, not CacheableBlocks - switch it at some point
         CacheableBlock::clearByTags($tags);
     }
 }

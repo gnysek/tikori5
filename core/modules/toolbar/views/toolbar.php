@@ -9,7 +9,6 @@
         cursor: pointer;
         padding: 3px 10px;
         background: #333;
-        border-radius: 3px;
     }
 
     .dbg-close:hover div {
@@ -22,7 +21,6 @@
         background: darkcyan;
         color: white;
         cursor: pointer;
-        border-radius: 4px;
     }
 
     .dbg-tab-link.active {
@@ -36,7 +34,6 @@
     .dbg-tab-link .dbg-tab-close {
         display: none;
         padding: 0px 7px;
-        border-radius: 4px;
         margin-left: 4px;
     }
 
@@ -84,13 +81,13 @@
     }
 
     #tikori-dbg-inner {
-        float: left;
+        margin-right: 65px;
     }
 
     .dbg-notfications-count {
         background: orange;
-        border-radius: 4px;
         padding: 0 4px;
+        color: black;
     }
 
     #unusedCssDbgTab code {
@@ -121,16 +118,90 @@
 
         background-color: rgba(255, 0, 0, 0.5);
     }
+
+    .tikori-dbg-counters {
+        display: inline-block;
+        padding: 5px 10px;
+        background: #444;
+        position: relative;
+    }
+
+    .tikori-dbg-counters .tikori-dbg-counters-container {
+        display: none;
+    }
+
+    .tikori-dbg-counters:hover .tikori-dbg-counters-container {
+        display: block;
+        position: absolute;
+        bottom: 30px;
+        left: 0;
+        background: black;
+        min-width: 150px;
+        padding: 5px;
+    }
+
+    .tikori-dbg-counters-container span {
+        background: orange;
+        padding: 0 10px;
+        margin-left: 10px;
+        color: black;
+        white-space: nowrap;
+    }
+
+    .tikori-dbg-counters-container tr td:first-child {
+        white-space: pre;
+    }
 </style>
 
-<?php $tabs[] = 'unusedCss';
+<?php
+$tabs[] = 'unusedCss';
 $nf['unusedCss'] = 0;
-$values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>'); ?>
+$values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>');
+?>
 
 <div id="tikori-dbg-toolbar">
 
     <div id="tikori-dbg-inner">
-        TOOLBAR
+        <?php if (count($counters)): ?>
+            <div class="tikori-dbg-counters">
+                &times;<?php echo count($counters); ?>
+                <div class="tikori-dbg-counters-container">
+                    <table>
+                        <?php foreach ($counters as $name => $cnt): ?>
+                            <tr>
+                                <td><?= $name ?></td>
+                                <td><span><?= $cnt ?>&times;</span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </table>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if (count($timers)): ?>
+            <div class="tikori-dbg-counters">
+                <?php echo round(array_sum($timers), 2); ?>s
+                <div class="tikori-dbg-counters-container">
+                    <table>
+                        <?php foreach ($timers as $name => $cnt): ?>
+                            <?php
+                            $roundedTime = round($cnt, 3);
+                            ?>
+                            <tr>
+                                <td><?= $name ?></td>
+                                <td><span><?= ($roundedTime == 0 ? '&lt;' : '') . round($cnt, 3) . 's' ?></span></td>
+                                <td><span><?php if ($cnt < 1): ?>
+                                            <?php echo $cnt * 1000;
+                                            echo ' ms'; ?>
+                                        <?php else: ?>
+                                            <?= '&ndash;'; ?>
+                                        <?php endif; ?></span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </table>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <?php foreach ($tabs as $tab): ?>
             <a onclick="activateTab('<?php echo $tab; ?>', this);" class="dbg-tab-link" id="tab-btn-<?php echo $tab; ?>">
@@ -142,18 +213,18 @@ $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>'); 
             </a>
         <?php endforeach; ?>
 
+        <div style="display: inline-block;">
+            &nbsp;<a class="dbg-tab-link" onclick="highlightTemplates();" style="padding: 5px 10px;" title="Template Hints">T</a>
+        </div>
+
         <div style="float: right; line-height: 27px;">
             <?php echo $status; ?>
         </div>
     </div>
-
-    <div style="display: inline-block;">
-        &nbsp;<a class="dbg-tab-link" onclick="highlightTemplates();" style="padding: 5px 10px;">T</a>
-    </div>
-
     <script type="text/javascript">
 
-        var toggleToolbarCookie = function(){};
+        var toggleToolbarCookie = function () {
+        };
 
         if (Cookies) {
             toggleToolbarCookie = function (hidden) {
@@ -187,7 +258,7 @@ $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>'); 
         }
 
         <?php if (Core::app()->cookie->getClean('___debug_toolbar_mode') == '1'): ?>
-        $().ready(function(){
+        $().ready(function () {
             showOrHide();
         });
         <?php endif; ?>
