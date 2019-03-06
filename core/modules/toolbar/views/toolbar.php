@@ -126,6 +126,17 @@
         position: relative;
     }
 
+    .tikori-dbg-counters:hover::before {
+        content: "";
+        background: darkorange;
+        width: 100%;
+        height: 3px;
+        display: block;
+        position: absolute;
+        top: -3px;
+        left: 0;
+    }
+
     .tikori-dbg-counters .tikori-dbg-counters-container {
         display: none;
     }
