@@ -109,6 +109,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return $this->_primaryKey;
     }
 
+    public function canModifyPK()
+    {
+        return $this->_canUpdatePK; // todo it should apply on ->attributes only ?
+    }
+
     public function getFirstPK() // TODO: fix all functions which may use this, so original getPK is better resolved in case of two PK
     {
         return $this->_primaryKey[0];
