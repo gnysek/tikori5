@@ -18,7 +18,7 @@
     .dbg-tab-link {
         padding: 5px 28px 5px 28px;
         display: inline-block;
-        background: darkcyan;
+        background: steelblue;
         color: white;
         cursor: pointer;
     }
@@ -175,7 +175,7 @@ $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>');
     <div id="tikori-dbg-inner">
         <?php if (count($counters)): ?>
             <div class="tikori-dbg-counters">
-                &times;<?php echo count($counters); ?>
+                &times;<?php echo array_sum($counters); ?>
                 <div class="tikori-dbg-counters-container">
                     <table>
                         <?php foreach ($counters as $name => $cnt): ?>

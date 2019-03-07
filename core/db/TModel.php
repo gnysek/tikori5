@@ -24,6 +24,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     protected $_related = array();
     protected static $_oop_relations = array();
     protected $_primaryKey = 'id';
+    protected $_canUpdatePK = false;
     protected $_scopes = array();
     protected $_relations = array();
     protected $_isNewRecord = true;
@@ -188,9 +189,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             }
             $w = array();
             foreach ($this->_primaryKey as $pk) {
-                $w[] = array($pk, 'IN', $id[$pk]);
+                $w[] = array($pk, '=', $id[$pk]);
             }
-            $collection = $this->findWhere(array($w));
+            $collection = $this->findWhere($w);
             //$sql = DbQuery::sql()->select()->from($this->_table)->where(array($w));
         } else {
             $w = array();
@@ -638,7 +639,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
                         $_model = $this->model($currentRelation->class);
                         $_byFields = $currentRelation->relationType == self::BELONGS_TO ? $_model->getFirstPK() : $currentRelation->byField;
-                        ToolbarModule::debug($values);
+                        #ToolbarModule::debug($values);
 
                         if (is_array($values)) {
                             sort($values);
@@ -781,7 +782,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     {
         $r = array();
         foreach ($this->_primaryKey as $pk) {
-            $r[] = array($pk, '=', $this->_values[$pk]);
+            $r[] = array($pk, '=', $this->_original[$pk]);
         }
         return $r;
     }
@@ -823,6 +824,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * Inserts current model values to database as new row
      *
      * @return bool
+     * @throws DbError
      */
     protected function _insert()
     {
@@ -849,9 +851,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     protected function _update($force = false)
     {
         $values = $this->_getModifiedFields($force);
-        foreach($this->_primaryKey as $pk) {
-            if (array_key_exists($pk, $values)) {
-                unset($values[$pk]);
+        if (!$this->_canUpdatePK) {
+            foreach ($this->_primaryKey as $pk) {
+                if (array_key_exists($pk, $values)) {
+                    unset($values[$pk]);
+                }
             }
         }
 
@@ -893,7 +897,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $modified = array();
         if ($force) {
             foreach ($this->_fields as $field) {
-                if (!in_array($field, $this->_primaryKey)) {
+                if ($this->_canUpdatePK or !in_array($field, $this->_primaryKey)) {
                     $modified[$field] = $this->_values[$field];
                 }
             }

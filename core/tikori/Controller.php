@@ -90,15 +90,18 @@ class Controller extends ControllerView
 
     public static function forward404($area = '')
     {
-        $c = new Controller($area);
-        $c->httpStatusAction(404);
-        //$c->runAction('', 'httpStatus');
+        self::_forwardHttpCode($area, 404);
     }
 
     public static function forward401($area = '')
     {
+        self::_forwardHttpCode($area, 104);
+    }
+
+    protected static function _forwardHttpCode($area, $code)
+    {
         $c = new Controller($area);
-        $c->httpStatusAction(401);
+        $c->httpStatusAction($code);
     }
 
     protected function _beforeRun()

@@ -5,6 +5,7 @@
  *
  * @author Piotr Gnys <gnysek@gnysek.pl>
  */
+
 namespace Tikori;
 
 class Error
@@ -19,36 +20,43 @@ class Error
         set_error_handler(array('\Tikori\Error', 'errh'), E_ALL);
     }
 
-    public static function shutdown_handler() {
-        if ($error = error_get_last() AND in_array($error['type'], array(E_PARSE, E_ERROR, E_USER_ERROR))) {
-            if (ob_get_level()) {
-                ob_clean();
-                ob_end_clean();
-            }
-
-            $exception = new \ErrorException($error['message'], $error['type'], 1, $error['file'], $error['line']);
-
-            if (function_exists('xdebug_get_function_stack')) {
-                $stack = array();
-                foreach (array_slice(array_reverse(xdebug_get_function_stack()), 2, -1) as $row) {
-                    $frame = array(
-                        'file' => $row['file'],
-                        'line' => $row['line'],
-                        'function' => isset($row['function']) ? preg_replace('/(.*?):(.*)/i','$1',$row['function']) : '*unknown*',
-                        'args' => array(),
-                    );
-                    if (!empty($row['class'])) {
-                        $frame['type'] = isset($row['type']) && $row['type'] === 'dynamic' ? '->' : '::';
-                        $frame['class'] = $row['class'];
-                    }
-                    $stack[] = $frame;
+    public static function shutdown_handler()
+    {
+        if ($error = error_get_last()) {
+            if (in_array($error['type'], array(E_PARSE, E_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR))) {
+                if (ob_get_level()) {
+                    ob_clean();
+                    ob_end_clean();
                 }
-                $ref = new \ReflectionProperty('\Exception', 'trace');
-                $ref->setAccessible(TRUE);
-                $ref->setValue($exception, $stack);
-            }
-            self::exch($exception);
 
+                $exception = new \ErrorException($error['message'], $error['type'], 1, $error['file'], $error['line']);
+
+                if (function_exists('xdebug_get_function_stack')) {
+                    $stack = array();
+                    foreach (array_slice(array_reverse(xdebug_get_function_stack()), 2, -1) as $row) {
+                        $frame = array(
+                            'file'     => $row['file'],
+                            'line'     => $row['line'],
+                            'function' => isset($row['function']) ? preg_replace('/(.*?):(.*)/i', '$1', $row['function']) : '*unknown*',
+                            'args'     => array(),
+                        );
+                        if (!empty($row['class'])) {
+                            $frame['type'] = isset($row['type']) && $row['type'] === 'dynamic' ? '->' : '::';
+                            $frame['class'] = $row['class'];
+                        }
+                        $stack[] = $frame;
+                    }
+                    $ref = new \ReflectionProperty('\Exception', 'trace');
+                    $ref->setAccessible(TRUE);
+                    $ref->setValue($exception, $stack);
+                }
+                self::exch($exception);
+
+            } else {
+                if (\Core::app()->mode != \Core::MODE_PROD) {
+                    self::log('[Muted Warning] #' . $error['type'] . '-' . $error['file'] . ':' . $error['line'] . ':: ' . $error['message']);
+                }
+            }
             exit(1); // prevent infinity-loop
         }
     }
@@ -172,10 +180,10 @@ class Error
 
             $errors[] = array(
                 'message' => $current->getMessage(),
-                'id' => (count($errors)),
-                'files' => array_reverse($files),//&$files,
-                'file' => str_replace(TIKORI_ROOT, '...', $exception->getFile()),
-                'line' => $exception->getLine(),
+                'id'      => (count($errors)),
+                'files'   => array_reverse($files),//&$files,
+                'file'    => str_replace(TIKORI_ROOT, '...', $exception->getFile()),
+                'line'    => $exception->getLine(),
             );
 
         } while ($current = $current->getPrevious());
@@ -198,21 +206,21 @@ class Error
         $code = '<unknown>';
         $codeInt = $exception->getCode();
         $codesArray = array(
-            E_ERROR => 'E_ERROR / Fatal error', // 1
-            E_WARNING => 'E_WARNING / Warning', // 2
-            E_PARSE => 'E_PARSE / Parse Error', // 4
-            E_NOTICE => 'E_NOTICE / Notice', // 8
-            E_CORE_ERROR => 'Fatal core startup error', // 16
-            E_CORE_WARNING => 'Core startup warning', // 32
-            E_COMPILE_ERROR => 'Compiler error', // 64
-            E_COMPILE_WARNING => 'Compile warning', // 128
-            E_USER_ERROR => 'E_ERROR', //256
-            E_USER_WARNING => 'Warning (user)', // 512
-            E_USER_NOTICE => 'E_USER_NOTICE', // 1024
-            E_STRICT => 'E_STRICT', // 2048
+            E_ERROR             => 'E_ERROR / Fatal error', // 1
+            E_WARNING           => 'E_WARNING / Warning', // 2
+            E_PARSE             => 'E_PARSE / Parse Error', // 4
+            E_NOTICE            => 'E_NOTICE / Notice', // 8
+            E_CORE_ERROR        => 'Fatal core startup error', // 16
+            E_CORE_WARNING      => 'Core startup warning', // 32
+            E_COMPILE_ERROR     => 'Compiler error', // 64
+            E_COMPILE_WARNING   => 'Compile warning', // 128
+            E_USER_ERROR        => 'E_ERROR', //256
+            E_USER_WARNING      => 'Warning (user)', // 512
+            E_USER_NOTICE       => 'E_USER_NOTICE', // 1024
+            E_STRICT            => 'E_STRICT', // 2048
             E_RECOVERABLE_ERROR => 'Recoverable', // 4096
-            E_DEPRECATED => 'E_DEPRECEATD', // 8192
-            E_USER_DEPRECATED => 'E_DEPRECEATD', // 16384
+            E_DEPRECATED        => 'E_DEPRECEATD', // 8192
+            E_USER_DEPRECATED   => 'E_DEPRECEATD', // 16384
             #E_ALL => 'All ?', // 32767
         );
 
@@ -227,16 +235,16 @@ class Error
                 (\Core::app()->getMode() == \Core::MODE_PROD) ? 'error.fatal' : 'core.exception',
                 array(
                     'errorType' => $code,
-                    'errorId' => $codeInt,
-                    'message' => $exception->getMessage(),
-                    'errors' => array_reverse($errors),
+                    'errorId'   => $codeInt,
+                    'message'   => $exception->getMessage(),
+                    'errors'    => array_reverse($errors),
                     #'messages'  => $messages,
-                    'file' => $exception->getFile(),
-                    'line' => $exception->getLine(),
+                    'file'      => $exception->getFile(),
+                    'line'      => $exception->getLine(),
                     'reqMethod' => (empty($e[\Request::REQUEST_METHOD])) ? '' : $e[\Request::REQUEST_METHOD],
-                    'reqPath' => (empty($e[\Request::PATH_INFO])) ? '' : $e[\Request::PATH_INFO],
+                    'reqPath'   => (empty($e[\Request::PATH_INFO])) ? '' : $e[\Request::PATH_INFO],
                     #'files'     => $files,
-                    'view' => $view,
+                    'view'      => $view,
                 ), true
             );
         } else {

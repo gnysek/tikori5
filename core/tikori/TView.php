@@ -78,7 +78,7 @@ class TView
      */
     public function renderPartial($file, $data = NULL, $return = true)
     {
-        return $this->renderPartialInContext($file, null, $data, $return);
+        return $this->renderPartialInContext($file, $this->context, $data, $return);
     }
 
     /**
@@ -108,7 +108,7 @@ class TView
         if ($filename = $this->_findViewFile($file, $context)) {
             return $this->renderInternal($filename, $data, $return);
         } else {
-            throw new Exception('View ' . $file . ' not found.');
+            throw new Exception('View <kbd>' . $file . '</kbd> not found.');
         }
     }
 

@@ -340,6 +340,7 @@ class Route
      * @var string        route URI
      */
     protected $_uri = '';
+    protected $_requested_uri = '';
 
     /**
      * @var array
@@ -467,6 +468,8 @@ class Route
      */
     public function matches($uri)
     {
+        $this->_requested_uri = $uri;
+
         if ($this->_callback) {
             $closure = $this->_callback;
             $params = call_user_func($closure, $uri);
@@ -523,6 +526,22 @@ class Route
                 return $def;
             }
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getUri()
+    {
+        return $this->_uri;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRequestedUri()
+    {
+        return $this->_requested_uri;
     }
 
     /**

@@ -180,7 +180,7 @@ class Core
     public static function autoload($class, $throw = true)
     {
         // TODO: remove self::$namespacesEnabled so if namespace, then path will be taken from it instead of autloadPaths
-        if (class_exists($class) and self::$namespacesEnabled == false) {
+        if ((class_exists($class) or trait_exists($class)) and self::$namespacesEnabled == false) {
             return true;
         }
 
@@ -248,7 +248,7 @@ class Core
                 );
             }
             require_once $filename;
-            if (!class_exists($namespace . $class) && $throw) {
+            if ((!class_exists($namespace . $class) and !trait_exists($namespace . $class)) && $throw) {
                 $_loaded_classes = get_declared_classes();
                 $f = array_search('Core', $_loaded_classes);
                 $_loaded_classes = implode(PHP_EOL, array_slice($_loaded_classes, $f));
@@ -286,7 +286,7 @@ class Core
      *
      * @var int $decimalPart how many digists in decimal part you want
      * @var boolean $returnLessWhenZero should it return &lt; 0.0001 when time == 0
-     * @return string
+     * @return string|float
      */
     public static function genTimeNow($decimalPart = 4, $returnLessWhenZero = true)
     {
