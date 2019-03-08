@@ -33,6 +33,7 @@ class ToolbarModule extends TModule
                 'status'   => implode(' | ', $this->_status),
                 'counters' => $this->_counters,
                 'timers'   => $this->_timers,
+                'timeline' => Profiler::getBenchForToolbar(),
             ));
 
             if (stripos($data['output'], '</body>') > 1) {

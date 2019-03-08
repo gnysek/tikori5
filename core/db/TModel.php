@@ -187,6 +187,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     public function find($id)
     {
+        $bench = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Finding sth in ' . get_class($this) . '');
+
         // TODO - this is a weird hack
         if (is_array($id)) {
             if (!array_key_exists($this->_primaryKey[0], $id)) {
@@ -209,6 +211,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         }
 
         if ($collection && $collection->count() == 0) {
+            Profiler::benchFinish($bench);
             return null;
         } elseif ($collection && $collection->count() == 1) {
             // todo: make it so it doesn't need to use collection - make applying eagers more universal
@@ -222,9 +225,10 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             foreach ($record->getAlreadyLoadedRelations() as $relName) {
                 $this->populateRelation($relName, $record->$relName);
             }
-
+            Profiler::benchFinish($bench);
             return $this;
         } else {
+            Profiler::benchFinish($bench);
             throw new DbError('Returned more than 1 record - PK wrongly defined?');
         }
     }
@@ -278,6 +282,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     public function findWhere($where = null, $limit = -1, $offset = 0, $conditions = array())
     {
         Profiler::addLog('FIND WHERE STARTED');
+        $bench = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Finding WHERE in ' . get_class($this) . '');
+
         $sql = DbQuery::sql()->select()->from($this->_table);
         if (!empty($where)) {
             $sql->where($where);
@@ -339,6 +345,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                                 if ($schema = Core::app()->db->getSchema()->getTableSchema(self::getTableName($this->_relations[$relationName][1]))) {
                                     $fields = $schema->getColumnNames();
                                 } else {
+                                    Profiler::benchFinish($bench);
                                     throw new Exception('Cannot find Schema for table ' . self::getTableName($this->_relations[$relationName][1]));
                                 }
 
@@ -439,9 +446,12 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
         Profiler::addLog('FIND WHERE apply dot eagers');
 
+        $benchEagers = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Applying eagers in ' . get_class($this) . '');
         $this->_applyDotEagersAfterLoadedNormalOnes($collection);
+        Profiler::benchFinish($benchEagers);
 
         Profiler::addLog('FIND WHERE FINISHED');
+        Profiler::benchFinish($bench);
         return $collection;
     }
 
@@ -459,9 +469,13 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     public function count($by = null)
     {
+        $bench = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Counting in ' . get_class($this) . '');
+
         $sql = DbQuery::sql()->select('COUNT(*) AS tikori_total')->from($this->_table);
         $this->_applyEagers($sql);
         $result = $sql->execute();
+
+        Profiler::benchFinish($bench);
         return (!empty($result[0])) ? $result[0]->tikori_total : 0;
     }
 
@@ -470,6 +484,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      * @param $conditions
      *
      * @return int
+     * @throws DbError
      */
     public function countWhere($by = null, $conditions)
     {

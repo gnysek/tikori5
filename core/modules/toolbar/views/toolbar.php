@@ -162,12 +162,50 @@
     .tikori-dbg-counters-container tr td:first-child {
         white-space: pre;
     }
+
+    .timeline {
+        border: 1px solid black;
+        width: 100%;
+        height: 20px;
+        position: relative;
+        background: #c9c9c9;
+    }
+
+    .timeline-entry {
+        background: green;
+        position: absolute;
+        height: 18px;
+        min-width: 1px;
+        border-right: 1px solid darkgreen;
+        margin-right: -1px;
+    }
+
+    .timeline-entry > span {
+        display: none;
+    }
+
+    .timeline-tips {
+        display: none;
+    }
+
+    .timeline-entry:hover + .timeline-tips{
+        display: block;
+        position: absolute;
+        top: 25px;
+        background: wheat;
+        padding: 5px;
+        min-width: 50%;
+        z-index: 100;
+    }
 </style>
 
 <?php
 $tabs[] = 'unusedCss';
 $nf['unusedCss'] = 0;
 $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>');
+
+$tabs[] = 'niceTimeline';
+$values['niceTimeline'] = array('<div id="niceTimelineDbgTab">' . $timeline . '</div>');
 ?>
 
 <div id="tikori-dbg-toolbar">
@@ -228,7 +266,7 @@ $values['unusedCss'] = array('<div id="unusedCssDbgTab">getting css...</div>');
             &nbsp;<a class="dbg-tab-link" onclick="highlightTemplates();" style="padding: 5px 10px;" title="Template Hints">T</a>
         </div>
 
-        <div style="float: right; line-height: 27px;">
+        <div style="display: inline; line-height: 27px;">
             <?php echo $status; ?>
         </div>
     </div>

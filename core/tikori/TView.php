@@ -78,7 +78,10 @@ class TView
      */
     public function renderPartial($file, $data = NULL, $return = true)
     {
-        return $this->renderPartialInContext($file, $this->context, $data, $return);
+        $bench = Profiler::benchStart('TView', $file);
+        $result = $this->renderPartialInContext($file, $this->context, $data, $return);
+        Profiler::benchFinish($bench);
+        return $result;
     }
 
     /**

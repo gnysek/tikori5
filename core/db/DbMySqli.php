@@ -71,16 +71,19 @@ class DbMySqli extends DBAbstract
     }
 
     protected $_last_debug_src = '';
+
     /**
      * @param        $sql
      * @param string $skip
-     * @param bool   $assoc
+     * @param bool $assoc
      * @return array|bool|Record
      * @throws DbError
      */
     public function query($sql, $skip = '', $assoc = TRUE)
     {
         Profiler::addLog('SQL QUERY: <kbd title="' . $sql . '">' . $sql . '</kbd>', Profiler::LEVEL_SQL);
+        $benchmark = Profiler::benchStart(\TProfiler::BENCH_CAT_SQL, 'SQL QUERY: <kbd title="' . $sql . '">' . $sql . '</kbd>');
+
         $this->_queries++;
         $this->_queryList[] = $sql;
 
@@ -117,11 +120,10 @@ class DbMySqli extends DBAbstract
             }
         }
 
-        $time = Core::genTimeNow(10);
-
         if (preg_match('/^(create|drop|insert|update|delete|replace|alter|set|truncate)/i', trim($sql))) {
             $result = $this->conn()->query($sql);
             Profiler::addLog('Exec finished');
+            $time = Profiler::benchFinish($benchmark);
             if ($result === false) {
                 $errNum = mysqli_errno($this->conn());
                 throw new DbError($errNum . ': ' . $this->conn()->error . '<br/><br/><code>' . $sql . '</code>', $errNum);
@@ -130,10 +132,11 @@ class DbMySqli extends DBAbstract
         } else {
             $result = mysqli_query($this->conn(), $sql);
             Profiler::addLog('Query finished');
+            $time = Profiler::benchFinish($benchmark);
         }
 
         if (Core::app()->hasLoadedModule('toolbar')) {
-            Core::app()->toolbar->addTimer('SQL Query Time', Core::genTimeNow(10) - $time);
+            Core::app()->toolbar->addTimer('SQL Query Time', $time);
         }
 
 
@@ -146,7 +149,7 @@ class DbMySqli extends DBAbstract
             if ($result instanceof mysqli_result) {
                 $return = array();
                 if ($result->num_rows) {
-                    $time = Core::genTimeNow(10);
+                    $benchmark = Profiler::benchStart(\TProfiler::BENCH_CAT_SQL_FETCH, 'SQL Fetch Time');
 
                     while ($row = $result->fetch_object('Record')) {
                         /* @var $row Record */
@@ -156,9 +159,10 @@ class DbMySqli extends DBAbstract
                         $return[] = $row;
                     }
                     Profiler::addLog('Fetch & records creating finished');
+                    $time = Profiler::benchFinish($benchmark);
 
                     if (Core::app()->hasLoadedModule('toolbar')) {
-                        Core::app()->toolbar->addTimer('SQL Fetch Time', Core::genTimeNow(10) - $time);
+                        Core::app()->toolbar->addTimer('SQL Fetch Time', $time);
                     }
                     return $return;
                 } else {

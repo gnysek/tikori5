@@ -145,8 +145,8 @@ class TProfiler
             Core::app()->toolbar->setNotificationsNumberOnTab('loadedClasses', count($classes));
 
             Core::app()->toolbar->addStatus(sprintf('Zużycie pamięci: <kbd>%s MB</kbd> (~<kbd>%s MB</kbd>)',
-                round(memory_get_peak_usage(false) / 1024 / 1024, 4),
-                round(memory_get_peak_usage(true) / 1024 / 1024, 4))
+                    round(memory_get_peak_usage(false) / 1024 / 1024, 4),
+                    round(memory_get_peak_usage(true) / 1024 / 1024, 4))
             );
             Core::app()->toolbar->addStatus(sprintf('PHP %s', preg_replace('/((?:\+|-).*)/', '', phpversion())));
 
@@ -175,6 +175,151 @@ class TProfiler
         if ($percentage >= 10) {
             return sprintf($style, 'red');
         }
+    }
+
+    public static $benchData = [];
+    public static $benchCategories = [];
+    protected static $_benchStack = [];
+
+    const BENCH_CAT_SQL = 'Sql Query';
+    const BENCH_CAT_SQL_FETCH = 'Sql fetching';
+
+    /**
+     * @param $benchCategory
+     * @param $benchDesc
+     * @return int
+     */
+    public static function benchStart($benchCategory, $benchDesc)
+    {
+        $num = count(self::$benchData) - 1;
+
+        if (!in_array($benchCategory, self::$benchCategories)) {
+            self::$benchCategories[] = $benchCategory;
+            self::$_benchStack[$benchCategory] = 1;
+        }
+
+        self::$benchData[$num] = [
+            'c'   => $benchCategory,
+            'd'   => $benchDesc,
+            's'   => Core::genTimeNow(10),
+            'f'   => Core::genTimeNow(10),
+            'lvl' => min(10, self::$_benchStack[$benchCategory]),
+        ];
+
+        self::$_benchStack[$benchCategory]++;
+
+        return $num;
+    }
+
+    /**
+     * @param $id
+     * @return string
+     */
+    public static function benchFinish($id)
+    {
+        self::$benchData[$id]['f'] = Core::genTimeNow(10);
+        self::$_benchStack[self::$benchData[$id]['c']]--;
+
+        return self::$benchData[$id]['f'] - self::$benchData[$id]['s'];
+    }
+
+    public static function getBenchForToolbar()
+    {
+        $html = '<table style="width: 100%;">';
+
+        // prepare timers for stats
+        $totalTime = Core::genTimeNow();
+
+        $maxTime = 0;
+        foreach (self::$benchData as $i => $data) {
+            $maxTime = max($maxTime, $data['f'] - $data['s']);
+        }
+        if ($maxTime > 0) {
+            $maxTime = max(0.001, $maxTime / 3);
+        }
+
+        // prepare multilevels
+        $levels = [];
+        foreach (self::$benchCategories as $category) {
+            $levels[$category] = 1;
+        }
+
+        foreach (self::$benchData as $i => $data) {
+            $levels[$data['c']] = min(10, max($data['lvl'], $levels[$data['c']]));
+        }
+
+        // prepare table
+        $html .= '<tr>
+                <td style="width: 10%">TOTAL</td>
+                <td style = "width: 80%">
+                    <div class="timeline">
+                        <div class="timeline-entry" style="width: 100%"></div>
+                    </div>
+                </td>
+                <td style = "width: 5%">= ' . $totalTime . 's</td>
+                </tr>';
+
+        $totalTimePerCategory = [];
+
+        foreach (self::$benchCategories as $category) {
+
+            $entries = [];
+            $currRowTimeSum = 0;
+            foreach (self::$benchData as $i => $data) {
+                if ($data['c'] == $category) {
+                    $ts = round(($data['s'] / $totalTime) * 100, 4);
+                    $tf = round(($data['f'] / $totalTime) * 100, 4);
+                    $tf -= $ts;
+                    $tt = $data['f'] - $data['s'];
+
+                    $bg = '';
+                    if ($data['f'] - $data['s'] > $maxTime) {
+                        $bg = ' background: orange;';
+                        if ($data['f'] - $data['s'] > $maxTime * 2) {
+                            $bg = ' background: red;';
+                        }
+                    }
+
+                    $currRowTimeSum += ($data['lvl'] == 1) ? ($data['f'] - $data['s']) : 0; // don't add those which are during another one
+
+                    $entries[] = '
+                    <div class="timeline-entry" data-lvl="' . $data['lvl'] . '" style="left: ' . $ts . '%; width: ' . $tf . '%; top: ' . (($data['lvl'] - 1) * 20) . 'px;' . $bg . '"></div>
+                    <div class="timeline-tips" style="top:' . ($levels[$category] * 20 + 5) . 'px;">Time: ' . round($tt, 5) . 's (' . round($tt / $totalTime * 100, 4) . '%)<br>' . round($data['s'], 5) . 's - ' . round($data['f'], 5) . 's<br>' . $data['d'] . '</div>';
+                }
+            }
+
+            $html .= '<tr>
+                <td style="width: 10%">' . $category . '</td>
+                <td style = "width: 80%">
+                    <div class="timeline" style="height: ' . ($levels[$category] * 20) . 'px;">
+                    ' . implode('', $entries) . '
+                    </div>
+                </td>
+                <td style = "width: 5%">= ' . round($currRowTimeSum, 5) . 's</td>
+                </tr>';
+
+            $totalTimePerCategory[$category] = $currRowTimeSum;
+        }
+
+        $html .= '<tr><td colspan="3" class="text-center">SUM</td></tr>';
+
+        foreach ($totalTimePerCategory as $category => $time) {
+            $html .= '<tr>
+                <td style="width: 10%">' . $category . '</td>
+                <td style = "width: 80%">
+                    <div class="timeline">
+                        <div class="timeline-entry" style="width: ' . round(($time / $totalTime * 100), 5) . '%"></div>
+                    </div>
+                </td>
+                <td style = "width: 5%">= ' . round($time, 5) . 's</td>
+                </tr>';
+        }
+
+        $html .= '<tr><td colspan="3" class="text-center">Timeline generation time: ' . (Core::genTimeNow() - $totalTime) . 's</td></tr>';
+
+        $html .= '</table> ';
+
+        return $html;
     }
 
 }
