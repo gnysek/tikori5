@@ -188,7 +188,7 @@
         display: none;
     }
 
-    .timeline-entry:hover + .timeline-tips{
+    .timeline-entry:hover + .timeline-tips {
         display: block;
         position: absolute;
         top: 25px;
@@ -196,6 +196,17 @@
         padding: 5px;
         min-width: 50%;
         z-index: 100;
+    }
+
+    #tikori-dbg-ajax-calls-table td {
+        white-space: nowrap;
+        padding: 0 5px;
+    }
+
+    #tikori-dbg-ajax-calls-table kbd {
+        font-size: 110%;
+        border-radius: 0;
+        padding: 2px 5px;
     }
 </style>
 
@@ -251,6 +262,29 @@ $values['niceTimeline'] = array('<div id="niceTimelineDbgTab">' . $timeline . '<
                 </div>
             </div>
         <?php endif; ?>
+
+        <div class="tikori-dbg-counters">
+            <div>A&times; <span id="tikori-dbg-ajax-calls">0</span></div>
+            <div class="tikori-dbg-counters-container">
+
+                <table id="tikori-dbg-ajax-calls-table">
+                    <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th>Url</th>
+                        <th>Time</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td colspan="4" class="text-center">&nbsp;</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
 
         <?php foreach ($tabs as $tab): ?>
             <a onclick="activateTab('<?php echo $tab; ?>', this);" class="dbg-tab-link" id="tab-btn-<?php echo $tab; ?>">
@@ -352,7 +386,7 @@ $values['niceTimeline'] = array('<div id="niceTimelineDbgTab">' . $timeline . '<
 <?php endforeach; ?>
 
 <?php /* unused css */ ?>
-<script type="application/javascript">
+<script type="text/javascript">
     /*
     https://gist.github.com/kdzwinel/426a0f76f113643fa285
     This script attempts to identify all CSS classes mentioned in HTML but not defined in the stylesheets.
@@ -413,6 +447,78 @@ $values['niceTimeline'] = array('<div id="niceTimelineDbgTab">' . $timeline . '<
         }
 
     })();
+
+    // ajax calls toolbar
+    var ajax_stack = [];
+
+    var refreshAjaxTable = function () {
+        var html = '';
+        var general_status = 'yellowgreen; color: black;';
+        var number_of_errors = 0;
+        var is_anything_loading = false;
+
+        $.each(ajax_stack, function () {
+            var status_color = general_status;
+            if (this.error) {
+                number_of_errors++;
+                status_color = 'red';
+            }
+            if (this.status == null) {
+                is_anything_loading = true;
+            }
+
+            html += '<tr>';
+            html += '<td>' + this.method + '</td>';
+            html += '<td>' + ((this.status == null) ? '&hellip;' : ('<span style="background-color:' + status_color + '">' + this.status + '</span>')) + '</td>';
+            html += '<td style="white-space: nowrap;"><kbd>' + this.url + '</kbd></td>';
+            html += '<td>' + ((this.duration == null) ? '&hellip;' : (this.duration + 'ms')) + '</td>';
+            html += '</tr>';
+        });
+
+        if (number_of_errors > 0) {
+            general_status = 'red';
+        }
+        if (ajax_stack.length === 0 || is_anything_loading) {
+            general_status = 'gray';
+        }
+
+        $('#tikori-dbg-ajax-calls').html('<span style="background:' + general_status + '; padding: 0 5px;">' + ajax_stack.length + '</span>');
+        $('#tikori-dbg-ajax-calls-table tbody').html(html);
+    };
+
+    if (window.XMLHttpRequest && XMLHttpRequest.prototype.addEventListener) {
+
+        var referencetoXMLHR = XMLHttpRequest.prototype.open;
+
+        XMLHttpRequest.prototype.open = function (method, url, async, user, pass) {
+            var self = this;
+            referencetoXMLHR.apply(this, Array.prototype.slice.call(arguments)); // run original function
+
+            var stackElement = {
+                error: false,
+                url: url.replace(window.location.origin, ''),
+                status: null,
+                method: method,
+                start: new Date(),
+                duration: null
+            };
+
+            var idx = ajax_stack.push(stackElement) - 1;
+
+            this.addEventListener('readystatechange', function () {
+                if (self.readyState == 4) {
+                    stackElement.duration = new Date() - stackElement.start;
+                    stackElement.error = self.status < 200 || self.status >= 400;
+                    stackElement.status = self.status;
+
+                    //extractHeaders(self, stackElement);
+                    refreshAjaxTable();
+                }
+            }, false);
+
+            refreshAjaxTable();
+        };
+    }
 
     function markCss(o) {
         var self = $(o);
