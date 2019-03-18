@@ -183,6 +183,7 @@ class TProfiler
 
     const BENCH_CAT_SQL = 'Sql Query';
     const BENCH_CAT_SQL_FETCH = 'Sql fetching';
+    const BENCH_CAT_CORE = 'Core';
 
     /**
      * @param $benchCategory
@@ -214,9 +215,14 @@ class TProfiler
     /**
      * @param $id
      * @return string
+     * @throws Exception
      */
     public static function benchFinish($id)
     {
+        if (!array_key_exists($id, self::$benchData)) {
+            throw new \Exception('Benchmark ' . $id . ' not found??');
+        }
+
         self::$benchData[$id]['f'] = Core::genTimeNow(10);
         self::$_benchStack[self::$benchData[$id]['c']]--;
 
@@ -274,16 +280,16 @@ class TProfiler
 
                     $bg = '';
                     if ($data['f'] - $data['s'] > $maxTime) {
-                        $bg = ' background: orange;';
+                        $bg = ' timeline-entry-orange';
                         if ($data['f'] - $data['s'] > $maxTime * 2) {
-                            $bg = ' background: red;';
+                            $bg = ' timeline-entry-orange';
                         }
                     }
 
                     $currRowTimeSum += ($data['lvl'] == 1) ? ($data['f'] - $data['s']) : 0; // don't add those which are during another one
 
                     $entries[] = '
-                    <div class="timeline-entry" data-lvl="' . $data['lvl'] . '" style="left: ' . $ts . '%; width: ' . $tf . '%; top: ' . (($data['lvl'] - 1) * 20) . 'px;' . $bg . '"></div>
+                    <div class="timeline-entry' . $bg . '" data-lvl="' . $data['lvl'] . '" style="left: ' . $ts . '%; width: ' . $tf . '%; top: ' . (($data['lvl'] - 1) * 20) . 'px;"></div>
                     <div class="timeline-tips" style="top:' . ($levels[$category] * 20 + 5) . 'px;">Time: ' . round($tt, 5) . 's (' . round($tt / $totalTime * 100, 4) . '%)<br>' . round($data['s'], 5) . 's - ' . round($data['f'], 5) . 's<br>' . $data['d'] . '</div>';
                 }
             }

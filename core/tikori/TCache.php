@@ -20,9 +20,9 @@ class TCache extends TModule
     /**
      * Initial settings
      */
-    public function __construct()
+    public function __construct($cacheDir = '/cache/')
     {
-        $this->cachePath = Core::app()->appDir . '/cache/';
+        $this->cachePath = Core::app()->appDir . $cacheDir;
         $this->cacheTime = time();
         if (!file_exists($this->cachePath)) {
             mkdir($this->cachePath, 0777, true);

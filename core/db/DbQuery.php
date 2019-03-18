@@ -168,6 +168,11 @@ class DbQuery
         return $this;
     }
 
+    public function haveWhere()
+    {
+        return count($this->_where) > 0;
+    }
+
     public function customwhere($where) {
         $this->_customWhere = $where;
     }
@@ -430,9 +435,32 @@ class DbQuery
 
                     // TODO: better checking...
                     //$afterCondition = ((is_string($w[2]) or is_array($w[2])) ? Core::app()->db->protect($w[2]) : $this->_nullify($w[2]));
+
+                    $inContainsNull = false;
+                    $itsInCondition = (strtoupper($w[1]) == 'IN' or strtoupper($w[1]) == 'NOT IN');
+                    if ($itsInCondition and is_array($w[2])) {
+                       if (in_array(null, $w[2])) {
+                           $inContainsNull = true;
+                           $___k = array_search(null, $w[2]);
+                           unset($w[2][$___k]);
+                       }
+                    }
+
                     $afterCondition = (is_string($w[2]) and preg_match('/\(SELECT/', $w[2])) ? $w[2] : $this->_formatAgainstType($_fromTable, $w[0], $w[2]);
 
-                    if (strtoupper($w[1]) == 'IN' or strtoupper($w[1]) == 'NOT IN') {
+                    if ($itsInCondition) {
+                        if ($inContainsNull) {
+                            $bldWithNull = '(' . $bld . '`' . $w[0] . '` IS NULL';
+
+                            if (count($w[2])) {
+                                $bldWithNull .= ' OR ' . $bld . '`' . $w[0] . '` ' . $w[1] . ' (' . $afterCondition . ')';
+                            }
+
+                            $bldWithNull .= ')';
+                            $where[] = $bldWithNull;
+                            continue;
+                        }
+
                         $afterCondition = '(' . $afterCondition . ')';
                     }
 

@@ -174,10 +174,31 @@
     .timeline-entry {
         background: green;
         position: absolute;
-        height: 18px;
+        height: 12px;
         min-width: 1px;
-        border-right: 1px solid darkgreen;
         margin-right: -1px;
+    }
+
+    .timeline-entry:before {
+        content: "";
+        border-left: 1px solid green;
+        height: 18px;
+        width: 1px;
+        display: block;
+    }
+
+    .timeline-entry-orange {
+        background: orange;
+    }
+    .timeline-entry-orange:before {
+        border-color: orange;
+    }
+
+    .timeline-entry-red {
+        background: red;
+    }
+    .timeline-entry-red:before {
+        border-color: red;
     }
 
     .timeline-entry > span {

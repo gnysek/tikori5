@@ -978,8 +978,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 $this->created_at = $this->_getDateFormat();
             }
 
-            if (in_array('updated_at', $this->_fields)) {
-                $this->updated_at = $this->_getDateFormat();
+            if (in_array('updated_at', $this->_fields) and !in_array('updated_at', $this->_modified)) {
+                // update only if this model have field "updated at" and it wasn't already changed by user (this allow to set "updated_at" to past dates
+                if ($this->isModified() or $forceToSave) {
+                    $this->updated_at = $this->_getDateFormat();
+                }
             }
         }
 

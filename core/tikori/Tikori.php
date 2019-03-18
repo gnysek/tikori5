@@ -89,14 +89,19 @@ class Tikori extends Application
 
         }
 
+        $b = Profiler::benchStart(\Profiler::BENCH_CAT_CORE, 'Getting autoload cache');
         Core::getAutoloadCache();
+        Profiler::benchFinish($b);
 
         // route
+        $b = Profiler::benchStart(\Profiler::BENCH_CAT_CORE, 'Route generation');
         Route::reconfigure();
+        Profiler::benchFinish($b);
 
         //TODO: this should be moved to parent!
         //$this->observer = new Observer();
 
+        $b = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Database setup');
         if ($this->cfg('db', null) !== null) {
             $_db = $this->getDatabaseDriver();
             $db = new $_db();
@@ -107,14 +112,19 @@ class Tikori extends Application
                 $this->setComponent('dbconfig', new DBConfig());
             }
         }
+        Profiler::benchFinish($b);
 
         // configure modules
+        $b = Profiler::benchStart(Profiler::BENCH_CAT_CORE, 'Prepare modules');
         $modules = $this->cfg('modules');
         if (!empty($modules)) {
             foreach ($this->cfg('modules') as $module => $configPath) {
+                $bsub = Profiler::benchStart(Profiler::BENCH_CAT_CORE, 'Loading module ' . $module);
                 $this->preloadModule($module, $configPath);
+                Profiler::benchFinish($bsub);
             }
         }
+        Profiler::benchFinish($b);
 
         $this->session = new Core\Common\NullSession();
         $this->user = new Core\Common\EmptyUser();
@@ -151,11 +161,15 @@ class Tikori extends Application
         //$this->lang->loadLanguages();
 
         // process route
+        $b = Profiler::benchStart(\Profiler::BENCH_CAT_CORE, 'Route processing');
         $this->route = Route::process_uri($this->request->getRouterPath());
+        Profiler::benchFinish($b);
 
+        $b = Profiler::benchStart(\Profiler::BENCH_CAT_CORE, 'Process URI');
         if ($this->route == null) {
             $this->route = Route::process_uri('');
         }
+        Profiler::benchFinish($b);
 
         if ($this->route == null) {
             // if still
@@ -168,14 +182,19 @@ class Tikori extends Application
             Core::app()->toolbar->putValueToTab('Request', 'Route processed and is ' . (($this->route == NULL) ? 'not found' : 'found'));
         }
 
+        // running controller
+        $b = Profiler::benchStart(\Profiler::BENCH_CAT_CORE, 'Running controller + events');
+
         Core::event(self::EVENT_BEFORE_DISPATCH);
 
         $this->_runController($this->route);
 
         Core::event(self::EVENT_AFTER_DISPATCH);
 
+        Profiler::benchFinish($b);
         Profiler::addLog('Route handled');
 
+        // sending response
         $this->response->send();
 
         Core::saveAutoloadCache();
