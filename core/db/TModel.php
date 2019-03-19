@@ -743,7 +743,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     // eager
 
     /**
-     * @param array $with
+     * @param array|string $with
      * @return $this
      * @throws Exception
      */

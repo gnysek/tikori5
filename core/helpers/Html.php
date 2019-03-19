@@ -99,7 +99,7 @@ class Html
 
         // external
         if (preg_match('/^(\/*)http.*/', $url[0])) { // in case / or // was added, include it here also
-            return $url[0];
+            return ltrim($url[0], '/');
         }
 
         $scope = null;
