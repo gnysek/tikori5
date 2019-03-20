@@ -86,7 +86,7 @@ class Tikori extends Application
         $this->setComponent('cache', new Cache());
         $regenerateAutloads = false;
         if ($this->cache->findCache('config-sum')) {
-
+            // todo: load merged config
         }
 
         $b = Profiler::benchStart(\Profiler::BENCH_CAT_CORE, 'Getting autoload cache');
@@ -119,6 +119,11 @@ class Tikori extends Application
         $modules = $this->cfg('modules');
         if (!empty($modules)) {
             foreach ($this->cfg('modules') as $module => $configPath) {
+
+                if ($this->dbconfig) {
+                    $this->dbconfig->renconfigure($module);
+                }
+
                 $bsub = Profiler::benchStart(Profiler::BENCH_CAT_CORE, 'Loading module ' . $module);
                 $this->preloadModule($module, $configPath);
                 Profiler::benchFinish($bsub);

@@ -87,18 +87,18 @@ abstract class Application
 
     public function preloadModule($module, $config = NULL)
     {
-//        foreach (array(true, false) as $includeCoreDir) {
-//            $this->addAutoloadPaths(
-//                array(
-//                     'modules/' . $module,
-//                     'modules/' . $module . '/config',
-//                     'modules/' . $module . '/controllers',
-//                     'modules/' . $module . '/models',
-//                     'modules/' . $module . '/views',
-//                     'modules/' . $module . '/widgets',
-//                ), $includeCoreDir
-//            );
-//        }
+        $_module = 'modules/' . trim(strtolower($module), '/') . '/';
+
+        foreach ([TIKORI_FPATH . '/' . $_module, TIKORI_ROOT . DIRECTORY_SEPARATOR . 'app/' . $_module] as $_tryConfig) {
+            if (file_exists($_tryConfig . 'config.json')) {
+                $json = json_decode(file_get_contents($_tryConfig . 'config.json'), true);
+                if (json_last_error() == false) {
+                    foreach ($json as $name => $value) {
+                        Core::app()->cfg()->set($name, $value, false);
+                    }
+                }
+            }
+        }
 
         $this->registerAutoloadPaths($module);
 
@@ -106,6 +106,7 @@ abstract class Application
         if (Core::autoload($moduleClass, true)) {
             $class = new $moduleClass;
             $this->setComponent($module, $class);
+            $class->setModuleCfgName(strtolower($module));
         }
     }
 

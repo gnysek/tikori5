@@ -187,10 +187,11 @@ class TView
             $cacheList = $this->_themes + array('');
         }
 
-        foreach ($cacheList as $theme) {
-            if (array_key_exists($this->area . $theme . $file, self::$_viewFiles)) {
-                return self::$_viewFiles[$this->area . $theme . $file];
-            }
+        $currentThemeIdentifier = 'T:' . $this->_themes[0] . '|A:' . $this->area . '|F:';
+
+        if (array_key_exists($currentThemeIdentifier . $file, self::$_viewFiles)) {
+            Profiler::addLog(sprintf('Loaded template from cache: <kbd>%s</kbd> <kbd>[%s]</kbd>', self::$_viewFiles[$currentThemeIdentifier . $file], $currentThemeIdentifier . $file));
+            return self::$_viewFiles[$currentThemeIdentifier . $file];
         }
 
         $paths = array();
@@ -265,10 +266,12 @@ class TView
                     $this->_usedTheme = $matches[1];
                 }
 
-                if (!in_array($file, self::$_viewFiles)) {
-                    self::$_viewFiles[$this->area . ($this->_usedTheme != 'default' ? $this->_usedTheme : '') . $file] = str_replace('\\', '/', $filename);
+                if (!in_array($currentThemeIdentifier . $file, self::$_viewFiles)) {
+                    self::$_viewFiles[$currentThemeIdentifier . $file] = str_replace('\\', '/', $filename);
                     self::$_viewFilesChanged = true;
                 }
+
+                Profiler::addLog(sprintf('Loaded template + added to cache: <kbd>%s</kbd> <kbd>[%s]</kbd>', $filename, $currentThemeIdentifier . $file));
 
                 return $filename;
             }

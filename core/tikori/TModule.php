@@ -3,11 +3,8 @@
 class TModule
 {
 
-//	public function registerModule() {
-//
-//	}
-
     protected $__initialized = false;
+    protected $__moduleName = '';
 
     public function init()
     {
@@ -23,5 +20,17 @@ class TModule
     public function addObserver($eventName)
     {
         Core::app()->observer->addObserver($eventName, $this);
+    }
+
+    public function updateConfig($path, $value)
+    {
+        if (Core::app()->dbconfig) {
+            Core::app()->dbconfig->saveConfig($path, $value, $this->__moduleName);
+        }
+    }
+
+    public function setModuleCfgName($name)
+    {
+        $this->__moduleName = $name;
     }
 }
