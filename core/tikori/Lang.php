@@ -161,7 +161,7 @@ class Lang
     /**
      * @param $lang
      * @param array $args
-     * @return mixed|string|string[]|null
+     * @return string|null
      * @throws Exception
      */
     public function translateTo($lang, $args)
@@ -195,7 +195,7 @@ class Lang
 
     /**
      * @param $args
-     * @return null|string|string[]
+     * @return null|string
      * @throws \Exception
      */
     public function translate($args)

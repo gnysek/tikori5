@@ -28,6 +28,7 @@ class TProfiler
                 $message,
                 $tn,
                 (count(self::$_log) > 1) ? sprintf('%0.4f', $tn - self::$_log[count(self::$_log) - 1][2]) : 0,
+                memory_get_usage(false),
             );
         }
 
@@ -80,6 +81,7 @@ class TProfiler
         $logs[] = '<th>ID</th>';
         $logs[] = '<th>Type</th>';
         $logs[] = '<th>Action</th>';
+        $logs[] = '<th colspan="2">Memory</th>';
         $logs[] = '<th>Time</th>';
         $logs[] = '<th>Total</th>';
         $logs[] = '<th colspan="2">%</th>';
@@ -108,10 +110,14 @@ class TProfiler
                 $style = ($log[0] > 0 and array_key_exists($log[0], $styles)) ? $styles[$log[0]] : '';
                 $type = ($log[0] > 0 and array_key_exists($log[0], $types)) ? $types[$log[0]] : '&ndash;';
 
+                $memoryAddon = ($id == 0) ? 0 : ($log[4] - self::$_log[$id - 1][4]);
+
                 $logs[] = '<tr style="border-bottom: 1px solid black;">';
                 $logs[] = '<td>' . ($id + 1) . '</td>';
                 $logs[] = '<td' . $style . '>' . $type . '</td>';
                 $logs[] = '<td' . $style . '>' . $log[1] . '</td>';
+                $logs[] = '<td>' . round($log[4] / 1024 / 1024, 4) . 'MB</td>';
+                $logs[] = '<td>' . ($memoryAddon > 0 ? '+' : '') . round($memoryAddon/1024/1024, 4) . 'MB</td>';
                 $logs[] = '<td>+' . $log[3] . 's.</td>';
                 $logs[] = '<td>=' . $log[2] . 's.</td>';
                 $logs[] = '<td' . self::percentageColor($currentPercentage) . '>+' . sprintf('%0.2f', $currentPercentage) . '%</td>';

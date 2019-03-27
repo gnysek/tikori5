@@ -323,6 +323,10 @@ class Tikori extends Application
     }
 }
 
+/**
+ * @return string|null
+ * @throws Exception
+ */
 function __()
 {
     $args = func_get_args();

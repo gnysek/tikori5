@@ -807,6 +807,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         return $r;
     }
 
+    public function beforeDelete()
+    {
+        return true;
+    }
+
     /**
      * Delete that record from database
      *
@@ -815,6 +820,8 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      */
     public function delete()
     {
+        $this->beforeDelete();
+
         DbQuery::sql()
             ->delete()
             ->from($this->_table)
