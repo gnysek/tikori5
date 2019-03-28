@@ -352,6 +352,10 @@ class Request extends DefaultObject
 
         if (!empty($_GET)) {
             foreach ($_GET as $k => $v) {
+                //todo: allow arrays at some point in get
+                if (is_array($v)) {
+                    continue;
+                }
                 //todo: allow utf-8 maybe ?
                 $this->_get[$k] = trim(preg_replace('#[^a-z0-9/_\-%\s]#i', '', $v));
                 $this->_getRaw[$k] = $v;

@@ -1,5 +1,7 @@
 <?php
 
+use Collection;
+
 /**
  * Class Model
  *
@@ -17,16 +19,12 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 //	const MANY_MANY = 4;
 
     protected $_table = '';
-    protected $_fields = array();
     protected $_values = array();
     protected $_original = array();
-    protected $_rules = array();
     protected $_related = array();
     protected static $_oop_relations = array();
     protected $_primaryKey = 'id';
     protected $_canUpdatePK = false;
-    protected $_scopes = array();
-    protected $_relations = array();
     protected $_isNewRecord = true;
     /**
      * @var array List of attributes that should be hidden when displaying (e.g. password)
@@ -47,21 +45,45 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     /**
      * @var null|TDbTableSchema
      */
-    protected $_schema = null;
+    #protected $_schema = null;
 
+    /**
+     * @var array
+     */
+    protected static $_cachedCommon = [];
+    const COMMON_SCHEMA = 'schema';
+    const COMMON_RELATIONS = 'relations';
+    const COMMON_FIELDS = 'fields';
+    const COMMON_SCOPES = 'scopes';
+    const COMMON_RULES = 'rules';
+
+    /**
+     * TModel constructor.
+     * @param array $attributes
+     * @param bool $isNew
+     * @throws DbError
+     */
     public function __construct($attributes = array(), $isNew = true)
     {
-        $this->_schema = Core::app()->db->getTableInfo($this->getTable());
-        $this->_scopes = $this->scopes();
-        $this->_relations = $this->relations();
-        $this->_fields = $this->getFields();
+        if ($this->__noCommon(self::COMMON_SCHEMA)) {
+            $this->__setCommon(self::COMMON_SCHEMA, Core::app()->db->getTableInfo($this->getTable()));
+        }
+        if ($this->__noCommon(self::COMMON_SCOPES)) {
+            $this->__setCommon(self::COMMON_SCOPES, $this->scopes());
+        }
+        if ($this->__noCommon(self::COMMON_RELATIONS)) {
+            $this->__setCommon(self::COMMON_RELATIONS, $this->relations());
+        }
+        if ($this->__noCommon(self::COMMON_FIELDS)) {
+            $this->__setCommon(self::COMMON_FIELDS, $this->getFields());
+        }
         $class = get_class($this);
 
         if (!array_key_exists($class, self::$_oop_relations)) {
             // always fill with at least empty array, so haveRelationInClass method will work
             self::$_oop_relations[$class] = array();
-            if (!empty($this->_relations)) {
-                foreach ($this->_relations as $relationName => $relation) {
+            if (!empty($this->__getCommon(self::COMMON_RELATIONS))) {
+                foreach ($this->__getCommon(self::COMMON_RELATIONS) as $relationName => $relation) {
                     self::$_oop_relations[$class][$relationName] = new TModelRelation($relationName, $relation[0], $class, $relation[1], $relation[2]);
                 }
             }
@@ -73,15 +95,17 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         }
 
         // set default values
-        if (!empty($this->_fields)) {
-            foreach ($this->_fields as $fieldName) {
-                if (array_key_exists($fieldName, $this->_relations)) {
+        if (!empty($this->__getCommon(self::COMMON_FIELDS))) {
+            foreach ($this->__getCommon(self::COMMON_FIELDS) as $fieldName) {
+                if (array_key_exists($fieldName, $this->__getCommon(self::COMMON_RELATIONS))) {
                     throw new DbError('Model ' . get_class($this) . ' have field named same as relation: ' . $fieldName);
                 }
-                $this->_values[$fieldName] = $this->_original[$fieldName] = ($fieldName == $this->getFirstPK()) ? null : ($this->_schema->getColumn($fieldName)->defaultValue);
+                $this->_values[$fieldName] = $this->_original[$fieldName] = ($fieldName == $this->getFirstPK()) ? null : ($this->__getCommon(self::COMMON_SCHEMA)->getColumn($fieldName)->defaultValue);
             }
         }
-        $this->_rules = $this->_prepareRules();
+        if ($this->__noCommon(self::COMMON_RULES)) {
+            $this->__setCommon(self::COMMON_RULES, $this->_prepareRules());
+        }
         $this->_isNewRecord = $isNew;
 
         $this->_populate($attributes);
@@ -89,6 +113,48 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             $this->_populateOnNewRecord();
         }
         //$this->_new = true;
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     */
+    protected function __setCommon($name, $value)
+    {
+        $class = get_class($this);
+        if (!array_key_exists($class, self::$_cachedCommon)) {
+            self::$_cachedCommon[$class] = [];
+        }
+        if (!array_key_exists($name, self::$_cachedCommon[$class])) {
+            self::$_cachedCommon[$class][$name] = $value;
+        }
+    }
+
+    /**
+     * @param $name
+     * @return mied|null
+     */
+    protected function __getCommon($name)
+    {
+        $class = get_class($this);
+        if (array_key_exists($class, self::$_cachedCommon)) {
+            if (array_key_exists($name, self::$_cachedCommon[$class])) {
+                return self::$_cachedCommon[$class][$name];
+            }
+        }
+
+        return null;
+    }
+
+    protected function __noCommon($name) {
+        $class = get_class($this);
+        if (array_key_exists($class, self::$_cachedCommon)) {
+            if (array_key_exists($name, self::$_cachedCommon[$class])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function getTable()
@@ -298,20 +364,60 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $this->_applyEagers($sql);
 
         $result = $sql->execute();
-        $return = array();
+
+        Profiler::addLog('SQL Executed, now create models');
+
+        $collectionOfModels = array();
         $relationCacheByPk = array();
+        $mainClassName = get_called_class();
+
+        //region get rows as Models, and apply pre-eagers added with JOIN
+
+        $shouldApplyPreEagers = false;
+        $shouldApplyPreEagersRelationNames = [];
+        if (!empty($this->_eagers)) {
+            foreach ($this->_eagers as $k => $relationName) {
+
+                if (stripos($relationName, '.') > 0) {
+                    continue;
+                }
+
+                switch ($this->__getCommon(self::COMMON_RELATIONS)[$relationName][0]) {
+                    case self::BELONGS_TO:
+                        $shouldApplyPreEagers = true;
+                        $shouldApplyPreEagersRelationNames[] = $relationName . '.' . $this->__getCommon(self::COMMON_RELATIONS)[$relationName][0];
+                        break;
+                    default:
+                        $methodName = '__doRelationBeforePopulate_' . $this->__getCommon(self::COMMON_RELATIONS)[$relationName][0];
+                        if (method_exists($this, $methodName)) {
+                            $shouldApplyPreEagers = true;
+                            $shouldApplyPreEagersRelationNames[] = $relationName . '.' . $this->__getCommon(self::COMMON_RELATIONS)[$relationName][0];
+                        }
+                        break;
+                }
+            }
+        }
+
+        $_pr = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Populating ' . count($result) . ' rows of ' . $mainClassName . ($shouldApplyPreEagers ? ' with eagerly loaded BELONGS TO' : ' without pre-eagers'));
+
+        $pureValues = [];
+
         foreach ($result as $row) {
-            /* @var $row Result */
+            /* @var $row Record */
             //$c = self::model();
-            $mainClassName = get_called_class();
 //            $c->setValues($row->getIterator()->getArrayCopy());
-            $values = $row->getIterator()->getArrayCopy();
+            $values = $row->getProperties();
+
+            $pureValues[] = $values; //todo: remove as it duplicates, save RAM !!!
+
             $c = new $mainClassName($values, false);
             /* @var $c TModel */
 //            $c->setAttributes($values);
 
             // after getting data, load those which cannot be joined in another query, to attach them later
-            if (!empty($this->_eagers)) {
+
+            if ($shouldApplyPreEagers and !empty($this->_eagers)) {
+
                 foreach ($this->_eagers as $k => $relationName) {
 
                     if (stripos($relationName, '.') > 0) {
@@ -333,37 +439,41 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                         continue;
                     }
 
-                    switch ($this->_relations[$relationName][0]) {
+                    switch ($this->__getCommon(self::COMMON_RELATIONS)[$relationName][0]) {
+                        // todo - could it be added little later, around line 460, as there are again eagers checked ???
                         case self::BELONGS_TO:
 
-                            $_cacheUniqueName = $relationName . $values[$this->_relations[$relationName][2]];
+                            $_cacheUniqueName = $relationName . $values[$this->__getCommon(self::COMMON_RELATIONS)[$relationName][2]];
 
                             if (!array_key_exists($_cacheUniqueName, $relationCacheByPk)) {
-//                                $r = Model::model($this->_relations[$relationName][1]);
+//                                $r = Model::model($this->__getCommon(self::COMMON_RELATIONS)[$relationName][1]);
                                 $rvalues = array();
 
-                                if ($schema = Core::app()->db->getSchema()->getTableSchema(self::getTableName($this->_relations[$relationName][1]))) {
+                                if ($schema = Core::app()->db->getSchema()->getTableSchema(self::getTableName($this->__getCommon(self::COMMON_RELATIONS)[$relationName][1]))) {
                                     $fields = $schema->getColumnNames();
                                 } else {
                                     Profiler::benchFinish($bench);
-                                    throw new Exception('Cannot find Schema for table ' . self::getTableName($this->_relations[$relationName][1]));
+                                    throw new Exception('Cannot find Schema for table ' . self::getTableName($this->__getCommon(self::COMMON_RELATIONS)[$relationName][1]));
                                 }
 
                                 foreach ($fields as $relationfield) {
                                     $relationfieldName = 'r' . ($k + 1) . '_' . $relationfield;
                                     $rvalues[$relationfield] = $values[$relationfieldName];
                                 }
-                                $relatedClassName = $this->_relations[$relationName][1];
+                                $relatedClassName = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][1];
                                 $r = new $relatedClassName($rvalues, false);
                                 /* @var $r TModel */
 //                                $r->setAttributes($rvalues);
                                 $relationCacheByPk[$_cacheUniqueName] = $r;
+                            } else {
+                                #var_dump('relation already cached ' . $mainClassName . $_cacheUniqueName);
                             }
 
                             $c->populateRelation($relationName, $relationCacheByPk[$_cacheUniqueName]);
+
                             break;
                         default:
-                            $methodName = '__doRelationBeforePopulate_' . $this->_relations[$relationName][0];
+                            $methodName = '__doRelationBeforePopulate_' . $this->__getCommon(self::COMMON_RELATIONS)[$relationName][0];
                             if (method_exists($this, $methodName)) {
                                 $this->$methodName($relationName);
                             }
@@ -372,56 +482,105 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 }
             }
 
-            $return[] = $c;
+            $collectionOfModels[] = $c;
         }
+        Profiler::benchFinish($_pr);
+        //endregion
 
-        // create collection and attach
-        $collection = new Collection($return);
+        //region create collection and attach
+
+        Profiler::addLog('Rows added, now create collection');
+        $collection = new Collection($collectionOfModels);
+        Profiler::addLog('Rows added, collection done');
 
         if (!empty($this->_eagers)) {
+
+            $_pr = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Populating EAGERS ' . $mainClassName . ' -- except BELONGS_TO');
+
             foreach ($this->_eagers as $relationName) {
+
+                $_prsub = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Populating after-EAGER ' . $mainClassName . '.' . $relationName);
 
                 if (stripos($relationName, '.') > 0) {
                     continue;
                 }
 
                 $values = array();
-                switch ($this->_relations[$relationName][0]) {
+                switch ($this->__getCommon(self::COMMON_RELATIONS)[$relationName][0]) {
                     case self::HAS_MANY:
 //                        var_dump($this->getPK());
 //                        var_dump($collection->getColumnValues($this->getPK()));
                         $byField = $this->getFirstPK();
                         Profiler::addLog('FIND WHERE - getting related');
+                        $_benchHasMany1 = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Populating after-EAGER <kbd>HAS MANY</kbd> ' . $mainClassName . '.' . $relationName);
                         $related = $this->_getRelated($relationName, false, $collection->getColumnValues($byField));
-                        Profiler::addLog('FIND WHERE - related got, will assign ' . count($related) . ' to ' . count($return) . ' records');
+                        #Profiler::benchFinish($_benchHasMany);
+                        Profiler::addLog('FIND WHERE - related got, will assign ' . count($related) . ' to ' . count($collectionOfModels) . ' records');
                         /* @var Collection $related */
 //                        var_dump(count($related));
-                        foreach ($return as $row) {
+
+                        $_benchHasMany = Profiler::benchStart(Profiler::BENCH_CAT_SQL,'ASSIGN HAS MANY - ' . count($collectionOfModels) . ' rows');
+                        $toAssign = null;
+                        $tryFastAssign = false;
+
+                        $_benchHasMany2 = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'getRowsByColumnValue');
+                        foreach ($collectionOfModels as $row) {
                             if (count($related) == 0) {
                                 // because of VIA [eg.tags] can return just array
                                 $toAssign = $related; //empty collection
                             } elseif (array_key_exists($relationName, $this->_relationViaLinks)) {
                                 // relation VIA
-                                $toAssign = $related->getRowsWhereColumnValues($this->_relations[$relationName][2][0], $this->_relationViaLinks[$relationName][$row->$byField]);
+                                $toAssign = $related->getRowsWhereColumnValues($this->__getCommon(self::COMMON_RELATIONS)[$relationName][2][0], $this->_relationViaLinks[$relationName][$row->$byField]);
                             } else {
-                                $toAssign = $related->getRowsByColumnValue($this->_relations[$relationName][2], $row->$byField);
+                                #$toAssign = $related->getRowsByColumnValue($byField, $row->$byField);
+                                $tryFastAssign = true;
+                                break;
                             }
 
-//                            var_dump($byField . ' ' . $row->$byField . ' ' . $this->_relations[$relationName][2]);
+//                            var_dump($byField . ' ' . $row->$byField . ' ' . $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2]);
 //                            var_dump(count($toAssign));
                             /* @var TModel $row */
-                            $row->populateRelation($relationName, $toAssign);
+                            if ($toAssign) {
+                                $row->populateRelation($relationName, $toAssign);
+                            }
                         }
+                        Profiler::benchFinish($_benchHasMany2);
+
+                        // try faster way
+                        if ($tryFastAssign) {
+                            $_benchHasMany2 = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'getRowsByColumnValue NEW');
+                            $preparedFastRows = [];
+                            foreach ($related as $relatedRow) {
+                                if (!array_key_exists($relatedRow->$byField, $preparedFastRows)) {
+                                    $preparedFastRows[$relatedRow->$byField] = [];
+                                }
+
+                                $preparedFastRows[$relatedRow->$byField][] = $relatedRow;
+                            }
+
+                            foreach ($collectionOfModels as $row) {
+                                if (array_key_exists($row->$byField, $preparedFastRows)) {
+                                    $row->populateRelation($relationName, new Collection($preparedFastRows[$row->$byField]));
+                                } else {
+                                    $row->populateRelation($relationName, new Collection());
+                                }
+                            }
+                            Profiler::benchFinish($_benchHasMany2);
+                        }
+                        // end of faster way
+
+                        Profiler::benchFinish($_benchHasMany);
+                        Profiler::benchFinish($_benchHasMany1);
                         Profiler::addLog('FIND WHERE - related populated');
                         break;
                     case self::BELONGS_TO:
                         break;
                     /*case self::BELONGS_TO:
-//                        var_dump($this->_relations[$relationName][2]);
-                        $byField = $this->_relations[$relationName][2];
+//                        var_dump($this->__getCommon(self::COMMON_RELATIONS)[$relationName][2]);
+                        $byField = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2];
 //                        var_dump($collection->getColumnValues($byField));
                         $related = $this->_getRelated($relationName, false, $collection->getColumnValues($byField));
-                        $rel = Model::model($this->_relations[$relationName][1])->getPK();
+                        $rel = Model::model($this->__getCommon(self::COMMON_RELATIONS)[$relationName][1])->getPK();
 //                        var_dump($related);
                         foreach ($return as $row) {
 //                            var_dump($rel . ' ' . $byField . ' ' . $row->$byField);
@@ -432,23 +591,35 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 //                        throw new Exception('Not yet implemented');
                         break;*/
                     default:
-                        $methodName = '__doRelation_' . $this->_relations[$relationName][0];
+                        $methodName = '__doRelation_' . $this->__getCommon(self::COMMON_RELATIONS)[$relationName][0];
+
+                        $_benchOther = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Populating after-EAGER <kbd>' . $methodName . '</kbd> ' . $mainClassName . '.' . $relationName);
+
                         if (method_exists($this, $methodName)) {
                             $this->$methodName($relationName);
                         } else {
-                            throw new Exception('Not yet implemented, or no __doRelation_' . $methodName . ' found');
+                            throw new Exception('Not yet implemented, or no ' . $methodName . ' found');
                         }
+
+                        Profiler::benchFinish($_benchOther);
                         break;
                 }
                 ///var_dump($this->_getRelated($relationName, array('1')));
+                Profiler::benchFinish($_prsub);
             }
+
+            Profiler::benchFinish($_pr);
         }
 
         Profiler::addLog('FIND WHERE apply dot eagers');
 
+        //endregion
+
+        //region apply sub-relations
         $benchEagers = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Applying eagers in ' . get_class($this) . '');
         $this->_applyDotEagersAfterLoadedNormalOnes($collection);
         Profiler::benchFinish($benchEagers);
+        //endregion
 
         Profiler::addLog('FIND WHERE FINISHED');
         Profiler::benchFinish($bench);
@@ -505,21 +676,21 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     continue;
                 }
 
-                switch ($this->_relations[$relationName][0]) {
+                switch ($this->__getCommon(self::COMMON_RELATIONS)[$relationName][0]) {
                     case self::BELONGS_TO:
 
-                        $model = TModel::model($this->_relations[$relationName][1]);
+                        $model = TModel::model($this->__getCommon(self::COMMON_RELATIONS)[$relationName][1]);
                         /* @var $model TModel */
-                        $sql->joinOn(array($k + 1, $model->getTable()), array($model->getFirstPK(), '=', $this->_relations[$relationName][2]));
+                        $sql->joinOn(array($k + 1, $model->getTable()), array($model->getFirstPK(), '=', $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2]));
 
                         break;
                     /*case self::HAS_MANY:
 
-                        $model = Model::model($this->_relations[$relationName][1]);
-                        $sql->joinOn($model->getTable(), array($this->_relations[$relationName][2], '=', $this->getPK()));
+                        $model = Model::model($this->__getCommon(self::COMMON_RELATIONS)[$relationName][1]);
+                        $sql->joinOn($model->getTable(), array($this->__getCommon(self::COMMON_RELATIONS)[$relationName][2], '=', $this->getPK()));
                     */
                     default:
-                        $methodName = '__doEager_' . $this->_relations[$relationName][0];
+                        $methodName = '__doEager_' . $this->__getCommon(self::COMMON_RELATIONS)[$relationName][0];
                         if (method_exists($this, $methodName)) {
                             $this->$methodName($relationName, $sql);
                         }
@@ -923,7 +1094,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     {
         $modified = array();
         if ($force) {
-            foreach ($this->_fields as $field) {
+            foreach ($this->__getCommon(self::COMMON_FIELDS) as $field) {
                 if ($this->_canUpdatePK or !in_array($field, $this->_primaryKey)) {
                     $modified[$field] = $this->_values[$field];
                 }
@@ -981,11 +1152,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     public function save($forceToSave = false)
     {
         if ($this->timestamps) {
-            if ($this->_isNewRecord && in_array('created_at', $this->_fields) && $this->created_at == 0) {
+            if ($this->_isNewRecord && in_array('created_at', $this->__getCommon(self::COMMON_FIELDS)) && $this->created_at == 0) {
                 $this->created_at = $this->_getDateFormat();
             }
 
-            if (in_array('updated_at', $this->_fields) and !in_array('updated_at', $this->_modified)) {
+            if (in_array('updated_at', $this->__getCommon(self::COMMON_FIELDS)) and !in_array('updated_at', $this->_modified)) {
                 // update only if this model have field "updated at" and it wasn't already changed by user (this allow to set "updated_at" to past dates
                 if ($this->isModified() or $forceToSave) {
                     $this->updated_at = $this->_getDateFormat();
@@ -1033,23 +1204,23 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         $this->_filter();
 
         $valid = true;
-        foreach ($this->_rules as $field => $entry) {
+        foreach ($this->__getCommon(self::COMMON_RULES) as $field => $entry) {
             foreach ($entry['rules'] as $rule) {
 
-                if (!in_array($field, $this->_fields)) {
+                if (!in_array($field, $this->__getCommon(self::COMMON_FIELDS))) {
                     $this->_errors[$field][] = 'FATAL: Unknown field in model rules: ' . $field . '.';
                     continue;
                 }
 
                 switch ($rule) {
                     case 'required':
-                        if (empty($this->_values[$field]) && $this->_values[$field] == null && ($this->_schema->getColumn($field)->phpType !== 'integer' && $this->_values[$field] == 0)) {
+                        if (empty($this->_values[$field]) && $this->_values[$field] == null && ($this->__getCommon(self::COMMON_SCHEMA)->getColumn($field)->phpType !== 'integer' && $this->_values[$field] == 0)) {
                             $valid = false;
                             $this->_errors[$field][] = 'Required';
                         }
                         break;
                     case 'int':
-                        if (!is_numeric($this->_values[$field]) and ($this->_schema->getColumn($field)->allowNull == false)) {
+                        if (!is_numeric($this->_values[$field]) and ($this->__getCommon(self::COMMON_SCHEMA)->getColumn($field)->allowNull == false)) {
                             $valid = false;
                             $this->_errors[$field][] = 'Needs to be a number';
                         }
@@ -1169,7 +1340,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
      */
     public function getFields()
     {
-        return $this->_schema->getColumnNames();
+        return $this->__getCommon(self::COMMON_SCHEMA)->getColumnNames();
     }
 
     /**
@@ -1236,7 +1407,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     public function __get($value)
     {
-        if (in_array($value, $this->_fields)) {
+        if (in_array($value, $this->__getCommon(self::COMMON_FIELDS))) {
             if (array_key_exists($value, $this->_values)) {
                 return $this->_values[$value];
             } else {
@@ -1246,7 +1417,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             if (isset($this->_related[$value])) {
                 return $this->_related[$value];
             } else {
-                if (array_key_exists($value, $this->_relations)) {
+                if (array_key_exists($value, $this->__getCommon(self::COMMON_RELATIONS))) {
 //			          var_dump('relation ' . __CLASS__);
                     return $this->getRelated($value);
                 } else {
@@ -1273,7 +1444,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             case 'get':
                 $value = substr($name, 3);
 
-                if (in_array($value, $this->_fields)) {
+                if (in_array($value, $this->__getCommon(self::COMMON_FIELDS))) {
                     if (array_key_exists($value, $this->_values)) {
                         return $this->_values[$value];
                     } else {
@@ -1302,7 +1473,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     {
         $setter = 'set' . ucfirst($name);
         if (array_key_exists($name, $this->_values)) {
-            $value = $this->_schema->columns[$name]->typecast($value);
+            $value = $this->__getCommon(self::COMMON_SCHEMA)->columns[$name]->typecast($value);
             //TODO: choose that it should be != or !== for $value=$this->_values compare
             if ($value !== $this->_values[$name]) {
                 $this->_modified[] = $name;
@@ -1344,11 +1515,11 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
             $attributes = array();
         }
 
-        foreach ($this->_fields as $fieldName) {
+        foreach ($this->__getCommon(self::COMMON_FIELDS) as $fieldName) {
             if (array_key_exists($fieldName, $attributes)) {
-                $this->_values[$fieldName] = $this->_original[$fieldName] = $value = $this->_schema->columns[$fieldName]->typecast($attributes[$fieldName]);
+                $this->_values[$fieldName] = $this->_original[$fieldName] = $value = $this->__getCommon(self::COMMON_SCHEMA)->columns[$fieldName]->typecast($attributes[$fieldName]);
             } else {
-                $this->_values[$fieldName] = $this->_original[$fieldName] = $this->_schema->columns[$fieldName]->defaultValue;
+                $this->_values[$fieldName] = $this->_original[$fieldName] = $this->__getCommon(self::COMMON_SCHEMA)->columns[$fieldName]->defaultValue;
             }
         }
     }
@@ -1387,7 +1558,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     public function haveRelation($name)
     {
-        return (array_key_exists($name, $this->_relations));
+        return (array_key_exists($name, $this->__getCommon(self::COMMON_RELATIONS)));
     }
 
     public function getRelated($relationName)
@@ -1417,7 +1588,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
     protected function _getRelatedData($relationName, $field)
     {
-        return (array_key_exists($relationName, $this->_relations)) ? $this->_relations[$relationName][$field] : null;
+        return (array_key_exists($relationName, $this->__getCommon(self::COMMON_RELATIONS))) ? $this->__getCommon(self::COMMON_RELATIONS)[$relationName][$field] : null;
     }
 
     const RELATION_VIA = 'via';
@@ -1435,12 +1606,12 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     {
         // todo: if called again, will load again! should be fixed
         $result = null;
-        switch ($this->_relations[$relationName][0]) {
+        switch ($this->__getCommon(self::COMMON_RELATIONS)[$relationName][0]) {
             case self::HAS_MANY:
-                $rel = self::model($this->_relations[$relationName][1]);
+                $rel = self::model($this->__getCommon(self::COMMON_RELATIONS)[$relationName][1]);
                 $conditions = array();
-                if (array_key_exists(3, $this->_relations[$relationName])) {
-                    $conditions = $this->_relations[$relationName][3];
+                if (array_key_exists(3, $this->__getCommon(self::COMMON_RELATIONS)[$relationName])) {
+                    $conditions = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][3];
                 }
                 if (empty($customValues)) {
                     $customValues = [$this->_values[$this->getFirstPK()]];
@@ -1452,7 +1623,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     unset($conditions['with']);
                 }
 
-                $_byField = $this->_relations[$relationName][2];
+                $_byField = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2];
 
                 // VIA RELATION, eg 'field' => array(self::HAS_MANY, 'Model', ['Model_field', 'via' => ['ModelVia', 'self_id_field', 'model_id_fields']]),
                 if (is_array($_byField)) {
@@ -1499,9 +1670,9 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 }
                 break;
             case self::BELONGS_TO:
-                $rel = self::model($this->_relations[$relationName][1]);
+                $rel = self::model($this->__getCommon(self::COMMON_RELATIONS)[$relationName][1]);
                 if (empty($customValues)) {
-                    $customValues = $this->_values[$this->_relations[$relationName][2]];
+                    $customValues = $this->_values[$this->__getCommon(self::COMMON_RELATIONS)[$relationName][2]];
                 }
                 $result = $rel->findWhere(array($rel->getFirstPK(), 'IN', $customValues));
                 if ($populate) {
@@ -1509,7 +1680,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                 }
                 break;
             default:
-                throw new DbError('Unknown relation type ' . $this->_relations[$relationName][0]);
+                throw new DbError('Unknown relation type ' . $this->__getCommon(self::COMMON_RELATIONS)[$relationName][0]);
         }
 
         return $this->_returnRelation($relationName, $result, $populate);
@@ -1575,7 +1746,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
 
         $headerCount = count($this->_values);
 
-        foreach ($this->_relations as $relationName => $relation) {
+        foreach ($this->__getCommon(self::COMMON_RELATIONS) as $relationName => $relation) {
             ///echo $relation[1];
             switch ($relation[0]) {
                 case self::HAS_ONE:

@@ -38,7 +38,7 @@ abstract class DbAbstract
      * @param bool   $assoc Assoc or not?
      *
      * @throws DbError
-     * @return Collection
+     * @return Record|Record[]
      */
     abstract public function query($sql, $skip = '', $assoc = TRUE);
 

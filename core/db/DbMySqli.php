@@ -149,8 +149,10 @@ class DbMySqli extends DBAbstract
             if ($result instanceof mysqli_result) {
                 $return = array();
                 if ($result->num_rows) {
+                    Profiler::addLog('Fetchich Mysql result to <kbd>Record Class</kbd>');
                     $benchmark = Profiler::benchStart(\TProfiler::BENCH_CAT_SQL_FETCH, 'SQL Fetch Time');
 
+                    // fetch all rows as record
                     while ($row = $result->fetch_object('Record')) {
                         /* @var $row Record */
                         if ($assoc == false) {
@@ -158,6 +160,7 @@ class DbMySqli extends DBAbstract
                         }
                         $return[] = $row;
                     }
+
                     Profiler::addLog('Fetch & records creating finished');
                     $time = Profiler::benchFinish($benchmark);
 

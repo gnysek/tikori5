@@ -146,6 +146,7 @@ class TCache extends TModule
      */
     public function findCache($filename)
     {
+        clearstatcache(true, $this->cachePath . $filename);
         return file_exists($this->cachePath . $filename);
     }
 

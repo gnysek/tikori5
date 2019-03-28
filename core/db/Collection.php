@@ -299,12 +299,13 @@ class Collection implements ArrayAccess, Iterator, Countable
      * @param $column
      * @param $value
      * @return Collection|TModel[]|$this[]|self[]
+     * @throws Exception
      */
     public function getRowsByColumnValue($column, $value)
     {
         $values = array();
         foreach ($this->_data as $record) {
-            if (($record[$column] == $value)) {
+            if ($record[$column] == $value) {
                 $values[] = $record;
             }
         }

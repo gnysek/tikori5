@@ -110,14 +110,14 @@ class TProfiler
                 $style = ($log[0] > 0 and array_key_exists($log[0], $styles)) ? $styles[$log[0]] : '';
                 $type = ($log[0] > 0 and array_key_exists($log[0], $types)) ? $types[$log[0]] : '&ndash;';
 
-                $memoryAddon = ($id == 0) ? 0 : ($log[4] - self::$_log[$id - 1][4]);
+                $memoryAddon = ($id == 0) ? 0 : round(($log[4] - self::$_log[$id - 1][4]) / 1024 / 1024, 4);
 
                 $logs[] = '<tr style="border-bottom: 1px solid black;">';
                 $logs[] = '<td>' . ($id + 1) . '</td>';
                 $logs[] = '<td' . $style . '>' . $type . '</td>';
                 $logs[] = '<td' . $style . '>' . $log[1] . '</td>';
                 $logs[] = '<td>' . round($log[4] / 1024 / 1024, 4) . 'MB</td>';
-                $logs[] = '<td>' . ($memoryAddon > 0 ? '+' : '') . round($memoryAddon/1024/1024, 4) . 'MB</td>';
+                $logs[] = '<td' . ($memoryAddon > 1 ? ' style="background: red;"' : '') . '>&nbsp;+' . $memoryAddon . 'MB</td>';
                 $logs[] = '<td>+' . $log[3] . 's.</td>';
                 $logs[] = '<td>=' . $log[2] . 's.</td>';
                 $logs[] = '<td' . self::percentageColor($currentPercentage) . '>+' . sprintf('%0.2f', $currentPercentage) . '%</td>';

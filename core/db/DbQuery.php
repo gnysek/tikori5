@@ -40,7 +40,7 @@ class DbQuery
     }
 
     /**
-     * @return array|bool|Collection|Record
+     * @return array|bool|Record
      * @throws DbError
      */
     public function execute()
