@@ -549,13 +549,14 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                         // try faster way
                         if ($tryFastAssign) {
                             $_benchHasMany2 = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'getRowsByColumnValue NEW');
+                            $byRelatedField = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2];
                             $preparedFastRows = [];
                             foreach ($related as $relatedRow) {
-                                if (!array_key_exists($relatedRow->$byField, $preparedFastRows)) {
-                                    $preparedFastRows[$relatedRow->$byField] = [];
+                                if (!array_key_exists($relatedRow->$byRelatedField, $preparedFastRows)) {
+                                    $preparedFastRows[$relatedRow->$byRelatedField] = [];
                                 }
 
-                                $preparedFastRows[$relatedRow->$byField][] = $relatedRow;
+                                $preparedFastRows[$relatedRow->$byRelatedField][] = $relatedRow;
                             }
 
                             foreach ($collectionOfModels as $row) {
