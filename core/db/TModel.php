@@ -1,7 +1,5 @@
 <?php
 
-use Collection;
-
 /**
  * Class Model
  *
@@ -1193,6 +1191,24 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
         }
 
         throw new DbError('Cannot save record [beforeSave error]');
+    }
+
+    /**
+     * @param string $fieldName
+     * @param int $value
+     * @return bool
+     * @throws DbError
+     */
+    public function updateCounter($fieldName = 'counter', $value = 0)
+    {
+        DbQuery::sql()
+            ->update()
+            ->from($this->_table)
+            ->fields([$fieldName => $value])
+            ->where($this->_getWhereByPK())
+            ->execute();
+
+        return true;
     }
 
     /**     * */
