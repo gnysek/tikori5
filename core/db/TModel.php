@@ -1488,13 +1488,14 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
     }
 
     /**
+     * Sets values by using $this->attributes /
      * @param $values
      * @return $this
      */
     public function setAttributes($values)
     {
         if (is_array($values)) {
-            // TODO: default value setting by column type//probablu moved now to populate
+            // TODO: default value setting by column type//probably moved now to populate
             foreach ($values as $field => $value) {
                 $this->__set($field, $value);
             }

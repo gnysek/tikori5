@@ -15,7 +15,8 @@ class CacheableBlock
             $path = Core::app()->cache->cachePath . '*__' . strtoupper(preg_replace('/[^a-z0-9]/', '', strtolower($tag))) . '__*';
 
             foreach (glob($path) as $file) {
-                if (file_exists($file)) {
+                clearstatcache(true, $file);
+                if (is_file($file)) {
                     unlink($file);
                 }
             }
