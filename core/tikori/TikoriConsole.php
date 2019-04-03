@@ -101,10 +101,11 @@ class TikoriConsole extends Application
                 }
 
                 try {
+                    $_t = Core::genTimeNow();
                     $task = new $cronTask;
                     echo '---> Running [' . $cronTask . ']' . PHP_EOL;
                     $task->run();
-                    echo PHP_EOL . '---> Task [' . $cronTask . '] done !' . PHP_EOL;
+                    echo PHP_EOL . '---> Task [' . $cronTask . '] done in ' . (Core::genTimeNow() - $_t) . 's !' . PHP_EOL;
                 } catch (Exception $e) {
                     echo 'Cron task [' . $cronTask . '] encountered an error: ' . $e->getMessage() . PHP_EOL;
                 } catch (Throwable $e) {
