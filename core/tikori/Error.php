@@ -137,7 +137,7 @@ class Error
             ob_end_clean();
         }
 
-        self::log($exception->getFile() . ':' . $exception->getLine() . ':: ' . $exception->getMessage());
+        self::log($exception->getTraceAsString() . PHP_EOL . $exception->getFile() . ':' . $exception->getLine() . ':: ' . $exception->getMessage());
 
         $errors = array();
 

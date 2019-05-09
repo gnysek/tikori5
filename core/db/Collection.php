@@ -194,6 +194,7 @@ class Collection implements ArrayAccess, Iterator, Countable
     public function reverse()
     {
         $this->_data = array_reverse($this->_data);
+        return $this;
     }
 
     /**

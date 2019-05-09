@@ -6,7 +6,8 @@
  * @property string $tableName  Table Name
  * @property array $attributes Attribute values
  */
-abstract class TModel implements IteratorAggregate, ArrayAccess
+
+class TModel implements IteratorAggregate, ArrayAccess
 {
 
     const BELONGS_TO = 'BELONGS_TO';
@@ -1233,7 +1234,7 @@ abstract class TModel implements IteratorAggregate, ArrayAccess
                     case 'required':
                         if (empty($this->_values[$field]) && $this->_values[$field] == null && ($this->__getCommon(self::COMMON_SCHEMA)->getColumn($field)->phpType !== 'integer' && $this->_values[$field] == 0)) {
                             $valid = false;
-                            $this->_errors[$field][] = 'Required';
+                            $this->_errors[$field][] = __('Required');
                         }
                         break;
                     case 'int':

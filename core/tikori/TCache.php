@@ -181,6 +181,7 @@ class TCache extends TModule
 
     public function purgeCache()
     {
+        clearstatcache();
         foreach (new DirectoryIterator($this->cachePath) as $fileInfo) {
             if (!$fileInfo->isDot()) {
                 unlink($fileInfo->getPathname());
