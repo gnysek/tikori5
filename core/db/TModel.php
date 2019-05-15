@@ -166,6 +166,12 @@ class TModel implements IteratorAggregate, ArrayAccess
 
     public static function getTableName($modelName)
     {
+        if ($modelName == 'SmfMembers') {
+            if (class_exists($modelName) and method_exists($modelName, 'getTableName')) {
+                return $modelName::getTableName($modelName);
+            }
+        }
+
         return strtolower(preg_replace('/(.)([A-Z])/', "$1_$2", $modelName));
     }
 

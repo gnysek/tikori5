@@ -45,8 +45,9 @@ abstract class DbAbstract
     /**
      * @param        $sql
      * @param string $skip
-     * @param bool   $assoc
+     * @param bool $assoc
      * @return Result|bool|array
+     * @throws DbError
      */
     public function queryOne($sql, $skip = '', $assoc = TRUE) {
         $result = $this->query($sql, $skip, $assoc);
