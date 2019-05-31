@@ -247,6 +247,11 @@ class Collection implements ArrayAccess, Iterator, Countable
         return $optionArray;
     }
 
+    public function toArray()
+    {
+        return $this->_data;
+    }
+
     private function _getArrayValueFromRecord($record, array $values)
     {
         $data = array();
