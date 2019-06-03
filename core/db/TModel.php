@@ -1500,7 +1500,17 @@ class TModel implements IteratorAggregate, ArrayAccess
             $value = $this->__getCommon(self::COMMON_SCHEMA)->columns[$name]->typecast($value);
             //TODO: choose that it should be != or !== for $value=$this->_values compare
             if ($value !== $this->_values[$name]) {
-                $this->_modified[] = $name;
+                if ($value === $this->_original[$name]) {
+                    // if we're back to original value, mark this attribute as unmodified
+                    if (($key = array_search($name, $this->_modified)) !== null) {
+                        unset($this->_modified[$key]);
+                    }
+                } else {
+                    // prevent multiple modifications
+                    if (!in_array($name, $this->_modified)) {
+                        $this->_modified = $name;
+                    }
+                }
                 $this->_values[$name] = $value;
             }
         } else {

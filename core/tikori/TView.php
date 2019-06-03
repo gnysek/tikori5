@@ -57,7 +57,7 @@ class TView
 
             $out = $this->renderPartial($this->layout, array('content' => $out));
         } catch (Exception $e) {
-            throw new Exception('Rendering view <code>' . $file . '</code> error: ' . $e->getMessage(), $e->getCode(), $e);
+            throw new Exception('Rendering view <code>' . $file . '</code> error: ' . $e->getMessage() . ', the context was <code>' . get_class($this) . '</code>', $e->getCode(), $e);
         }
 
         Core::app()->observer->fireEvent('render_finished', array('output' => &$out));
