@@ -1508,7 +1508,7 @@ class TModel implements IteratorAggregate, ArrayAccess
                 } else {
                     // prevent multiple modifications
                     if (!in_array($name, $this->_modified)) {
-                        $this->_modified = $name;
+                        $this->_modified[] = $name;
                     }
                 }
                 $this->_values[$name] = $value;
