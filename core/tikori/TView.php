@@ -187,7 +187,7 @@ class TView
             $cacheList = $this->_themes + array('');
         }
 
-        $currentThemeIdentifier = 'T:' . $this->_themes[0] . '|A:' . $this->area . '|F:';
+        $currentThemeIdentifier = (count($themes) ? 'T:' . ($this->_themes[0] . '|') : '') . 'A:' . $this->area . '|F:';
 
         if (array_key_exists($currentThemeIdentifier . $file, self::$_viewFiles)) {
             Profiler::addLog(sprintf('Loaded template from cache: <kbd>%s</kbd> <kbd>[%s]</kbd>', self::$_viewFiles[$currentThemeIdentifier . $file], $currentThemeIdentifier . $file));
