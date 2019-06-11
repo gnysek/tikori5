@@ -87,10 +87,15 @@ class Error
     {
         //echo Error::display(new Exception($errstr, $errno), array('file' => $errfile, 'line' => $errline));
         if (in_array($errno, array(E_WARNING, E_DEPRECATED, E_USER_DEPRECATED))) {
-            self::log('[Muted Warning] ' . $errfile . ':' . $errline . ':: ' . $errstr);
+            if (\Core::app()->mode != \Core::MODE_PROD) {
+                self::log('[Muted Warning] ' . $errfile . ':' . $errline . ':: ' . $errstr, 'warnings.log');
+            }
             return false;
         }
         if (self::$enableStrict === false and in_array($errno, array(E_NOTICE, E_STRICT))) {
+            if (\Core::app()->mode != \Core::MODE_PROD) {
+                self::log('[Notice or Strict] ' . $errfile . ':' . $errline . ':: ' . $errstr, 'stricts.log');
+            }
             return false;
         }
         echo self::display(new \ErrorException($errstr, $errno, 1, $errfile, $errline), true);

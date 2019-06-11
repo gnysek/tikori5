@@ -17,7 +17,7 @@ class Html
 
     public static function linkTagWrapped($wrap = 'li', $text, $url, $wrapOptions = array(), $options = array())
     {
-        $fakeOptions = (!empty($options['_activeByPath'])) ? array('_activeByPath' => $options['_activeByPath']) : array();
+        $fakeOptions = (!empty($options['_activeByPath'])) ? array('_activeByPath' => $options['_activeByPath']) : array('_activeByPath' => $url);
         self::_linkCheckActiveClass($fakeOptions, $url);
 
         if (!empty($options['_activeByPath'])) {
