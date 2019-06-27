@@ -10,6 +10,7 @@
 
 use \Core\Common\DefaultObject as DefaultObject;
 
+
 class Request extends DefaultObject
 {
 
@@ -34,6 +35,8 @@ class Request extends DefaultObject
     const REMOTE_ADDR = 'ip';
     const ROUTE = 'route';
     const URL_SCHEME = 'protocol-scheme';
+
+    const EVENT_REQUEST_CREATED = 'core_request_created';
 
     public $env = array();
     private $_scriptUrl = NULL;

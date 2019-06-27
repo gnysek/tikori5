@@ -19,6 +19,21 @@ class Log
         fclose($f);
     }
 
+    public static function short($data, $file = 'system.log')
+    {
+        if (!file_exists(self::logDir())) {
+            mkdir(self::logDir(), 0777, true);
+        }
+
+        if (!file_exists(self::logDir() . '/' . $file)) {
+            file_put_contents(self::logDir() . '/' . $file, '');
+        }
+
+        $f = fopen(self::logDir() . '/' . $file, 'a+');
+        fwrite($f, var_export($data, true) . PHP_EOL);
+        fclose($f);
+    }
+
     public static function logDir()
     {
         return TIKORI_ROOT . '/log';

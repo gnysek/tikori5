@@ -151,6 +151,8 @@ class Tikori extends Application
 
         // request
         $this->request = new Request();
+        Core::event(Request::EVENT_REQUEST_CREATED, null);
+
         $this->setComponent('cookie', new Cookie());
         Profiler::addLog('Request created');
         $this->response = new Response();
