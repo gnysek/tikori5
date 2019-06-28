@@ -25,7 +25,7 @@ class DbQuery
     private $_type = 1;
     private $_locked = false;
     private $_fields = array();
-    private $_joinType = '';
+    private $_joinType = [];
     private $_joinTables = array();
     private $_joinOn = array();
     private $_fromInsteadJoin = false;
@@ -231,7 +231,7 @@ class DbQuery
 
         $this->_joinTables[] = $table; // pass table ID also
         $this->_joinOn[$_tableName] = $on;
-        $this->_joinType = (in_array($joinType, array(self::JOIN_INNER, self::JOIN_LEFT, self::JOIN_RIGHT))) ? $joinType : self::JOIN_LEFT;
+        $this->_joinType[$_tableName] = (in_array($joinType, array(self::JOIN_INNER, self::JOIN_LEFT, self::JOIN_RIGHT))) ? $joinType : self::JOIN_LEFT;
 
         return $this;
     }
@@ -276,6 +276,8 @@ class DbQuery
         $sql = array();
         $fromAssoc = $this->_isAssoc($this->_from);
 
+        $_tableIndex = 1;
+
         // type
         switch ($this->_type) {
             case self::Q_UPDATE:
@@ -298,32 +300,37 @@ class DbQuery
                         $fields[] = '`' . $this->_fromAliases[$val] . '`.*';
                     }
 
-                    if (!empty($this->_joinTables)) {
-                        foreach ($this->_joinTables as $k => $table) {
-
-                            $_index = $k + 1;
-                            $_tableName = $table;
-
-                            if (is_array($table)) {
-                                list($_index, $_tableName) = $table;
-                            }
-
-                            $_fields = Core::app()->db->getTableInfo($_tableName)->getColumnNames();
-                            foreach ($_fields as $_field) {
-                                $fields[] = '`t' . $_index . '`.`' . $_field . '` AS `r' . $_index . '_' . $_field . '`';
-                            }
-                        }
-                    }
-
-                    $sql[] = implode(', ', $fields);
                 } else {
                     $fields = array();
                     foreach ($this->_fields as $field) {
                         //TODO: aliases
                         $fields[] = $field;
                     }
-                    $sql[] = implode(',', $fields);
                 }
+
+                if (!empty($this->_joinTables)) {
+                    foreach ($this->_joinTables as $k => $table) {
+
+                        $_index = $k + 1;
+                        $_tableName = $table;
+
+                        if (is_array($table)) {
+                            list($_index, $_tableName) = $table;
+                        }
+
+                        $_tableNameDirty = $_tableName;
+                        $_tableName = trim($_tableName, '()'); //todo drity hack
+                        $this->_fromAliases[$_tableNameDirty] = $this->alias . $_index;
+
+                        $_fields = Core::app()->db->getTableInfo($_tableName)->getColumnNames();
+                        foreach ($_fields as $_field) {
+                            //$fields[] = '`t' . $_index . '`.`' . $_field . '` AS `r' . $_index . '_' . $_field . '`';
+                            $fields[] = '`' . $this->_fromAliases[$_tableNameDirty] . '`.`' . $_field . '` AS `r' . $_index . '_' . $_field . '`';
+                        }
+                    }
+                }
+
+                $sql[] = implode(',', $fields);
                 $sql[] = "\nFROM";
         }
 
@@ -344,17 +351,16 @@ class DbQuery
             if (!empty($this->_joinTables)) {
                 foreach ($this->_joinTables as $k => $table) {
 
-                    $_index = $k + 1;
+                    $_index = $_tableIndex;
+                    $_tableIndex++;
                     $_tableName = $table;
 
                     if (is_array($table)) {
                         list($_index, $_tableName) = $table;
                     }
 
-                    $this->_fromAliases[$_tableName] = $this->alias . $_index;
-
-                    $sql[] = "\n" . $this->_joinType;
-                    $sql[] = '`' . $_tableName . '` `' . $this->_fromAliases[$_tableName] . '`';
+                    $sql[] = "\n" . $this->_joinType[$_tableName];
+                    $sql[] = '`' . trim($_tableName, '()') . '` `' . $this->_fromAliases[$_tableName] . '`'; // todo dirty hack for filtering
                     $sql[] = 'ON';
                     $sql[] = '`' . $this->alias . $_index . '`.`' . $this->_joinOn[$_tableName][0] . '`';
                     $sql[] = $this->_joinOn[$_tableName][1];
@@ -424,10 +430,11 @@ class DbQuery
                     $bld = '';
                     if (!in_array($this->_type, array(self::Q_UPDATE, self::Q_DELETE))) {
                         if (!array_key_exists($_fromTable, $this->_fromAliases)) {
-                            throw new DbError(sprintf('Unknown table alias %s, only %s (for: %s) are found.',
+                            throw new DbError(sprintf('Unknown table alias %s, only %s (for: %s) are found. <kbd>%s</kbd>',
                                 $_fromTable,
                                 implode(', ', array_keys($this->_fromAliases)),
-                                implode(', ', array_values($this->_fromAliases))
+                                implode(', ', array_values($this->_fromAliases)),
+                                implode(' ', $sql)
                             ));
                         }
                         $bld = '`' . $this->_fromAliases[$_fromTable] . '`.';
@@ -445,6 +452,8 @@ class DbQuery
                            unset($w[2][$___k]);
                        }
                     }
+
+                    $_fromTable = trim($_fromTable, '()'); // TODO filters dirty hack
 
                     $afterCondition = (is_string($w[2]) and preg_match('/\(SELECT/', $w[2])) ? $w[2] : $this->_formatAgainstType($_fromTable, $w[0], $w[2]);
 
