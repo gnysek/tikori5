@@ -62,6 +62,8 @@ class Response
             505 => '505 HTTP Version Not Supported'
         );
 
+    const HTTP_STATUS_OK = 200;
+
     public function __construct($body = '', $status = 200, $header = array())
     {
         $this->_status = $status;
@@ -233,7 +235,7 @@ class Response
     }
 
     public function clear() {
-        $this->_status = 200;
+        $this->_status = self::HTTP_STATUS_OK;
         $this->_headers = array();
         $this->_body = '';
 

@@ -289,6 +289,7 @@ class Tikori extends Application
                                 // TODO: autload should be used here I think...
                                 include_once $file;
                                 if (class_exists($classToCreate, false)) {
+                                    /* @var $classToCreate Controller */
                                     $class = new $classToCreate($route->area, $route->scope);
                                 } else {
                                     throw new Exception('Class not found');
