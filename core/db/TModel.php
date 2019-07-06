@@ -648,13 +648,17 @@ class TModel implements IteratorAggregate, ArrayAccess
     {
         $bench = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Counting in ' . get_class($this) . '');
 
+        $this->_isInsideCount = true;
         $sql = DbQuery::sql()->select('COUNT(*) AS tikori_total')->from($this->_table);
         $this->_applyEagers($sql);
         $result = $sql->execute();
+        $this->_isInsideCount = false;
 
         Profiler::benchFinish($bench);
         return (!empty($result[0])) ? $result[0]->tikori_total : 0;
     }
+
+    protected $_isInsideCount = false;
 
     /**
      * @param $by
@@ -665,11 +669,18 @@ class TModel implements IteratorAggregate, ArrayAccess
      */
     public function countWhere($by = null, $conditions)
     {
+        $bench = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'Counting in ' . get_class($this) . '');
+
         //TODO: with conditions not working here!
-        $sql = DbQuery::sql()->select('COUNT(*) AS tikori_total')->from($this->_table);
+        $this->_isInsideCount = true;
+        $distinct = $by === null ? '*' : $by;
+        $sql = DbQuery::sql()->select('COUNT(' . $distinct . ') AS tikori_total')->from($this->_table);
         $sql->conditions($conditions);
         $this->_applyEagers($sql);
         $result = $sql->execute();
+        $this->_isInsideCount = false;
+
+        Profiler::benchFinish($bench);
         return (!empty($result[0])) ? (int)$result[0]->tikori_total : 0;
     }
 
@@ -1594,6 +1605,11 @@ class TModel implements IteratorAggregate, ArrayAccess
     public function haveRelation($name)
     {
         return (array_key_exists($name, $this->__getCommon(self::COMMON_RELATIONS)));
+    }
+
+    public function relationLoaded($name)
+    {
+        return array_key_exists($name, $this->_related);
     }
 
     public function getRelated($relationName)

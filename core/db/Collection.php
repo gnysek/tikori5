@@ -441,6 +441,17 @@ class Collection implements ArrayAccess, Iterator, Countable
         return $total;
     }
 
+    public function inCollection($column, $value)
+    {
+        foreach ($this->_data as $record) {
+            if (isset($record[$column]) and $record[$column] == $value) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function delete()
     {
         foreach ($this->_data as $key => $row) {

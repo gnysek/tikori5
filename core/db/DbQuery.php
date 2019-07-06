@@ -337,7 +337,7 @@ class DbQuery
         // from
         $from = array();
         foreach ($this->_from as $key => $val) {
-            $from[] = '`' . $val . '` ' . ((in_array($this->_type,array(self::Q_SELECT, self::Q_REPLACE))) ? ' `' . $this->_fromAliases[$val] . '`' : '');
+            $from[] = '`' . str_replace('.', '`.`', $val) . '` ' . ((in_array($this->_type,array(self::Q_SELECT, self::Q_REPLACE))) ? ' `' . $this->_fromAliases[$val] . '`' : '');
         }
         $sql[] = implode(', ', $from);
 
@@ -360,7 +360,7 @@ class DbQuery
                     }
 
                     $sql[] = "\n" . $this->_joinType[$_tableName];
-                    $sql[] = '`' . trim($_tableName, '()') . '` `' . $this->_fromAliases[$_tableName] . '`'; // todo dirty hack for filtering
+                    $sql[] = '`' . trim(str_replace('.', '`.`', $_tableName), '()') . '` `' . $this->_fromAliases[$_tableName] . '`'; // todo dirty hack for filtering
                     $sql[] = 'ON';
                     $sql[] = '`' . $this->alias . $_index . '`.`' . $this->_joinOn[$_tableName][0] . '`';
                     $sql[] = $this->_joinOn[$_tableName][1];
@@ -418,6 +418,11 @@ class DbQuery
                 $where = array();
 //				var_dump($this->_where);
                 foreach ($this->_where as $w) {
+
+                    if (count($w) == 0) {
+                        //var_dump($w);
+                        continue;
+                    }
 
                     // additional fourth param to use WHEREs with () - idea removed
                     /*if (count($w) == 4 && $w[3] === true) {

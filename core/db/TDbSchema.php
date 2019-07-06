@@ -166,7 +166,7 @@ class TDbSchema
 
     public function quoteSimpleTableName($name)
     {
-        return strpos($name, "`") !== false ? $name : "`" . $name . "`";
+        return sprintf('`%s`', str_replace('.', '`.`', trim($name, '`')));
     }
 
     public function quoteColumnName($name)
