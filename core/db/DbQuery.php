@@ -211,6 +211,9 @@ class DbQuery
                 case 'orwhere': case 'customwhere':
                     $this->customwhere($conditionValue);
                     break;
+                case 'group':case 'groupby':
+                    $this->group($conditionValue);
+                    break;
             }
         }
 

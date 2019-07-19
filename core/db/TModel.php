@@ -313,13 +313,23 @@ class TModel implements IteratorAggregate, ArrayAccess
      * @param $key
      * @param $value
      * @param bool $onlyFirst
+     * @param bool $returnMeOnNullOnlyFirst
      * @return null|$this|TModel|Collection
      * @throws Exception
      */
-    public function findBy($key, $value, $onlyFirst = false)
+    public function findBy($key, $value, $onlyFirst = false, $returnMeOnNullOnlyFirst = false)
     {
         $results = $this->findWhere(array($key, '=', $value));
-        return ($onlyFirst && count($results) >= 1) ? $results[0] : $results;
+
+        if ($onlyFirst) {
+            if (count($results) > 0) {
+                return $results[0];
+            } else {
+                return ($returnMeOnNullOnlyFirst) ? $this : null;
+            }
+        }
+
+        return $results;
         // it's now made in DbQuery
 //        if (!is_numeric($value)) {
 //            $value = Core::app()->db->protect($value);

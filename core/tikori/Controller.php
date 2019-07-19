@@ -74,19 +74,19 @@ class Controller extends ControllerView
         }
     }
 
-    public function runAction($controller = NULL, $action = NULL)
-    {
-        Profiler::addLog(
-            '-> Running Action: <kbd>' . $this->getControllerClassName($controller) . '/' . $action . '</kbd>'
-        );
-        if (get_called_class() == $controller) {
-            $this->run(Core::app()->route, $action);
-        } else {
-            $class = $this->getControllerClassName($controller);
-            $c = new $class($this->area);
-            $c->run(Core::app()->route, $action);
-        }
-    }
+//    public function runAction($controller = NULL, $action = NULL)
+//    {
+//        Profiler::addLog(
+//            '-> Running Action: <kbd>' . $this->getControllerClassName($controller) . '/' . $action . '</kbd>'
+//        );
+//        if (get_called_class() == $controller) {
+//            $this->run(Core::app()->route, $action);
+//        } else {
+//            $class = $this->getControllerClassName($controller);
+//            $c = new $class($this->area);
+//            $c->run(Core::app()->route, $action);
+//        }
+//    }
 
     public static function forward404($area = '')
     {
