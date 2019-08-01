@@ -54,7 +54,6 @@ class TView
             } else {
                 $out = (string)$data;
             }
-
             $out = $this->renderPartial($this->layout, array('content' => $out));
         } catch (Exception $e) {
             throw new Exception('Rendering view <code>' . $file . '</code> error: ' . $e->getMessage() . ', the context was <code>' . get_class($this) . '</code>', $e->getCode(), $e);
@@ -248,7 +247,7 @@ class TView
         $paths[] = Core::app()->appDir . '/views/';
         $paths[] = Core::app()->coreDir . '/views/';
 
-        if (!empty($this->area)) {
+        if (!empty($this->area) and substr($file, 0, 1) != '/') {
             $addons = array();
             foreach ($paths as $entry) {
                 $addons[] = $entry . $this->area . '/';
@@ -269,9 +268,10 @@ class TView
                 if (!in_array($currentThemeIdentifier . $file, self::$_viewFiles)) {
                     self::$_viewFiles[$currentThemeIdentifier . $file] = str_replace('\\', '/', $filename);
                     self::$_viewFilesChanged = true;
+                    Profiler::addLog(sprintf('Loaded template + added to cache: <kbd>%s</kbd> <kbd>[%s]</kbd>', $filename, $currentThemeIdentifier . $file));
+                } else {
+                    Profiler::addLog(sprintf('Displayed template: <kbd>%s</kbd> <kbd>[%s]</kbd>', $filename, $currentThemeIdentifier . $file));
                 }
-
-                Profiler::addLog(sprintf('Loaded template + added to cache: <kbd>%s</kbd> <kbd>[%s]</kbd>', $filename, $currentThemeIdentifier . $file));
 
                 return $filename;
             }

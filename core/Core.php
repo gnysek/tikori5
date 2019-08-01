@@ -45,8 +45,15 @@ class Core
      *
      * @return null
      */
-    public static function run($path = '', $config = 'default')
+    public static function run($path = null, $config = 'default')
     {
+        /**
+         * @const TIKORI_ROOT string
+         */
+        if (empty($path)) {
+            $path = str_replace('\\', '/', getcwd());
+        }
+
         defined('TIKORI_ROOT') or define('TIKORI_ROOT', $path);
         chdir(TIKORI_ROOT);
 

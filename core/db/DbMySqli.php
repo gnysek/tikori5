@@ -87,7 +87,7 @@ class DbMySqli extends DBAbstract
         $this->_queries++;
         $this->_queryList[] = $sql;
 
-        if (Core::app()->getMode() != Core::MODE_PROD) {
+        if (Core::app()->getMode() != Core::MODE_PROD or Core::app()->cfg('db/debug', false) == true) {
             // add info about this query and it's location
             if (Core::app()->hasLoadedModule('toolbar')) {
                 $b = array_reverse(debug_backtrace(~DEBUG_BACKTRACE_PROVIDE_OBJECT));

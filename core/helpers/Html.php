@@ -17,7 +17,7 @@ class Html
 
     public static function linkTagWrapped($wrap = 'li', $text, $url, $wrapOptions = array(), $options = array())
     {
-        $fakeOptions = (!empty($options['_activeByPath'])) ? array('_activeByPath' => $options['_activeByPath']) : array('_activeByPath' => $url);
+        $fakeOptions = (!empty($options['_activeByPath'])) ? array('_activeByPath' => $options['_activeByPath']) : array('_activeByPath' => '/' . preg_quote($url, '/') . '/');
         self::_linkCheckActiveClass($fakeOptions, $url);
 
         if (!empty($options['_activeByPath'])) {
@@ -48,7 +48,7 @@ class Html
                 }
 
                 foreach ($options['_activeByPath'] as $pattern) {
-                    if (preg_match($pattern, $current)) {
+                    if (!empty($pattern) and preg_match($pattern, $current)) {
                         $inCurrentLink = true;
                     }
                 }

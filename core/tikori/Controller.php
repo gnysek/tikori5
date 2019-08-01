@@ -134,13 +134,19 @@ class Controller extends ControllerView
 
         if (!method_exists($this, $this->getActionMethodName())) {
 
-            $this->_actionBefore();
-
             Profiler::addLog('No method found for <code>' . $this->getActionMethodName() . '</code>');
-            if (method_exists($this, 'defaultAction')) {
-                $this->defaultAction();
+
+            $this->_actionBefore();
+            if (Core::app()->response->status() == 200) {
+
+                if (method_exists($this, 'defaultAction')) {
+                    $this->defaultAction();
+                } else {
+                    $this->unknownAction();
+                }
+
             } else {
-                $this->unknownAction();
+                // seems that it already returned something
             }
 
             $this->_afterAction();
@@ -295,6 +301,7 @@ class Controller extends ControllerView
      */
     public function httpStatusAction($status = 404)
     {
+        ob_get_clean();
         Core::app()->response->status($status);
         $this->render('http404', array('status' => $status, 'message' => Response::getMessageForCode($status)));
 

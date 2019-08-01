@@ -211,7 +211,7 @@ class DbQuery
                 case 'orwhere': case 'customwhere':
                     $this->customwhere($conditionValue);
                     break;
-                case 'group':case 'groupby':
+                case 'group': case 'groupby':
                     $this->group($conditionValue);
                     break;
             }
@@ -500,7 +500,7 @@ class DbQuery
                     $bld .= $w[1] . ' ' . $afterCondition;
                     $where[] = $bld;
                 }
-                $sql[] = implode(' AND ', $where);
+                $sql[] = '(' . implode(' AND ', $where) . ')';
             }
 
             if (!empty($this->_customWhere)) {
