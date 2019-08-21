@@ -7,6 +7,7 @@ class Html
     public static $hrefActiveClass = 'active';
     public static $labelClass = 'col-sm-2 control-label';
     public static $formClass = 'form-control';
+    const ACTIVE_BY_PATH = '_activeByPath';
 
     public static function link($text, $url, $options = array())
     {
@@ -17,11 +18,11 @@ class Html
 
     public static function linkTagWrapped($wrap = 'li', $text, $url, $wrapOptions = array(), $options = array())
     {
-        $fakeOptions = (!empty($options['_activeByPath'])) ? array('_activeByPath' => $options['_activeByPath']) : array('_activeByPath' => '/' . preg_quote($url, '/') . '/');
+        $fakeOptions = (!empty($options[self::ACTIVE_BY_PATH])) ? array(self::ACTIVE_BY_PATH => $options[self::ACTIVE_BY_PATH]) : array(self::ACTIVE_BY_PATH => '/' . preg_quote($url, '/') . '/');
         self::_linkCheckActiveClass($fakeOptions, $url);
 
-        if (!empty($options['_activeByPath'])) {
-            unset($options['_activeByPath']);
+        if (!empty($options[self::ACTIVE_BY_PATH])) {
+            unset($options[self::ACTIVE_BY_PATH]);
         }
 
         $html = self::link($text, $url, $options);
@@ -41,20 +42,20 @@ class Html
         }
         $inCurrentLink = ($current == $url);
 
-        if (!empty($options['_activeByPath'])) {
+        if (!empty($options[self::ACTIVE_BY_PATH])) {
             if ($inCurrentLink == false) {
-                if (!is_array($options['_activeByPath'])) {
-                    $options['_activeByPath'] = array($options['_activeByPath']);
+                if (!is_array($options[self::ACTIVE_BY_PATH])) {
+                    $options[self::ACTIVE_BY_PATH] = array($options[self::ACTIVE_BY_PATH]);
                 }
 
-                foreach ($options['_activeByPath'] as $pattern) {
+                foreach ($options[self::ACTIVE_BY_PATH] as $pattern) {
                     if (!empty($pattern) and preg_match($pattern, $current)) {
                         $inCurrentLink = true;
                     }
                 }
 
             }
-            unset($options['_activeByPath']);
+            unset($options[self::ACTIVE_BY_PATH]);
         }
 
         //TODO: when error/exception raised, request is empty ?
@@ -72,7 +73,7 @@ class Html
     {
         $options = array();
         if (!empty($byPath)) {
-            $options['_activeByPath'] = array($byPath);
+            $options[self::ACTIVE_BY_PATH] = array($byPath);
         }
 
         $result = self::_linkCheckActiveClass($options, $url);

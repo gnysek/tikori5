@@ -302,6 +302,7 @@ class Controller extends ControllerView
     public function httpStatusAction($status = 404)
     {
         ob_get_clean();
+        $this->pageTitle = Core::app()->cfg('appName');
         Core::app()->response->status($status);
         $this->render('http404', array('status' => $status, 'message' => Response::getMessageForCode($status)));
 
@@ -315,6 +316,17 @@ class Controller extends ControllerView
     {
         $where = Html::url($where);
         //TODO: what if before redirect text was send?
+        Core::app()->response->header('Location', $where);
+    }
+
+    /**
+     * @param string|array $where
+     */
+    public function redirectStatus($where = '/', $status = 301)
+    {
+        $where = Html::url($where);
+        //TODO: what if before redirect text was send?
+        Core::app()->response->header('HTTP/1.1 301 Moved Permanently');
         Core::app()->response->header('Location', $where);
     }
 

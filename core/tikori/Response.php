@@ -100,9 +100,10 @@ class Response
      */
     public function header($name = null, $value = null)
     {
-        if (!is_null($value)) {
-            $this->_headers[$name] = $value;
-        }
+        #if (!is_null($value)) {
+        $this->_headers[$name] = $value;
+        #}
+
         return (empty($name)) ? $this->_headers : $this->_headers[$name];
     }
 
@@ -190,9 +191,13 @@ class Response
 
             //Send headers
             foreach ($header as $name => $value) {
-                $hValues = explode("\n", $value);
-                foreach ($hValues as $hVal) {
-                    header("$name: $hVal", false);
+                if ($value === null) {
+                    header($name, false);
+                } else {
+                    $hValues = explode("\n", $value);
+                    foreach ($hValues as $hVal) {
+                        header("$name: $hVal", false);
+                    }
                 }
             }
         }
