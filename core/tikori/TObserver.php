@@ -40,14 +40,21 @@ class TObserver
                 ) . ' observer(s)'
             );
             foreach ($this->_observers[$eventName] as $observer) {
-                if (method_exists($observer, $methodName)) {
+                if (is_callable($observer)) {
+                    ($observer)($data);
+                    Profiler::addLog('Fired event <code>' . $eventName . '</code> using passed closure.');
+                } else if (is_array($observer) and count($observer) == 2 and method_exists($observer[0], $observer[1])) {
+                    call_user_func_array(array($observer[0], $observer[1]), array($data));
+                    Profiler::addLog('Fired event <code>' . $eventName . '</code> using <code>' . get_class($observer[0]) . '::' . $observer[1] . '</code>');
+                } else if (!is_array($observer) and method_exists($observer, $methodName)) {
                     call_user_func_array(array($observer, $methodName), array($data));
+                    Profiler::addLog('Fired event <code>' . $eventName . '</code> using <code>' . get_class($observer) . '::' . $methodName . '</code>');
                 } else {
-                    Profiler::addLog('Firing event <code>' . $eventName . '</code> which is registered but there\'s no method <code>' . $methodName . '</code> for it');
+                    Profiler::addLog('Firing event <code>' . $eventName . '</code> which is registered but there\'s no method <code>' . $methodName . '</code> for it.');
                 }
             }
         } else {
-            Profiler::addLog('Firing event <code>' . $eventName . '</code> but there\'s no observers');
+            Profiler::addLog('Firing event <code>' . $eventName . '</code> but there\'s no observers.');
         }
     }
 }

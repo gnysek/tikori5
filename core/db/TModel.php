@@ -1348,7 +1348,7 @@ class TModel implements IteratorAggregate, ArrayAccess
 
     public function addErrors($errors = array())
     {
-
+        throw new \Exception('Not implemented');
     }
 
     public function getErrorsField($field)
@@ -1388,12 +1388,9 @@ class TModel implements IteratorAggregate, ArrayAccess
         return $this->__getCommon(self::COMMON_SCHEMA)->getColumnNames();
     }
 
-    /**
-     * TODO: empty body
-     */
     public function attributeLabels()
     {
-
+        return [];
     }
 
     public function getAttributeLabel($attribute)

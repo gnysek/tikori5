@@ -102,7 +102,7 @@ class Cookie extends TModule
     public function getClean($name, $defValue = NULL)
     {
         if (array_key_exists($name, $_COOKIE)) {
-            return $_COOKIE[$name];
+            return urldecode($_COOKIE[$name]);
         }
 
         return $defValue;

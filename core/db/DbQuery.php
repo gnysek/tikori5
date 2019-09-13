@@ -362,6 +362,8 @@ class DbQuery
                         list($_index, $_tableName) = $table;
                     }
 
+                    $this->_fromAliases[$_tableName] = $this->alias . $_index; // todo this overwrites previous values
+
                     $sql[] = "\n" . $this->_joinType[$_tableName];
                     $sql[] = '`' . trim(str_replace('.', '`.`', $_tableName), '()') . '` `' . $this->_fromAliases[$_tableName] . '`'; // todo dirty hack for filtering
                     $sql[] = 'ON';
