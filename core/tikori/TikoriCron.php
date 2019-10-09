@@ -1,7 +1,15 @@
 <?php
 
+/**
+ * Class TikoriCron
+ * @see TikoriConsole
+ */
 abstract class TikoriCron
 {
+    abstract public function run($params = []);
 
-    abstract public function run();
+    public function allowedParams()
+    {
+        return [];
+    }
 }

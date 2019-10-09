@@ -14,7 +14,7 @@ class <?php echo $modelName; ?> extends TModel
 
 	/**
 	 * @param null|string $model
-	 * @return <?php echo $modelName; ?>|Model;
+	 * @return <?php echo $modelName; ?>|TModel
 	 */
 	public static function model($model = __CLASS__)
 	{

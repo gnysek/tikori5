@@ -8,21 +8,29 @@ class Html
     public static $labelClass = 'col-sm-2 control-label';
     public static $formClass = 'form-control';
     const ACTIVE_BY_PATH = '_activeByPath';
+    const SKIP_ACTIVE = '_skipActive';
 
     public static function link($text, $url, $options = array())
     {
         $_url = self::url($url);
-        self::_linkCheckActiveClass($options, $_url);
+
+        if (!isset($options[self::SKIP_ACTIVE])) {
+            self::_linkCheckActiveClass($options, $url);
+        }
+
         return html::htmlTag('a', $options + array('href' => $_url, 'title' => htmlspecialchars(trim(strip_tags($text)))), $text);
     }
 
     public static function linkTagWrapped($wrap = 'li', $text, $url, $wrapOptions = array(), $options = array())
     {
         $fakeOptions = (!empty($options[self::ACTIVE_BY_PATH])) ? array(self::ACTIVE_BY_PATH => $options[self::ACTIVE_BY_PATH]) : array(self::ACTIVE_BY_PATH => '/' . preg_quote($url, '/') . '/');
-        self::_linkCheckActiveClass($fakeOptions, $url);
 
-        if (!empty($options[self::ACTIVE_BY_PATH])) {
-            unset($options[self::ACTIVE_BY_PATH]);
+        if (!isset($options[self::ACTIVE_BY_PATH])) {
+            self::_linkCheckActiveClass($fakeOptions, $url);
+        }
+
+        if (!empty($options[self::SKIP_ACTIVE])) {
+            unset($options[self::SKIP_ACTIVE]);
         }
 
         $html = self::link($text, $url, $options);
@@ -86,6 +94,7 @@ class Html
     /**
      * @param string|array $url
      * @return string
+     * @throws Exception
      */
     public static function url($url = array())
     {
@@ -210,6 +219,9 @@ class Html
         $html = '<' . $tag;
 
         foreach ($options as $k => $v) {
+            if ($v === null) {
+                continue;
+            }
             if (strncmp($k, '_', 1) === 0) {
                 continue;
             }

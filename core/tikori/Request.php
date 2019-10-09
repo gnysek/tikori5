@@ -360,7 +360,7 @@ class Request extends DefaultObject
                     continue;
                 }
                 //todo: allow utf-8 maybe ?
-                $this->_get[$k] = trim(preg_replace('#[^a-z0-9/_\-%\s]#i', '', $v));
+                $this->_get[$k] = trim(preg_replace('#[^a-z0-9\p{L}/_\-%\s]#i', '', $v));
                 $this->_getRaw[$k] = $v;
             }
         }

@@ -232,15 +232,19 @@ abstract class Application
      * Reconfigures application using json string or array
      *
      * @param array|string $config
+     * @throws Exception
      */
     public function reconfigure($config)
     {
         $this->cfg()->clear();
+        $this->_cacheCfg = [];
         foreach($config as $file) {
             $this->cfg()->load($file);
         }
         $this->getMode();
     }
+
+    protected $_cacheCfg = []; //temporary solution for faster config data getting
 
     /**
      * @param string $item Path to item, like name or name/name
@@ -258,12 +262,22 @@ abstract class Application
             return $this->_config;
         } else {
 
+            // return from cache
+            if (!is_array($default) and array_key_exists($item . '|' . $default, $this->_cacheCfg)) {
+                return $this->_cacheCfg[$item . '|' . $default]; // this fastens the page even by 80%
+            }
+
             if (substr($item, strlen($item) - 2, 2) === '/*') {
                 return $this->cfg(substr($item, 0, strlen($item) - 2));
             }
             // maybe later add code to search bt path/to/node/somet* ?
 
-            return $this->_config->get($item, $default);
+            $result = $this->_config->get($item, $default);
+            if (!is_array($default) and !is_array($result) and !array_key_exists($item . '|' . $default, $this->_cacheCfg))  {
+                $this->_cacheCfg[$item . '|' . $default] = $result;
+            }
+
+            return $result;
         }
     }
 

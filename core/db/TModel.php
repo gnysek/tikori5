@@ -208,6 +208,16 @@ class TModel implements IteratorAggregate, ArrayAccess
         return $this->_values;
     }
 
+    public function getOriginalValues()
+    {
+        return array_merge($this->_original);
+    }
+
+    public function getOriginalValue($field)
+    {
+        return $this->_original[$field] ?? null;
+    }
+
     public function rules()
     {
         return array();
@@ -1101,6 +1111,11 @@ class TModel implements IteratorAggregate, ArrayAccess
     public function isModified()
     {
         return count($this->_modified) > 0;
+    }
+
+    public function isFieldModified($field)
+    {
+        return in_array($field, $this->_modified);
     }
 
     public function getModified()

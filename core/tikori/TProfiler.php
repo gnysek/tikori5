@@ -21,7 +21,7 @@ class TProfiler
      */
     public static function addLog($message, $level = 0)
     {
-        $tn = Core::genTimeNow();
+        $tn = Core::genTimeNow(4, false);
         if ($level < self::$skipLevelAbove) {
             self::$_log[] = array(
                 $level,
@@ -38,7 +38,7 @@ class TProfiler
     public static function addNotice($message)
     {
         self::$_notices[] = array(
-            $message, Core::genTimeNow(),
+            $message, Core::genTimeNow(4, false),
         );
     }
 
@@ -208,8 +208,8 @@ class TProfiler
         self::$benchData[$num] = [
             'c'   => $benchCategory,
             'd'   => $benchDesc,
-            's'   => Core::genTimeNow(10),
-            'f'   => Core::genTimeNow(10),
+            's'   => Core::genTimeNow(10, false),
+            'f'   => Core::genTimeNow(10, false),
             'lvl' => min(10, self::$_benchStack[$benchCategory]),
         ];
 
@@ -229,7 +229,7 @@ class TProfiler
             throw new \Exception('Benchmark ' . $id . ' not found??');
         }
 
-        self::$benchData[$id]['f'] = Core::genTimeNow(10);
+        self::$benchData[$id]['f'] = Core::genTimeNow(10, false);
         self::$_benchStack[self::$benchData[$id]['c']]--;
 
         return self::$benchData[$id]['f'] - self::$benchData[$id]['s'];
@@ -240,7 +240,7 @@ class TProfiler
         $html = '<table style="width: 100%;">';
 
         // prepare timers for stats
-        $totalTime = Core::genTimeNow();
+        $totalTime = Core::genTimeNow(4, false);
 
         $maxTime = 0;
         foreach (self::$benchData as $i => $data) {

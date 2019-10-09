@@ -14,7 +14,7 @@ class TikoriConsole extends Application
         if (defined('STDIN')) {
             global $argv, $argc;
             foreach ($argv as $i => $cmdArg) {
-                if (substr($cmdArg, 0, 2) == '--') {
+                if (substr($cmdArg, 0, 1) == '-') {
 
                     $cmdMode = str_replace('--', '', $cmdArg);
 
@@ -31,14 +31,14 @@ class TikoriConsole extends Application
                             break;
                         case 'task':
                             if ($argc > $i) {
-                                $this->_cmdArg = isset($argv[$i + 1]) ? $argv[$i + 1] : null;
+                                $this->_cmdArg = isset($argv[$i + 1]) ? trim($argv[$i + 1], '\'"') : null;
                             } else {
                                 echo 'Not provided task name' . PHP_EOL;
                                 exit;
                             }
                             break;
                         default:
-                            echo 'Unkown Mode: ' . $cmdMode;
+                            echo 'Unkown Mode: ' . $cmdMode . PHP_EOL . 'Run with --help to see possible options.' . PHP_EOL;
                             exit;
                             break;
                     }
@@ -85,8 +85,11 @@ class TikoriConsole extends Application
         if (is_array($cronTasks)) {
 
             if ($this->_cmdMode == 'task') {
+                // add also those that are "console-only" but not automatically ran by cron
+                $cronTasks = array_merge($cronTasks, Core::app()->cfg('console-only', []));
+
                 if (!in_array($this->_cmdArg, $cronTasks)) {
-                    echo 'Requested task ' . $this->_cmdArg . ' not found. Should be one of: ' . implode(', ', $cronTasks) . PHP_EOL;
+                    echo 'Requested task ' . $this->_cmdArg . ' not found (may be inactive). Should be one of: ' . implode(', ', $cronTasks) . PHP_EOL;
                     exit;
                 }
             }
@@ -104,7 +107,28 @@ class TikoriConsole extends Application
                     $_t = Core::genTimeNow();
                     $task = new $cronTask;
                     echo '---> Running [' . $cronTask . ']' . PHP_EOL;
-                    $task->run();
+
+                    /** @var TikoriCron $task */
+                    $allowedArgs = $task->allowedParams();
+                    $params = [];
+
+                    global $argv, $argc;
+
+                    for ($i = 1; $i < count($argv); $i++) {
+                        $cmdArg = $argv[$i];
+                        if (substr($cmdArg, 0, 2) == '--') {
+                            $cmdMode = str_replace('--', '', $cmdArg);
+
+                            if (in_array($cmdMode, $allowedArgs)) {
+                                if (count($argv) > $i + 1) {
+                                    $params[$cmdMode] = $argv[$i + 1];
+                                    $i++;
+                                }
+                            }
+                        }
+                    }
+
+                    $task->run($params);
                     echo PHP_EOL . '---> Task [' . $cronTask . '] done in ' . (Core::genTimeNow() - $_t) . 's !' . PHP_EOL;
                 } catch (Exception $e) {
                     echo 'Cron task [' . $cronTask . '] encountered an error: ' . $e->getMessage() . PHP_EOL;
@@ -117,6 +141,7 @@ class TikoriConsole extends Application
             echo ':( No cron tasks defined' . PHP_EOL;
         }
         echo PHP_EOL . '--> Finished in ' . Core::genTimeNow(4) . 's';
+        echo PHP_EOL . '--> Memory usage ' . memory_get_peak_usage() / 1024 / 1024 . 'MB';
         echo PHP_EOL;
     }
 }

@@ -47,7 +47,8 @@ class Cookie extends TModule
             }
         } else {
             $this->path = '/';
-            $this->domain = '.' . Core::app()->cfg('request/host');
+            $this->domain = substr_count(Core::app()->cfg('request/host'), '.') < 2 ? null : Core::app()->cfg('request/host');
+            // above fixes a bug in firefox, where foo.bar became .foo.bar. Null should set all
         }
     }
 
@@ -70,6 +71,15 @@ class Cookie extends TModule
             $this->path, $this->domain, $secure, $httponly
         );
         return TRUE;
+    }
+
+    public function setClean($name, $value, $expire = 0, $secure = null, $httponly = null)
+    {
+        setcookie(
+            $name, (string)$value, ($expire === 0) ? 0 : (time() + $expire),
+            $this->path, $this->domain, $secure, $httponly
+        );
+        return true;
     }
 
     /**
