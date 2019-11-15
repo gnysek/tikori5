@@ -21,15 +21,15 @@ class Html
         return html::htmlTag('a', $options + array('href' => $_url, 'title' => htmlspecialchars(trim(strip_tags($text)))), $text);
     }
 
-    public static function linkTagWrapped($wrap = 'li', $text, $url, $wrapOptions = array(), $options = array())
+    public static function linkTagWrapped($wrap = 'li', $text = '', $url = '', $wrapOptions = array(), $options = array())
     {
-        $fakeOptions = (!empty($options[self::ACTIVE_BY_PATH])) ? array(self::ACTIVE_BY_PATH => $options[self::ACTIVE_BY_PATH]) : array(self::ACTIVE_BY_PATH => '/' . preg_quote($url, '/') . '/');
+        $fakeOptions = (!empty($options[self::ACTIVE_BY_PATH])) ? [self::ACTIVE_BY_PATH => $options[self::ACTIVE_BY_PATH]] : [self::ACTIVE_BY_PATH => '/' . preg_quote($url, '/') . '$/'];
 
-        if (!isset($options[self::ACTIVE_BY_PATH])) {
+        if (!isset($options[self::SKIP_ACTIVE])) {
             self::_linkCheckActiveClass($fakeOptions, $url);
         }
 
-        if (!empty($options[self::SKIP_ACTIVE])) {
+        if (isset($options[self::SKIP_ACTIVE])) {
             unset($options[self::SKIP_ACTIVE]);
         }
 

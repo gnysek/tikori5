@@ -365,6 +365,7 @@ class Route
     public $area = null;
     public $action = 'default';
     public $controller = '';
+    public $controllerInstance = null;
 
     /**
      * Creates a new route. Sets the URI and regular expressions for keys.

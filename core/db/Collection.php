@@ -37,14 +37,14 @@ class Collection implements ArrayAccess, Iterator, Countable
      */
     public function __get($key)
     {
-        return isset($this->_data[$key]) ? $this->_data[$key] : NULL;
+        return isset($this->_data[$key]) ? $this->_data[$key] : null;
     }
 
     /**
      * Set an item.
      *
-     * @param string $key   Key
-     * @param mixed  $value Value
+     * @param string $key Key
+     * @param mixed $value Value
      */
     public function __set($key, $value)
     {
@@ -82,14 +82,14 @@ class Collection implements ArrayAccess, Iterator, Countable
      */
     public function offsetGet($offset)
     {
-        return isset($this->_data[$offset]) ? $this->_data[$offset] : NULL;
+        return isset($this->_data[$offset]) ? $this->_data[$offset] : null;
     }
 
     /**
      * Sets an item at the offset.
      *
      * @param string $offset Offset
-     * @param mixed  $value  Value
+     * @param mixed $value Value
      */
     public function offsetSet($offset, $value)
     {
@@ -168,7 +168,7 @@ class Collection implements ArrayAccess, Iterator, Countable
     public function valid()
     {
         $key = key($this->_data);
-        return ($key !== NULL && $key !== false);
+        return ($key !== null && $key !== false);
     }
 
     /**
@@ -191,10 +191,23 @@ class Collection implements ArrayAccess, Iterator, Countable
         return array_keys($this->_data);
     }
 
+    /**
+     * Reverses data
+     *
+     * @return $this
+     */
     public function reverse()
     {
         $this->_data = array_reverse($this->_data);
         return $this;
+    }
+
+    /**
+     * @param $data
+     */
+    public function push($data)
+    {
+        array_push($this->_data, $data);
     }
 
     /**
@@ -226,7 +239,7 @@ class Collection implements ArrayAccess, Iterator, Countable
     }
 
     /**
-     * @return mixed|null|TModel|$this
+     * @return mixed|null|TModel|$this|$this[]
      */
     public function getFirst()
     {
@@ -234,7 +247,7 @@ class Collection implements ArrayAccess, Iterator, Countable
             return $this->_data[0];
         }
 
-        return NULL;
+        return null;
     }
 
     public function toOptionArray($key, $value)
@@ -261,11 +274,11 @@ class Collection implements ArrayAccess, Iterator, Countable
         return implode(' ', $data);
     }
 
-	/**
-	 * @param $column
-	 *
-	 * @return array
-	 */
+    /**
+     * @param $column
+     *
+     * @return array
+     */
     public function getColumnValues($column)
     {
         $values = array();
@@ -365,10 +378,11 @@ class Collection implements ArrayAccess, Iterator, Countable
             }
         }
 
-        return NULL;
+        return null;
     }
 
-    public function getWhereNotEmpty($column) {
+    public function getWhereNotEmpty($column)
+    {
         $values = array();
         foreach ($this->_data as $record) {
             if ($value = $record->$column) {
@@ -389,7 +403,8 @@ class Collection implements ArrayAccess, Iterator, Countable
      * @param $function
      * @return Collection
      */
-    public function getWhere($function, $additionalParams = array()) {
+    public function getWhere($function, $additionalParams = array())
+    {
         $values = array();
 
         foreach ($this->_data as $record) {
@@ -412,7 +427,8 @@ class Collection implements ArrayAccess, Iterator, Countable
     /**
      * @return Collection
      */
-    public function getRandomized() {
+    public function getRandomized()
+    {
         $values = $this->_data;
         shuffle($values);
         return new Collection($values);
@@ -430,7 +446,8 @@ class Collection implements ArrayAccess, Iterator, Countable
         return $total;
     }
 
-    public function countRowsWhereNotEmpty($column) {
+    public function countRowsWhereNotEmpty($column)
+    {
         $total = 0;
         foreach ($this->_data as $record) {
             if (!empty($record[$column])) {

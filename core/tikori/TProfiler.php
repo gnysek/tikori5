@@ -126,14 +126,36 @@ class TProfiler
             }
         }
 
-        foreach (array('Request headers' => apache_request_headers(), 'Reponse headers' => array_merge(apache_response_headers(), Core::app()->response->header())) as $title => $headers) {
+        $requestHeaders = [];
+
+        if (function_exists('apache_response_headers')) {
+            $requestHeaders = ['Request headers' => apache_request_headers(), 'Reponse headers' => array_merge(apache_response_headers(), Core::app()->response->header())];
+        } else {
+            $rh = [];
+            foreach($_SERVER as $k => $v) {
+                if (stripos($k, 'HTTP_') !== false) {
+                    $rh[str_replace('HTTP_', '', $k)] = $v;
+                }
+            }
+
+            $requestHeaders = ['Request headers' => $rh, 'Response headers' => Core::app()->response->header()];
+        }
+
+        foreach ($requestHeaders as $title => $headers) {
             $logs[] = '<tr style="border-bottom: 1px solid black;"><th colspan="7">' . $title . '</th></tr>';
 
-            foreach ($headers as $name => $header) {
-                $logs[] = '<tr style="border-bottom: 1px solid black;">';
-                $logs[] = '<td colspan="2"><strong>' . $name . '</strong></td>';
-                $logs[] = '<td colspan="5"><kbd>' . $header . '</kbd></td>';
-                $logs[] = '</tr>';
+            if (is_array($headers)) {
+                foreach ($headers as $name => $header) {
+                    if (empty($name)) {
+                        continue;
+                    }
+                    $logs[] = '<tr style="border-bottom: 1px solid black;">';
+                    $logs[] = '<td colspan="2"><strong>' . $name . '</strong></td>';
+                    $logs[] = '<td colspan="5"><kbd>' . $header . '</kbd></td>';
+                    $logs[] = '</tr>';
+                }
+            } else {
+
             }
         }
 

@@ -145,7 +145,8 @@ class TModel implements IteratorAggregate, ArrayAccess
         return null;
     }
 
-    protected function __noCommon($name) {
+    protected function __noCommon($name)
+    {
         $class = get_class($this);
         if (array_key_exists($class, self::$_cachedCommon)) {
             if (array_key_exists($name, self::$_cachedCommon[$class])) {
@@ -260,6 +261,29 @@ class TModel implements IteratorAggregate, ArrayAccess
     public function load($id)
     {
         return $this->find($id);
+    }
+
+    /**
+     * Reload current model (if already exists)
+     * @return $this
+     * @throws DbError
+     */
+    public function reload()
+    {
+        // todo: seems to not work properly ?
+        if (!$this->isNewRecord()) {
+            if (count($this->_primaryKey) > 1) {
+                $w = [];
+                foreach ($this->_primaryKey as $p) {
+                    $w[] = $this->$p;
+                }
+                $this->load($w);
+            } else {
+                $this->load($this->{$this->_primaryKey});
+            }
+        }
+
+        return $this;
     }
 
     /*
@@ -544,7 +568,7 @@ class TModel implements IteratorAggregate, ArrayAccess
                         /* @var Collection $related */
 //                        var_dump(count($related));
 
-                        $_benchHasMany = Profiler::benchStart(Profiler::BENCH_CAT_SQL,'ASSIGN HAS MANY - ' . count($collectionOfModels) . ' rows');
+                        $_benchHasMany = Profiler::benchStart(Profiler::BENCH_CAT_SQL, 'ASSIGN HAS MANY - ' . count($collectionOfModels) . ' rows');
                         $toAssign = null;
                         $tryFastAssign = false;
 
@@ -718,7 +742,22 @@ class TModel implements IteratorAggregate, ArrayAccess
 
                         $model = TModel::model($this->__getCommon(self::COMMON_RELATIONS)[$relationName][1]);
                         /* @var $model TModel */
-                        $sql->joinOn(array($k + 1, $model->getTable()), array($model->getFirstPK(), '=', $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2]));
+                        $whereFirstField = $model->getFirstPK();
+                        $whereSecondField = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2];
+
+                        if (array_key_exists(3, $this->__getCommon(self::COMMON_RELATIONS)[$relationName])) {
+                            $_joinOnFields = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][3];
+
+                            if (array_key_exists(self::RELATION_FIELDS, $_joinOnFields)) {
+                                $whereFirstField = $_joinOnFields[self::RELATION_FIELDS][0];
+                                $whereSecondField = $_joinOnFields[self::RELATION_FIELDS][1];
+                            }
+                        }
+
+                        $sql->joinOn(
+                            [$k + 1, $model->getTable()],
+                            [$whereFirstField, '=', $whereSecondField]
+                        );
 
                         break;
                     /*case self::HAS_MANY:
@@ -1665,6 +1704,7 @@ class TModel implements IteratorAggregate, ArrayAccess
     }
 
     const RELATION_VIA = 'via';
+    const RELATION_FIELDS = 'relation_other_fields';
 
     protected $_relationViaLinks = [];
 

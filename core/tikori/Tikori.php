@@ -154,6 +154,7 @@ class Tikori extends Application
         Core::event(Request::EVENT_REQUEST_CREATED, null);
 
         $this->setComponent('cookie', new Cookie());
+        $this->observer->fireEvent('cookie_loaded');
         Profiler::addLog('Request created');
         $this->response = new Response();
         Profiler::addLog('Response created');
@@ -214,6 +215,10 @@ class Tikori extends Application
         return true;
     }
 
+    /**
+     * @param Route $route
+     * @throws Exception
+     */
     private function _runController($route)
     {
         if (($ca = $this->_createController($route)) !== NULL) {
@@ -234,6 +239,7 @@ class Tikori extends Application
 //                    return $controller->unknownAction();
 //                } else {
             try {
+                $route->controllerInstance = $controller;
                 return $controller->run($route);
             } catch (DbError $e) {
                 ob_get_clean();

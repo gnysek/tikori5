@@ -181,25 +181,28 @@ abstract class Application
     /**
      * Sets application mode
      *
+     * @param bool $forceOnlyGetOnStart
      * @return int (Core::MODE_DEBUG, Core::MODE_DEV, Core::MODE_PROD)
      */
-    public function getMode()
+    public function getMode($forceOnlyGetOnStart = false)
     {
-        if ( /* $this->cfg('mode') */
-            $this->mode === NULL
-        ) {
+        if ($this->mode === NULL or $forceOnlyGetOnStart) {
             if (isset($_ENV['TIKORI_MODE'])) {
-                $this->mode = $_ENV['TIKORI_MODE'];
+                $_mode = $_ENV['TIKORI_MODE'];
             } else {
                 $envMode = getenv('TIKORI_MODE');
                 if ($envMode !== false) {
-                    $this->mode = $envMode;
+                    $_mode = $envMode;
                 } else {
-                    $this->mode = ($this->cfg('mode') === NULL) ? Core::MODE_PROD : $this->cfg('mode');
+                    $_mode = ($this->cfg('mode') === NULL) ? Core::MODE_PROD : $this->cfg('mode');
                 }
             }
 
-            $this->mode = intval($this->mode);
+            if ($forceOnlyGetOnStart) {
+                return $_mode;
+            }
+
+            $this->mode = intval($_mode);
 
             switch ($this->mode) {
                 case Core::MODE_DEBUG:

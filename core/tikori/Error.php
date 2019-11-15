@@ -237,7 +237,7 @@ class Error
             self::$renderStarted = true;
 
             $body = $view->renderPartial(
-                (\Core::app()->getMode() == \Core::MODE_PROD) ? 'error.fatal' : 'core.exception',
+                (\Core::app()->getMode(true) == \Core::MODE_PROD) ? 'error.fatal' : 'core.exception',
                 array(
                     'errorType' => $code,
                     'errorId'   => $codeInt,
@@ -253,7 +253,7 @@ class Error
                 ), true
             );
         } else {
-            if (\Core::app()->getMode() == \Core::MODE_PROD) {
+            if (\Core::app()->getMode(true) == \Core::MODE_PROD) {
                 $body = '<p>There was fatal error during rendering page, sorry.</p>';
             } else {
                 $body = '<p>There was an error and probably it occurs also when rendering error page:</p>';

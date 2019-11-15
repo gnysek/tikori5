@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by JetBrains PhpStorm.
  * User: user
@@ -13,17 +14,24 @@ class TObserver
 
     protected $_observers = array();
 
-    public function addObserver($eventName, $observer)
+    /**
+     * @param $eventName
+     * @param object|array|callable $observer
+     * @param null $unique
+     */
+    public function addObserver($eventName, $observer, $unique = null)
     {
-        if (!array_key_exists($eventName, $this->_observers) or !array_key_exists(
-            get_class($observer), $this->_observers[$eventName]
-        )
-        ) {
-            $this->_observers[$eventName][get_class($observer)] = $observer;
+        if ($unique !== null) {
+            $unique = '_' . $unique;
+            if (!array_key_exists($unique, $this->_observers[$eventName])) {
+                $this->_observers[$eventName][$unique] = $observer;
+            }
+        } else {
+            $this->_observers[$eventName][] = $observer;
         }
     }
 
-    public function fireEvent($eventName, $data)
+    public function fireEvent($eventName, $data = [])
     {
 
         if (!empty($this->_observers[$eventName])) {
@@ -35,19 +43,21 @@ class TObserver
             $methodName = lcfirst($methodName) . self::EVENT_SUFFIX;
 
             Profiler::addLog(
-                'Firing event <code>' . $eventName . '</code> <kbd>' . $methodName . '</kbd> with ' . count(
-                    $this->_observers[$eventName]
-                ) . ' observer(s)'
+                sprintf(
+                    'Firing event <code>%s</code> <kbd>%s</kbd> with %s observer(s)',
+                    $eventName, $methodName, count($this->_observers[$eventName])
+                )
             );
+
             foreach ($this->_observers[$eventName] as $observer) {
                 if (is_callable($observer)) {
-                    ($observer)($data);
+                    ($observer)($data); // if function
                     Profiler::addLog('Fired event <code>' . $eventName . '</code> using passed closure.');
                 } else if (is_array($observer) and count($observer) == 2 and method_exists($observer[0], $observer[1])) {
-                    call_user_func_array(array($observer[0], $observer[1]), array($data));
+                    call_user_func_array(array($observer[0], $observer[1]), array($data)); // if array pointing to function
                     Profiler::addLog('Fired event <code>' . $eventName . '</code> using <code>' . get_class($observer[0]) . '::' . $observer[1] . '</code>');
                 } else if (!is_array($observer) and method_exists($observer, $methodName)) {
-                    call_user_func_array(array($observer, $methodName), array($data));
+                    call_user_func_array(array($observer, $methodName), array($data)); // if just an object, so method name is generated automatically
                     Profiler::addLog('Fired event <code>' . $eventName . '</code> using <code>' . get_class($observer) . '::' . $methodName . '</code>');
                 } else {
                     Profiler::addLog('Firing event <code>' . $eventName . '</code> which is registered but there\'s no method <code>' . $methodName . '</code> for it.');

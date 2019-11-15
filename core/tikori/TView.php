@@ -8,6 +8,10 @@ class TView
     public $context = null;
     public $area = null;
 
+    const EVENT_THEMES_REGISTER = 'tview_themes_register';
+    const EVENT_VIEW_FILE_FOUND = 'tview_view_file_found';
+    const EVENT_VIEW_FILE_AFTER_RENDER = 'tview_view_file_after_render';
+
     public function __construct()
     {
         // check that there are any defined layout media files
@@ -28,6 +32,8 @@ class TView
             if (!is_array($themes)) {
                 $themes = array($themes);
             }
+
+            Core::app()->observer->fireEvent(self::EVENT_THEMES_REGISTER, ['themes' => &$themes]);
 
             foreach($themes as $theme) {
                 if ($theme != 'default') {
@@ -114,28 +120,38 @@ class TView
         }
     }
 
+    /**
+     * @param $_fileNC
+     * @param null $_dataNC
+     * @param bool $_returnNC
+     * @return false|string
+     */
     public function renderInternal($_fileNC, $_dataNC = NULL, $_returnNC = false)
     {
         if (is_array($_dataNC)) {
             extract($_dataNC, EXTR_PREFIX_SAME, 'data');
         } else {
-            $data = $_dataNC;
+            $data = $_dataNC; // this will be used directly in rendered file
         }
 
+        ob_start();
+        ob_implicit_flush(false);
+        Profiler::addLog('Rendering <kbd>' . str_replace(Core::app()->appDir, '', $_fileNC) . '</kbd>');
+        if (Core::app()->getMode() != Core::MODE_PROD) {
+            echo '<!-- START ' . str_replace(Core::app()->appDir, '', $_fileNC) . ' -->';
+        }
+        require $_fileNC;
+        if (Core::app()->getMode() != Core::MODE_PROD) {
+            echo '<!-- END ' . str_replace(Core::app()->appDir, '', $_fileNC) . ' -->';
+        }
+        $result = ob_get_clean();
+
+        Core::app()->observer->fireEvent(self::EVENT_VIEW_FILE_AFTER_RENDER, ['result' => &$result, 'themes' => $this->_themes]);
+
         if ($_returnNC) {
-            ob_start();
-            ob_implicit_flush(false);
-            Profiler::addLog('Rendering <kbd>' . str_replace(Core::app()->appDir, '', $_fileNC) . '</kbd>');
-            if (Core::app()->getMode() != Core::MODE_PROD) {
-                echo '<!-- START ' . str_replace(Core::app()->appDir, '', $_fileNC) . ' -->';
-            }
-            require($_fileNC);
-            if (Core::app()->getMode() != Core::MODE_PROD) {
-                echo '<!-- END ' . str_replace(Core::app()->appDir, '', $_fileNC) . ' -->';
-            }
-            return ob_get_clean();
+            return $result;
         } else {
-            require $_fileNC;
+            echo $result;
         }
     }
 
@@ -180,17 +196,13 @@ class TView
         //     die();
         // }
 
-        $cacheList = array();
-
-        if (isset($this->controller) and !empty($this->_themes)) {
-            $cacheList = $this->_themes + array('');
-        }
-
         $currentThemeIdentifier = (count($this->_themes) ? 'T:' . ($this->_themes[0] . '|') : '') . 'A:' . $this->area . '|F:';
 
         if (array_key_exists($currentThemeIdentifier . $file, self::$_viewFiles)) {
             Profiler::addLog(sprintf('Loaded template from cache: <kbd>%s</kbd> <kbd>[%s]</kbd>', self::$_viewFiles[$currentThemeIdentifier . $file], $currentThemeIdentifier . $file));
-            return self::$_viewFiles[$currentThemeIdentifier . $file];
+            $_return = self::$_viewFiles[$currentThemeIdentifier . $file];
+            Core::app()->observer->fireEvent(self::EVENT_VIEW_FILE_FOUND, ['file' => &$_return, 'themes' => $this->_themes]);
+            return $_return;
         }
 
         $paths = array();
@@ -273,7 +285,9 @@ class TView
                     Profiler::addLog(sprintf('Displayed template: <kbd>%s</kbd> <kbd>[%s]</kbd>', $filename, $currentThemeIdentifier . $file));
                 }
 
-                return $filename;
+                $_return = $filename;
+                Core::app()->observer->fireEvent(self::EVENT_VIEW_FILE_FOUND, ['file' => &$_return, 'themes' => $this->_themes]);
+                return $_return;
             }
         }
 

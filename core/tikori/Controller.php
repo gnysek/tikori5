@@ -58,11 +58,17 @@ class Controller extends ControllerView
         }
     }*/
 
+    /**
+     * @throws Exception
+     */
     public function unknownAction()
     {
         $this->httpStatusAction(404);
     }
 
+    /**
+     * @param $action
+     */
     public function runActionNew($action)
     {
         if ($this->_actionBefore()) {
@@ -88,27 +94,48 @@ class Controller extends ControllerView
 //        }
 //    }
 
+    /**
+     * @param string $area
+     * @throws Exception
+     */
     public static function forward404($area = '')
     {
         self::_forwardHttpCode($area, 404);
     }
 
+    /**
+     * @param string $area
+     * @throws Exception
+     */
     public static function forward401($area = '')
     {
         self::_forwardHttpCode($area, 104);
     }
 
+    /**
+     * @param $area
+     * @param $code
+     * @throws Exception
+     */
     protected static function _forwardHttpCode($area, $code)
     {
         $c = new Controller($area);
         $c->httpStatusAction($code);
     }
 
+    /**
+     * @return bool
+     */
     protected function _beforeRun()
     {
         return true;
     }
 
+    /**
+     * @param $route
+     * @param null $action
+     * @throws Exception
+     */
     public function run($route, $action = NULL)
     {
         if ($route instanceof Route) {
@@ -224,6 +251,12 @@ class Controller extends ControllerView
         //		}
     }
 
+    /**
+     * @param null $controller
+     * @param null $arena
+     * @param string $suffix
+     * @return string
+     */
     public static function getControllerClassName($controller = NULL, $arena = NULL, $suffix = 'Controller')
     {
         $strict = 'this'; // fix for E_STRICT notice
@@ -236,6 +269,11 @@ class Controller extends ControllerView
         return (!empty($arena) ? ucfirst($arena) . '_' : '') . ucfirst(strtolower(($controller))) . $suffix;
     }
 
+    /**
+     * @param null $action
+     * @param string $suffix
+     * @return string
+     */
     public function getActionMethodName($action = NULL, $suffix = 'Action')
     {
         if (isset($this)) {
@@ -251,16 +289,26 @@ class Controller extends ControllerView
         return strtolower($action) . $suffix;
     }
 
+    /**
+     * @return bool
+     */
     protected function _actionBefore()
     {
         return true;
     }
 
+    /**
+     * @return bool
+     */
     protected function _afterAction()
     {
         return true;
     }
 
+    /**
+     * @return bool
+     * @throws Exception
+     */
     public function checkPermissions()
     {
         //		var_dump($this->checkPermissions);
@@ -274,21 +322,33 @@ class Controller extends ControllerView
         return true;
     }
 
+    /**
+     * @param string $controller
+     */
     public function setController($controller = '')
     {
         $this->controller = $controller;
     }
 
+    /**
+     * @param string $action
+     */
     public function setAction($action = '')
     {
         $this->action = $action;
     }
 
+    /**
+     * @return string
+     */
     public function getControllerFullName()
     {
         return ucfirst($this->controller) . 'Controller';
     }
 
+    /**
+     * @param $params
+     */
     public function setParams($params)
     {
         $this->params = array_merge($this->params, $params);
@@ -311,6 +371,7 @@ class Controller extends ControllerView
 
     /**
      * @param string|array $where
+     * @throws Exception
      */
     public function redirect($where = '/')
     {
@@ -321,6 +382,7 @@ class Controller extends ControllerView
 
     /**
      * @param string|array $where
+     * @throws Exception
      */
     public function redirectStatus($where = '/', $status = 301)
     {
@@ -333,6 +395,4 @@ class Controller extends ControllerView
     //	public function defaultAction() {
     //		throw new RouteNotFoundException('Unknown action');
     //	}
-
-
 }

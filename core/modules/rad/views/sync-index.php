@@ -8,6 +8,14 @@
         <td>Class name</td>
         <td colspan="2">Options</td>
     </tr>
+    <tr>
+        <td colspan="3"></td>
+        <td colspan="2"><?= Html::link('Dump all existing', 'rad/dumpAll'); ?></td>
+    </tr>
+    <tr>
+        <td colspan="3"></td>
+        <td colspan="2"><?= Html::link('Compare all existing', 'rad/compareAll'); ?></td>
+    </tr>
     <?php $i = 0; ?>
     <?php foreach ($tables as $table => $data): ?>
         <?php
