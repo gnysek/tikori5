@@ -250,6 +250,18 @@ class Collection implements ArrayAccess, Iterator, Countable
         return null;
     }
 
+    /**
+     * @return mixed|null|TModel|$this|$this[]
+     */
+    public function getLast()
+    {
+        if (!empty($this->_data) and count($this->_data)) {
+            return $this->_data[count($this->_data) - 1];
+        }
+
+        return null;
+    }
+
     public function toOptionArray($key, $value)
     {
         $optionArray = array();

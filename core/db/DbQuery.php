@@ -149,7 +149,7 @@ class DbQuery
         if (!is_array($where)) {
             $where = explode(' ', $where);
             if (count($where) != 3) {
-                throw new DbError('Wrong where param numbers.');
+                throw new DbError('Wrong "where()" param numbers.');
             }
         }
 

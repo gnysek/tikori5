@@ -3,7 +3,7 @@
 class Log
 {
 
-    public static function write($data, $file = 'system.log')
+    public static function write($data, $file = 'system.log', $clean = false)
     {
         if (!file_exists(self::logDir())) {
             mkdir(self::logDir(), 0777, true);
@@ -13,7 +13,7 @@ class Log
             file_put_contents(self::logDir() . '/' . $file, '');
         }
 
-        $f = fopen(self::logDir() . '/' . $file, 'a+');
+        $f = fopen(self::logDir() . '/' . $file, $clean ? 'w' : 'a+');
         fwrite($f, str_repeat('-', 80) . PHP_EOL);
         fwrite($f, date('d.m.Y H:i:s') . ': ' . PHP_EOL . var_export($data, true) . PHP_EOL);
         fclose($f);

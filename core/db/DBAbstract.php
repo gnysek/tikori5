@@ -129,6 +129,11 @@ abstract class DbAbstract
         return $this->getTableInfo($table)->getColumn($column) ? true : false;
     }
 
+    public function hasTable($table)
+    {
+        return $this->getSchema()->hasTable();
+    }
+
     public function getTableColumnType($table, $column){
         //TODO: duplicates with \DbQuery::_formatAgainstType()
         if ($table = $this->getTableInfo($table)->getColumn($column)) {

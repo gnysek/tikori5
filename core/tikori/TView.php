@@ -298,7 +298,7 @@ class TView
     {
         if (self::$_viewFilesChanged and is_array(self::$_viewFiles)) {
             ksort(self::$_viewFiles);
-            Core::app()->cache->saveCache(self::TEMPLATE_CACHE, json_encode(self::$_viewFiles));
+            Core::app()->cache->saveCache(self::TEMPLATE_CACHE, json_encode(self::$_viewFiles, JSON_PRETTY_PRINT));
             self::$_viewFilesChanged = false;
         }
     }
