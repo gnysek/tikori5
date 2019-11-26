@@ -131,7 +131,7 @@ abstract class DbAbstract
 
     public function hasTable($table)
     {
-        return $this->getSchema()->hasTable();
+        return $this->getSchema()->hasTable($table);
     }
 
     public function getTableColumnType($table, $column){
