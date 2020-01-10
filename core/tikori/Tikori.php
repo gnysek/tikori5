@@ -339,8 +339,18 @@ class Tikori extends Application
 function __()
 {
     $args = func_get_args();
-    if (Core::app()->lang != NULL) {
+    if (Core::app()->lang != null) {
         return Core::app()->lang->translate($args);
+    } else {
+
+        if (count($args)) {
+
+            $text = $args[0];
+            $args = array_slice($args, 1);
+
+            return @sprintf($text, $args);
+        }
+        return '';
     }
 }
 

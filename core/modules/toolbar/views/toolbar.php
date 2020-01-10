@@ -550,6 +550,9 @@ $values['niceTimeline'] = array('<div id="niceTimelineDbgTab">' . $timeline . '<
 
         activateTab('-', '-');
 
+        console.log('Not found selector: ' + selector);
+        console.log($(selector));
+
         var _top = Math.max(50, $(selector).first().offset().top - 20);
 
         $('html, body').animate({

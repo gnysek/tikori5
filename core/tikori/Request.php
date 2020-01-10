@@ -360,7 +360,7 @@ class Request extends DefaultObject
                     continue;
                 }
                 //todo: allow utf-8 maybe ?
-                $this->_get[$k] = trim(preg_replace('#[^a-z0-9\p{L}/_\-%\s]#i', '', $v));
+                $this->_get[$k] = trim(preg_replace('#[^a-z0-9\p{L}/_\-%\s\.,]#i', '', $v));
                 $this->_getRaw[$k] = $v;
             }
         }
@@ -414,6 +414,11 @@ class Request extends DefaultObject
     {
         //return (empty($this->env['PATH_INFO'])) ? '' : $this->env['PATH_INFO'];
         return $this->get('path-info');
+    }
+
+    public function hasPost($key)
+    {
+        return array_key_exists($key, $this->_post);
     }
 
     public function getPost($key = null, $default = NULL)

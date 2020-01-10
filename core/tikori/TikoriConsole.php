@@ -10,10 +10,23 @@ class TikoriConsole extends Application
 
     const CRON_CACHE_FILE = '.__CRONLOCK__';
 
+    const STATUS_PLANNED = 'planned';
+    const STATUS_STARTED = 'started';
+    const STATUS_FINISHED = 'finished';
+    const STATUS_FAILED = 'failed';
+    const STATUS_TIMEOUT = 'timeout';
+
+    const EVENT_STARTS_ALL_JOBS = 'cron_start_all_jobs';
+    const EVENT_START_JOB = 'cron_start_job';
+    const EVENT_END_JOB = 'cron_end_job';
+    const EVENT_ERROR_JOB = 'cron_error_job';
+    const EVENT_PASS_TO_JOB = 'cron_pass_t0_job';
+
     public function run($config)
     {
-        error_reporting(E_ALL | E_STRICT);
+        set_error_handler(array(TikoriConsole::class, 'errh'), E_ALL ^ E_NOTICE);
         ini_set('error_display', 1);
+        error_reporting(E_ALL | E_STRICT);
 
         $cmdArgsFound = [];
 
@@ -143,9 +156,8 @@ class TikoriConsole extends Application
 
                 Core::app()->cache->saveCache(self::CRON_CACHE_FILE, time());
             } else {
-                Core::app()->cache->deleteCache(self::CRON_CACHE_FILE, time());
+                Core::app()->cache->deleteCache(self::CRON_CACHE_FILE);
             }
-
 
             if (in_array($this->_cmdMode, ['task', '-t'])) {
                 // add also those that are "console-only" but not automatically ran by cron
@@ -153,51 +165,55 @@ class TikoriConsole extends Application
 
                 if (!in_array($this->_cmdArg, $cronTasks)) {
                     echo 'Requested task ' . $this->_cmdArg . ' not found (may be inactive). Should be one of: ' . implode(', ', $cronTasks) . PHP_EOL;
-                    exit;
+                    return;
                 }
             }
 
+            $tasksToExecute = [];
             foreach ($cronTasks as $cronTask) {
-                /* $cronTask TikoriCron */
-
                 if (in_array($this->_cmdMode, ['task', '-t'])) {
                     if ($this->_cmdArg != $cronTask) {
                         continue;
                     }
                 }
 
+                $tasksToExecute[] = $cronTask;
+            }
+
+            Core::app()->observer->fireEvent(self::EVENT_STARTS_ALL_JOBS, ['tasks' => $tasksToExecute]);
+
+            // perform
+            foreach ($tasksToExecute as $cronTaskId => $cronTask) {
+                /* $cronTask TikoriCron */
+
+                Core::app()->observer->fireEvent(self::EVENT_START_JOB, ['taskId' => $cronTaskId]);
+
                 try {
                     $_t = Core::genTimeNow();
+                    /** @var TikoriCron $task */
                     $task = new $cronTask;
                     echo '---> Running [' . $cronTask . ']' . PHP_EOL;
 
-                    /** @var TikoriCron $task */
-                    $allowedArgs = $task->allowedParams();
-                    $params = [];
+                    $params = $this->_prepareTaskParams($task);
 
-                    global $argv, $argc;
-
-                    for ($i = 1; $i < count($argv); $i++) {
-                        $cmdArg = $argv[$i];
-                        if (substr($cmdArg, 0, 1) == '-') {
-                            $cmdMode = str_replace('--', '', $cmdArg);
-
-                            if (in_array($cmdMode, $allowedArgs)) {
-                                if (count($argv) > $i + 1) {
-                                    $params[$cmdMode] = $argv[$i + 1];
-                                    $i++;
-                                }
-                            }
-                        }
-                    }
-
+                    Core::app()->observer->fireEvent(self::EVENT_PASS_TO_JOB, ['taskId' => $cronTaskId, 'task' => $task]);
                     $task->run($params);
-                    echo PHP_EOL . '---> Task [' . $cronTask . '] done in ' . (Core::genTimeNow() - $_t) . 's !' . PHP_EOL;
+                    echo PHP_EOL . '---> Task [' . $cronTask . '] done in ' . round(Core::genTimeNow() - $_t, 5) . 's !' . PHP_EOL;
+
+                    Core::app()->observer->fireEvent(self::EVENT_END_JOB, ['taskId' => $cronTaskId, 'startTime' => $_t]);
                 } catch (Exception $e) {
                     echo 'Cron task [' . $cronTask . '] encountered an error: ' . $e->getMessage() . PHP_EOL;
+
+                    Core::app()->observer->fireEvent(self::EVENT_ERROR_JOB,
+                        ['taskId' => $cronTaskId, 'status' => 'Exception', 'message' => 'Error: ' . $e->getMessage()]
+                    );
                 } catch (Throwable $e) {
                     echo 'Cron task [' . $cronTask . '] encountered a [FATAL] error: ' . $e->getMessage() . PHP_EOL;
                     echo str_replace('#', '   #', $e->getTraceAsString()) . PHP_EOL;
+
+                    Core::app()->observer->fireEvent(self::EVENT_ERROR_JOB,
+                        ['taskId' => $cronTaskId, 'status' => 'Exception', 'message' => 'Error: ' . $e->getMessage()]
+                    );
                 }
             }
         } else {
@@ -208,6 +224,70 @@ class TikoriConsole extends Application
         echo PHP_EOL;
 
         Core::app()->cache->deleteCache(self::CRON_CACHE_FILE);
+    }
+
+    /**
+     * @param $task
+     * @return array
+     */
+    protected function _prepareTaskParams($task)
+    {
+        /** @var TikoriCron $task */
+        $allowedArgs = [];
+        $_allowedArgs = $task->allowedParams();
+        $fillAlso = [];
+        foreach ($_allowedArgs as $_a) {
+            if (is_array($_a)) {
+                // array of options, link them with same param
+
+                $fixedNames = [];
+                foreach ($_a as $_alternatives) {
+                    $fixedNames[] = str_replace('--', '', $_alternatives);
+                }
+
+                foreach ($fixedNames as $_alternatives) {
+                    $allowedArgs[] = $_alternatives;
+                    $_f = $fixedNames;
+                    unset($_f[array_search($_alternatives, $_f)]);
+                    if (count($_f)) {
+                        $fillAlso[$_alternatives] = $_f;
+                    }
+                }
+
+                unset($fixedNames);
+            } else {
+                $allowedArgs[] = str_replace('--', '', $_a);
+            }
+        }
+
+        // fill
+
+        $params = [];
+
+        global $argv, $argc;
+
+        for ($i = 1; $i < count($argv); $i++) {
+            $cmdArg = $argv[$i];
+            if (substr($cmdArg, 0, 1) == '-') {
+                $cmdMode = str_replace('--', '', $cmdArg);
+
+                if (in_array($cmdMode, $allowedArgs)) {
+                    if (count($argv) > $i + 1) {
+                        $params[$cmdMode] = $argv[$i + 1];
+
+                        if (array_key_exists($cmdMode, $fillAlso)) {
+                            foreach ($fillAlso[$cmdMode] as $paramName) {
+                                $params[$paramName] = $argv[$i + 1];
+                            }
+                        }
+
+                        $i++;
+                    }
+                }
+            }
+        }
+
+        return $params;
     }
 
     /**
@@ -233,13 +313,8 @@ ASCII;
         $art = ob_get_clean();
 
         $i = rand(1, 3);
-        if ($i == 1) {
-            $art = str_replace('$', '░', $art);
-        } elseif ($i == 2) {
-            $art = str_replace('$', '▒', $art);
-        } elseif ($i == 3) {
-            $art = str_replace('$', '▓', $art);
-        }
+        $char = ['░', '▒', '▓'];
+        $art = str_replace('$', $char[$i - 1], $art);
 
         echo $art;
     }
@@ -312,5 +387,10 @@ ASCII;
             echo PHP_EOL;
         }
 
+    }
+
+    public static function errh($errno, $errstr, $errfile, $errline, $errcontext)
+    {
+        echo $errno . ':' . $errstr . PHP_EOL . $errfile . ':' . $errline . PHP_EOL . PHP_EOL;
     }
 }

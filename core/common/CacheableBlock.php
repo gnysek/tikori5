@@ -90,6 +90,12 @@ class CacheableBlock
 
     public function load()
     {
+        if (Core::app()->getMode() != Core::MODE_PROD) {
+            return '<!-- START CACHED:' . str_replace(Core::app()->appDir, '', $this->_cachedRealname) . ' -->' . PHP_EOL .
+                file_get_contents($this->_cachedRealname).
+                '<!-- END CACHED:' . str_replace(Core::app()->appDir, '', $this->_cachedRealname) . ' -->' . PHP_EOL;
+        }
+
         return file_get_contents($this->_cachedRealname);
     }
 

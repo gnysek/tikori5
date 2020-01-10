@@ -15,7 +15,7 @@ class Html
         $_url = self::url($url);
 
         if (!isset($options[self::SKIP_ACTIVE])) {
-            self::_linkCheckActiveClass($options, $url);
+            self::_linkCheckActiveClass($options, $_url);
         }
 
         return html::htmlTag('a', $options + array('href' => $_url, 'title' => htmlspecialchars(trim(strip_tags($text)))), $text);
@@ -309,36 +309,70 @@ class Html
 
     public static function radioFieldModel($model, $field, $values = array(), $divider = NULL)
     {
+        return self::radioField(get_class($model) . '[' . $field . ']', $values, $model->$field, $divider);
+//        $html = '';
+//        $i = 0;
+//
+//        foreach ($values as $k => $v) {
+//            $opt = array(
+//                'type'  => 'radio',
+//                'name'  => get_class($model) . '[' . $field . ']',
+//                'id'    => get_class($model) . '_' . $field . '_' . ++$i,
+//                'value' => $k
+//            );
+//
+//            if ($k == $model->$field) {
+//                $opt['checked'] = 'checked';
+//            }
+//
+//            $radio = self::htmlTag(
+//                'input',
+//                $opt
+//            );
+//
+//            $html .= self::htmlTag(
+//                'label', array(
+//                    'for' => get_class($model) . '_' . $field . '_' . $i,
+//                    'class' => 'radio-label'
+//                    #'id'  => get_class($model) . '_' . $field,
+//                ),
+//                $radio . $v
+//            );
+//
+//            $html .= $divider;
+//        }
+//
+//        return $html;
+    }
+
+    public static function radioField($field, $values = [], $value = null, $divider = null)
+    {
         $html = '';
         $i = 0;
 
         foreach ($values as $k => $v) {
-            $opt = array(
-                'type'  => 'radio',
-                'name'  => get_class($model) . '[' . $field . ']',
-                'id'    => get_class($model) . '_' . $field . '_' . ++$i,
-                'value' => $k
-            );
+            $i++;
 
-            if ($k == $model->$field) {
+            $opt = [
+                'type'  => 'radio',
+                'name'  => $field,
+                'id'    => strtolower(str_replace(['[', ']', '_'], '_', $field)) . $i,
+                'value' => $k,
+            ];
+
+            if ($k == $value) {
                 $opt['checked'] = 'checked';
             }
 
-            $radio = self::htmlTag(
-                'input',
-                $opt
-            );
+            $radio = self::htmlTag('input', $opt);
 
-            $html .= self::htmlTag(
-                'label', array(
-                    'for' => get_class($model) . '_' . $field . '_' . $i,
-                    'class' => 'radio-label'
-                    #'id'  => get_class($model) . '_' . $field,
-                ),
-                $radio . $v
-            );
+            $html .= self::htmlTag('label', [
+                'for'   => strtolower(str_replace(['[', ']', '_'], '_', $field)) . $i,
+                'class' => 'radio-label'
+                #'id'  => get_class($model) . '_' . $field,
+            ], $radio . ' ' . $v);
 
-            $html .= $divider;
+            $html .= $divider . PHP_EOL;
         }
 
         return $html;

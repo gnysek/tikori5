@@ -1108,8 +1108,13 @@ class TModel implements IteratorAggregate, ArrayAccess
             ->fields($this->_getModifiedFields())
             ->execute();
 
+        // reset originals
+        foreach ($this->_getModifiedFields() as $k => $v) {
+            $this->_original[$k] = $v;
+        }
+
         // TODO fix so autoincrement value is used instead of first PK - especially for tables which doesn't have PK!
-        $this->_values[$this->getFirstPK()] = Core::app()->db->lastId();
+        $this->_values[$this->getFirstPK()] = $this->_original[$this->getFirstPK()] = Core::app()->db->lastId();
 
         return true;
     }
@@ -1133,7 +1138,12 @@ class TModel implements IteratorAggregate, ArrayAccess
             }
         }
 
-        if (!empty($values)) {
+        if (count($values)) {
+
+            // reset originals
+            foreach ($values as $k => $v) {
+                $this->_original[$k] = $v;
+            }
 
             DbQuery::sql()
                 ->update()
@@ -1622,9 +1632,11 @@ class TModel implements IteratorAggregate, ArrayAccess
             $attributes = array();
         }
 
+        $this->_modified = [];
+
         foreach ($this->__getCommon(self::COMMON_FIELDS) as $fieldName) {
             if (array_key_exists($fieldName, $attributes)) {
-                $this->_values[$fieldName] = $this->_original[$fieldName] = $value = $this->__getCommon(self::COMMON_SCHEMA)->columns[$fieldName]->typecast($attributes[$fieldName]);
+                $this->_values[$fieldName] = $this->_original[$fieldName] = $this->__getCommon(self::COMMON_SCHEMA)->columns[$fieldName]->typecast($attributes[$fieldName]);
             } else {
                 $this->_values[$fieldName] = $this->_original[$fieldName] = $this->__getCommon(self::COMMON_SCHEMA)->columns[$fieldName]->defaultValue;
             }

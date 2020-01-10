@@ -17,7 +17,7 @@ class UrlTranslator
                 $domain = $domains;
             }
 
-            return 'http' . (Core::app()->request->isSecure() ? 's' : '') . '://' . $domain . '/';
+            return 'http' . ((Core::app()->request and Core::app()->request->isSecure()) ? 's' : '') . '://' . $domain . '/';
         }
     }
 }

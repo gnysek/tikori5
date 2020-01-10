@@ -502,4 +502,62 @@ class Collection implements ArrayAccess, Iterator, Countable
         }
         return $this;
     }
+
+    /**
+     * @param $word
+     * @param $field
+     * @return $this
+     *
+     */
+    public function sortBySimilarity($word, $field, $useLevInstSimil = false)
+    {
+        usort($this->_data, function ($a, $b) use ($word, $field, $useLevInstSimil) {
+
+            if ($useLevInstSimil) {
+                $percentA = levenshtein($word, $a->$field);
+                $percentB = levenshtein($word, $b->$field);
+            } else {
+                similar_text($word, $a->$field, $percentA);
+                similar_text($word, $b->$field, $percentB);
+            }
+
+            return $percentA === $percentB ? 0 : ($percentA > $percentB ? -1 : 1);
+        });
+
+        return $this;
+    }
+
+    public function getBySimilarityAsArray($word, $field, $useLevInstSimil = false, $onlyAbove = false)
+    {
+        $similarity = [];
+        foreach ($this->_data as $row) {
+            $similarity[] = $useLevInstSimil ? levenshtein($word, $row->$field) : similar_text($word, $row->$field);
+        }
+
+        arsort($similarity);
+
+        $result = [];
+        foreach ($similarity as $id => $percentages) {
+            if ($onlyAbove == false or $percentages >= $onlyAbove) {
+                $result[] = $this->_data[$id];
+            }
+        }
+
+        return $result;
+    }
+
+    public function getAverage($field)
+    {
+        $sum = 0;
+        $average = 0;
+
+        foreach ($this->_data as $row) {
+            if ($row->$field !== null) {
+                $average += floatval($row->$field);
+                $sum++;
+            }
+        }
+
+        return $sum == 0 ? 0 : ($average / $sum);
+    }
 }

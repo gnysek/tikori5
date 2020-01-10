@@ -17,9 +17,9 @@ class TModule
         return $this->__initialized;
     }
 
-    public function addObserver($eventName)
+    public function addObserver($eventName, $what = null)
     {
-        Core::app()->observer->addObserver($eventName, $this);
+        Core::app()->observer->addObserver($eventName, $what === null ? $this : $what);
     }
 
     public function updateConfig($path, $value)

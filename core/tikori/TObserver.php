@@ -18,6 +18,7 @@ class TObserver
      * @param $eventName
      * @param object|array|callable $observer
      * @param null $unique
+     * @return TObserver
      */
     public function addObserver($eventName, $observer, $unique = null)
     {
@@ -29,6 +30,8 @@ class TObserver
         } else {
             $this->_observers[$eventName][] = $observer;
         }
+
+        return $this;
     }
 
     public function fireEvent($eventName, $data = [])

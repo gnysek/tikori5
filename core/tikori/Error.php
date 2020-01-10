@@ -47,7 +47,7 @@ class Error
                         $stack[] = $frame;
                     }
                     $ref = new \ReflectionProperty('\Exception', 'trace');
-                    $ref->setAccessible(TRUE);
+                    $ref->setAccessible(true);
                     $ref->setValue($exception, $stack);
                 }
                 self::exch($exception);
@@ -254,7 +254,34 @@ class Error
             );
         } else {
             if (\Core::app()->getMode(true) == \Core::MODE_PROD) {
-                $body = '<p>There was fatal error during rendering page, sorry.</p>';
+                $body = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Błąd krytyczny</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                text-align: center;
+                color: cornsilk;
+                font-weight: bold;
+                background: #202f3a;
+            }
+            body > div {
+                margin: 5px auto;
+                padding-top: 50px;
+                max-width: 80%;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <p>Wystąpił błąd krytyczny podczas generowania tej strony, przepraszamy. Administrator został poinformowany o problemie.</p><p>There was fatal error during rendering page, sorry. Administrator has been notified about this issue.</p>
+        </div>
+    </body>
+</html>
+HTML;
             } else {
                 $body = '<p>There was an error and probably it occurs also when rendering error page:</p>';
                 $body .= ' <b>' . $exception->getMessage() . '</b>';

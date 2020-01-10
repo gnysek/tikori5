@@ -29,8 +29,8 @@ class TConfig
     {
         $_paths = explode('/', $path);
 
-        if (count($_paths[0]) < 1) {
-            if ( strlen($fullPath) == 0) {
+        if (!is_array($_paths) or count($_paths[0]) < 1) {
+            if (strlen($fullPath) == 0) {
                 return $this->_data;
             }
         } else {

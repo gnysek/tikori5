@@ -7,8 +7,8 @@ class ControllerView extends TView
 
     /**
      * @param string $class
-     * @param array  $properties
-     * @param bool   $captureOutput
+     * @param array $properties
+     * @param bool $captureOutput
      * @return Widget|mixed
      */
     public function widget($class, $properties = array(), $captureOutput = false)
@@ -47,6 +47,10 @@ class ControllerView extends TView
             $uniquename .= '_' . Core::app()->route->scope;
         }
 
+        if (count($this->_themes)) {
+            $uniquename .= sprintf('_%s_', implode('_', $this->_themes));
+        }
+
         $block = new CacheableBlock($this, $uniquename, $tags);
 
         if ($time === false or $time === null) {
@@ -55,13 +59,13 @@ class ControllerView extends TView
 
         $exists = $block->checkCacheExists($time == 0 ? 0 : (time() - $time));
 
-        if (!$exists) {
-            Profiler::addNotice('Cache [' . $uniquename .'] not found, or too old');
+        if (!$exists or Core::app()->cfg('dev/no-cache', false) == true) {
+            Profiler::addNotice('Cache [' . $uniquename . '] not found, or too old');
             $__cacheContent = $this->renderPartial($template, $data, true);
             $block->save($__cacheContent);
             return $__cacheContent;
         } else {
-            Profiler::addNotice('Cache [' . $uniquename .'] found');
+            Profiler::addNotice('Cache [' . $uniquename . '] found');
             return $block->load();
         }
     }

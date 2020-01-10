@@ -22,9 +22,9 @@ class Asset
      * @param $relativeFilePath
      * @return string
      */
-    public static function cssAsset($relativeFilePath)
+    public static function cssAsset($relativeFilePath, $version = false)
     {
-        return self::_returnAsset($relativeFilePath, self::TYPE_CSS) . PHP_EOL;
+        return self::_returnAsset($relativeFilePath, self::TYPE_CSS, $version) . PHP_EOL;
     }
 
     public static function mergeCssAssets($listOfCssFiles)
@@ -103,6 +103,7 @@ class Asset
     /**
      * @param $relativeFilePath
      * @return string
+     * @throws Exception
      */
     public static function jsAsset($relativeFilePath)
     {
@@ -113,8 +114,15 @@ class Asset
         return '';
     }
 
-    protected static function _returnAsset($relativeFilePath, $type)
+    protected static function _returnAsset($relativeFilePath, $type, $version = false)
     {
+        if (!preg_match('/(^http|\.(css|js)$)/', $relativeFilePath)) {
+            if (Core::app()->mode !== Core::MODE_PROD) {
+                throw new Exception($relativeFilePath . ' is not a .js/.css file!');
+            }
+            return '';
+        }
+
         $filepath = trim($relativeFilePath, '/');
         if (strpos($relativeFilePath, '?') > 0) {
             $relativeFilePath = substr($relativeFilePath, 0, strpos($relativeFilePath, '?'));
@@ -126,8 +134,9 @@ class Asset
         }
 
         if (file_exists(TIKORI_ROOT . '/' . $relativeFilePath)) {
-            return sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholder : self::$_jsPlaceholder, Core::app()->baseUrl() . $filepath);
+            return sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholder : self::$_jsPlaceholder, Core::app()->baseUrl() . $filepath . ($version ? sprintf('?v=%s', filemtime(TIKORI_ROOT . '/' . $relativeFilePath)) : ''));
         } else if (file_exists($filename)) {
+            // TODO: seems to be a security error - can read PHP files
             return (file_exists($filename)) ? sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholderContent : self::$_jsPlaceholderContent, file_get_contents($filename)) : '';
         }
     }
