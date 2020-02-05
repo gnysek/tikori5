@@ -177,6 +177,12 @@ class Asset
         return implode(PHP_EOL . $prefix, $html);
     }
 
+    public static function unsetRequiredAssets()
+    {
+        self::$_cssRequired = [];
+        self::$_jsRequired = [];
+    }
+
     public static function purgeAssets()
     {
         foreach (new DirectoryIterator(TIKORI_ROOT . '/media/assets') as $fileInfo) {

@@ -35,6 +35,11 @@ class Html
 
         $html = self::link($text, $url, $options);
 
+        if (isset($fakeOptions['class']) and isset($wrapOptions['class'])) {
+            $fakeOptions['class'] .= ' ' . $wrapOptions['class'];
+            unset($wrapOptions['class']);
+        }
+
         return self::htmlOpenTag($wrap, $fakeOptions + $wrapOptions) . $html . self::htmlCloseTag('li');
     }
 

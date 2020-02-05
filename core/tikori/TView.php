@@ -311,4 +311,9 @@ class TView
     {
         return call_user_func_array('__', func_get_args());
     }
+
+    public function hasTheme($theme)
+    {
+        return in_array($theme, $this->_themes);
+    }
 }

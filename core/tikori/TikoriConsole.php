@@ -25,6 +25,7 @@ class TikoriConsole extends Application
     public function run($config)
     {
         set_error_handler(array(TikoriConsole::class, 'errh'), E_ALL ^ E_NOTICE);
+        set_exception_handler(array(TikoriConsole::class, 'exch'));
         ini_set('error_display', 1);
         error_reporting(E_ALL | E_STRICT);
 
@@ -129,6 +130,8 @@ class TikoriConsole extends Application
         }
 
         $this->ascii();
+        ini_set('memory_limit', '512M');
+        echo '---> got ' . ini_get('memory_limit') . PHP_EOL;
         echo '---> Starting ' . date('d.m.Y H:i:s') . PHP_EOL;
 
         $cronTasks = Core::app()->cfg('cron');
@@ -392,5 +395,13 @@ ASCII;
     public static function errh($errno, $errstr, $errfile, $errline, $errcontext)
     {
         echo $errno . ':' . $errstr . PHP_EOL . $errfile . ':' . $errline . PHP_EOL . PHP_EOL;
+    }
+
+    /**
+     * @param Exception $e
+     */
+    public static function exch($e)
+    {
+        echo $e->getCode() . ':' . $e->getMessage() . PHP_EOL . $e->getFile() . ':' . $e->getLine() . PHP_EOL . PHP_EOL;
     }
 }

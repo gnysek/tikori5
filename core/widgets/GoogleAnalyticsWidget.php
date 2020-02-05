@@ -6,7 +6,10 @@ class GoogleAnalyticsWidget extends Widget
 
     public function onCall()
     {
-        if (Core::app()->cfg('widgets/adsense/debug') == true) return;
+        if (Core::app()->cfg('widgets/adsense/debug') == true) {
+            echo '<!-- google-analytics.com/ga.js - GOOGLE ANALYTICS widget in DEBUG mode-->' . PHP_EOL;
+            return;
+        };
 
         echo <<<HTML
 <script type="text/javascript">

@@ -166,7 +166,7 @@ class RadController extends Controller
             }
             file_put_contents($src, implode(PHP_EOL, $buildFile));
 
-            Core::app()->cache->clearByTags(['TBSCHEMA']);
+            Core::app()->db->getSchema()->clearSchemaCache();
 
             $this->redirect('rad/model');
         } else {
