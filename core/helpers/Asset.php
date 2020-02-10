@@ -21,10 +21,25 @@ class Asset
     /**
      * @param $relativeFilePath
      * @return string
+     * @throws Exception
      */
     public static function cssAsset($relativeFilePath, $version = false)
     {
         return self::_returnAsset($relativeFilePath, self::TYPE_CSS, $version) . PHP_EOL;
+    }
+
+    /**
+     * @param $relativeFilePath
+     * @return string
+     * @throws Exception
+     */
+    public static function jsAsset($relativeFilePath, $version = false)
+    {
+        if (!in_array($relativeFilePath, self::$_alreadyJs)) {
+            self::$_alreadyJs[] = $relativeFilePath;
+            return self::_returnAsset($relativeFilePath, self::TYPE_JS, $version) . PHP_EOL;
+        }
+        return '';
     }
 
     public static function mergeCssAssets($listOfCssFiles)
@@ -100,20 +115,6 @@ class Asset
 
     static protected $_alreadyJs = array();
 
-    /**
-     * @param $relativeFilePath
-     * @return string
-     * @throws Exception
-     */
-    public static function jsAsset($relativeFilePath)
-    {
-        if (!in_array($relativeFilePath, self::$_alreadyJs)) {
-            self::$_alreadyJs[] = $relativeFilePath;
-            return self::_returnAsset($relativeFilePath, self::TYPE_JS) . PHP_EOL;
-        }
-        return '';
-    }
-
     protected static function _returnAsset($relativeFilePath, $type, $version = false)
     {
         if (!preg_match('/(^http|\.(css|js)$)/', $relativeFilePath)) {
@@ -134,7 +135,9 @@ class Asset
         }
 
         if (file_exists(TIKORI_ROOT . '/' . $relativeFilePath)) {
-            return sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholder : self::$_jsPlaceholder, Core::app()->baseUrl() . $filepath . ($version ? sprintf('?v=%s', filemtime(TIKORI_ROOT . '/' . $relativeFilePath)) : ''));
+            return sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholder : self::$_jsPlaceholder,
+                Core::app()->baseUrl() . $filepath . ($version ? sprintf('?v=%s', filemtime(TIKORI_ROOT . '/' . $relativeFilePath)) : '')
+            );
         } else if (file_exists($filename)) {
             // TODO: seems to be a security error - can read PHP files
             return (file_exists($filename)) ? sprintf(($type == self::TYPE_CSS) ? self::$_cssPlaceholderContent : self::$_jsPlaceholderContent, file_get_contents($filename)) : '';

@@ -35,6 +35,11 @@ class Html
 
         $html = self::link($text, $url, $options);
 
+        if (isset($wrapOptions['html'])) {
+            $html .= $wrapOptions['html'];
+            unset($wrapOptions['html']);
+        }
+
         if (isset($fakeOptions['class']) and isset($wrapOptions['class'])) {
             $fakeOptions['class'] .= ' ' . $wrapOptions['class'];
             unset($wrapOptions['class']);
