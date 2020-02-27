@@ -90,6 +90,10 @@ class ControllerView extends TView
             $widget->setupProperties($properties);
             $widget->onCreate();
             $this->_widgets[$_widgetHash] = $widget;
+        } else {
+            if (is_array($properties) and count($properties)) {
+                $this->_widgets[$_widgetHash]->setupProperties($properties);
+            }
         }
         return $this->_widgets[$_widgetHash];
     }

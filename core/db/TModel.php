@@ -347,11 +347,11 @@ class TModel implements IteratorAggregate, ArrayAccess
      * @param $key
      * @param $value
      * @param bool $onlyFirst
-     * @param bool $returnMeOnNullOnlyFirst
+     * @param bool $returnEmptyInsteadNullWhenFirst returns current model object when nothing found, instead returning null
      * @return null|$this|TModel|Collection
      * @throws Exception
      */
-    public function findBy($key, $value, $onlyFirst = false, $returnMeOnNullOnlyFirst = false)
+    public function findBy($key, $value, $onlyFirst = false, $returnEmptyInsteadNullWhenFirst = false)
     {
         $results = $this->findWhere(array($key, '=', $value));
 
@@ -359,7 +359,7 @@ class TModel implements IteratorAggregate, ArrayAccess
             if (count($results) > 0) {
                 return $results[0];
             } else {
-                return ($returnMeOnNullOnlyFirst) ? $this : null;
+                return ($returnEmptyInsteadNullWhenFirst) ? $this : null;
             }
         }
 
@@ -1287,16 +1287,16 @@ class TModel implements IteratorAggregate, ArrayAccess
 
     /**
      * @param string $fieldName
-     * @param int $value
+     * @param int $newValue
      * @return bool
      * @throws DbError
      */
-    public function updateCounter($fieldName = 'counter', $value = 0)
+    public function updateCounter($fieldName = 'counter', $newValue = 0)
     {
         DbQuery::sql()
             ->update()
             ->from($this->_table)
-            ->fields([$fieldName => $value])
+            ->fields([$fieldName => $newValue])
             ->where($this->_getWhereByPK())
             ->execute();
 
