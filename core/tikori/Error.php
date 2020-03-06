@@ -16,6 +16,8 @@ class Error
     /* register all handlers */
     public static function registerErrors()
     {
+        restore_error_handler();
+        restore_exception_handler();
         set_exception_handler(array('\Tikori\Error', 'exch'));
         set_error_handler(array('\Tikori\Error', 'errh'), E_ALL);
     }

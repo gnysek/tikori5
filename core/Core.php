@@ -47,6 +47,18 @@ class Core
      */
     public static function run($path = null, $config = 'default')
     {
+        self::_onBeforeRun($path);
+
+        if (self::_isCli()) {
+            self::createApplication('TikoriConsole', $config);
+        } else {
+            self::createApplication('Tikori', $config);
+            self::$_isconsole = false;
+        }
+    }
+
+    protected static function _onBeforeRun($path)
+    {
         /**
          * @const TIKORI_ROOT string
          */
@@ -58,13 +70,14 @@ class Core
         chdir(TIKORI_ROOT);
 
         spl_autoload_register(array('Core', 'autoload'));
+    }
 
-        if (self::_isCli()) {
-            self::createApplication('TikoriConsole', $config);
-        } else {
-            self::createApplication('Tikori', $config);
-            self::$_isconsole = false;
-        }
+    public static function inject($path = null, $config = 'default')
+    {
+        self::_onBeforeRun($path);
+
+        self::createApplication('TikoriInjector', $config);
+        self::$_isconsole = false;
     }
 
     public static function isConsoleApplication() {
@@ -115,7 +128,7 @@ class Core
     /**
      * Returns current app
      *
-     * @return Tikori
+     * @return Tikori|TikoriConsole|TikoriInjector
      */
     public static function app()
     {

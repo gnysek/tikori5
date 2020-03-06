@@ -219,7 +219,7 @@ class Tikori extends Application
      * @param Route $route
      * @throws Exception
      */
-    private function _runController($route)
+    protected function _runController($route)
     {
         if (($ca = $this->_createController($route)) !== NULL) {
             list($controller, $action) = $ca;
