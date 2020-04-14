@@ -61,7 +61,7 @@ class TCache extends TModule
      * @param string $filename filename to load
      * @param mixed $defaultContent default content returned
      *
-     * @param bool $dontReturnMsg
+     * @param bool $dontReturnMsg should it return [Cache is empty] message on error or not
      * @return bool|string
      */
     public function loadCache($filename, $defaultContent = null, $dontReturnMsg = false)

@@ -45,6 +45,11 @@ class TDbColumnSchema
         if ($value === '' && $this->type !== TDbSchema::TYPE_TEXT && $this->type !== TDbSchema::TYPE_STRING && $this->type !== TDbSchema::TYPE_BINARY) {
             return null;
         }
+
+        if ($this->type == 'decimal' and $value !== null) {
+            return (double) number_format(str_replace(',', '.', (string)$value), $this->scale,'.', '');
+        }
+
         if ($value === null || gettype($value) === $this->phpType) {
             return $value;
         }

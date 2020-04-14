@@ -346,6 +346,26 @@ class TModel implements IteratorAggregate, ArrayAccess
     /**
      * @param $key
      * @param $value
+     * @param bool $returnEmptyInsteadNullWhenFirst
+     * @return $this|null
+     * @throws Exception
+     */
+    public function loadBy($key, $value, $returnEmptyInsteadNullWhenFirst = false)
+    {
+        $results = $this->findWhere(array($key, '=', $value));
+
+        if (count($results) == 1) {
+            return $results->getFirst();
+        } elseif (count($results) > 1 or (count($results) and $returnEmptyInsteadNullWhenFirst == false)) {
+            return null;
+        } else {
+            return $this;
+        }
+    }
+
+    /**
+     * @param $key
+     * @param $value
      * @param bool $onlyFirst
      * @param bool $returnEmptyInsteadNullWhenFirst returns current model object when nothing found, instead returning null
      * @return null|$this|TModel|Collection
@@ -1142,7 +1162,7 @@ class TModel implements IteratorAggregate, ArrayAccess
 
             // reset originals
             foreach ($values as $k => $v) {
-                $this->_original[$k] = $v;
+                #$this->_original[$k] = $v;
             }
 
             DbQuery::sql()
@@ -1151,10 +1171,15 @@ class TModel implements IteratorAggregate, ArrayAccess
                 ->fields($values)
                 ->where($this->_getWhereByPK())
                 ->execute();
-
         }
 
         return true;
+    }
+
+    public function resetOriginals() {
+        foreach ($this->_values as $k => $v) {
+            $this->_original[$k] = $v;
+        }
     }
 
     public function isModified()
@@ -1452,6 +1477,15 @@ class TModel implements IteratorAggregate, ArrayAccess
         return $this->__getCommon(self::COMMON_SCHEMA)->getColumnNames();
     }
 
+    /**
+     * @param $name
+     * @return bool
+     */
+    public function hasField($name)
+    {
+        return in_array($name, $this->getFields());
+    }
+
     public function attributeLabels()
     {
         return [];
@@ -1582,6 +1616,16 @@ class TModel implements IteratorAggregate, ArrayAccess
             $value = $this->__getCommon(self::COMMON_SCHEMA)->columns[$name]->typecast($value);
             //TODO: choose that it should be != or !== for $value=$this->_values compare
             if ($value !== $this->_values[$name]) {
+
+//                if (get_class($this) == DealsGames::class and $name == 'last_price_change') {
+//                    echo '<hr>';
+//                    var_dump([$value, $this->_values[$name], $this->_original[$name]]);
+//                    var_export($value);
+//                    var_export($this->_values[$name]);
+//                    var_dump($value === $this->_original[$name]);
+//                    var_dump(($key = array_search($name, $this->_modified)) !== null);
+//                }
+
                 if ($value === $this->_original[$name]) {
                     // if we're back to original value, mark this attribute as unmodified
                     if (($key = array_search($name, $this->_modified)) !== null) {
@@ -1739,6 +1783,11 @@ class TModel implements IteratorAggregate, ArrayAccess
                     $conditions = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][3];
                 }
                 if (empty($customValues)) {
+
+                    if ($this->isNewRecord()) {
+                        return new Collection(); // return empty collection for non-saved data
+                    }
+
                     $customValues = [$this->_values[$this->getFirstPK()]];
                 }
 
@@ -1797,6 +1846,14 @@ class TModel implements IteratorAggregate, ArrayAccess
             case self::BELONGS_TO:
                 $rel = self::model($this->__getCommon(self::COMMON_RELATIONS)[$relationName][1]);
                 if (empty($customValues)) {
+
+                    $_k = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2];
+                    $_v = $this->_values[$_k];
+
+                    if ($_k == $this->getFirstPK() or $_v == null) {
+                        return null;
+                    }
+
                     $customValues = $this->_values[$this->__getCommon(self::COMMON_RELATIONS)[$relationName][2]];
                 }
                 $result = $rel->findWhere(array($rel->getFirstPK(), 'IN', $customValues));
@@ -1856,16 +1913,19 @@ class TModel implements IteratorAggregate, ArrayAccess
         foreach ($this->_values as $k => $v) {
             $head .= ($k == $this->getFirstPK()) ? '<th><u>' . $k . '</u></th>' : '<th>' . $k . '</th>';
 
+//            $modified = (!$this->isNewRecord() and in_array($k, $this->_modified) and $this->_original[$k] !== $v);
             $modified = (!$this->isNewRecord() and in_array($k, $this->_modified));
             $new = ($this->isNewRecord());
 
             $row .= '<td' . ($modified ? ' style="background: pink;"' : ($new ? ' style="background: greenyellow;"' : '')) . '>';
             if ($modified) {
                 $row .= '<span style="color:red;">';
-                $row .= (($this->_original[$k] === null) ? ('<em>null</em>') : wordwrap($this->_original[$k], 50, '<br>', true));
+                $row .= sprintf('<kbd>%s</kbd> ', gettype($this->_original[$k]));
+                $row .= (($this->_original[$k] === null) ? ('<em>null</em>') : wordwrap(var_export($this->_original[$k], true), 50, '<br>', true));
                 $row .= '</span><br>';
             }
-            $row .= (($v === null) ? ('<em>null</em>') : wordwrap($v, 50, '<br>', true));
+            $row .= sprintf('<kbd>%s</kbd> ', gettype($v));
+            $row .= (($v === null) ? ('<em>null</em>') : wordwrap(var_export($v, true), 50, '<br>', true));
             $row .= '</td>';
         }
 

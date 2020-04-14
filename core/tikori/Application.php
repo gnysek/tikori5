@@ -182,7 +182,7 @@ abstract class Application
      * Sets application mode
      *
      * @param bool $forceOnlyGetOnStart Return the value on start of app, not now
-     * @return int (Core::MODE_DEBUG, Core::MODE_DEV, Core::MODE_PROD)
+     * @return int (Core::MODE_DEV, Core::MODE_PROD)
      */
     public function getMode($forceOnlyGetOnStart = false)
     {
@@ -205,7 +205,6 @@ abstract class Application
             $this->mode = intval($_mode);
 
             switch ($this->mode) {
-                case Core::MODE_DEBUG:
                 case Core::MODE_DEV:
                     error_reporting(E_ALL | E_STRICT);
                     ini_set('display_errors', 1);

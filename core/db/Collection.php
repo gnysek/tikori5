@@ -239,7 +239,7 @@ class Collection implements ArrayAccess, Iterator, Countable
     }
 
     /**
-     * @return mixed|null|TModel|$this|$this[]
+     * @return null|TModel
      */
     public function getFirst()
     {
@@ -251,7 +251,7 @@ class Collection implements ArrayAccess, Iterator, Countable
     }
 
     /**
-     * @return mixed|null|TModel|$this|$this[]
+     * @return null|TModel
      */
     public function getLast()
     {

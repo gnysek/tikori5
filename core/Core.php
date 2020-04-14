@@ -19,7 +19,6 @@ defined('TIKORI_FPATH') or define('TIKORI_FPATH', str_replace('\\', '/', dirname
 class Core
 {
 
-    const MODE_DEBUG = -1;
     const MODE_PROD = 0;
     const MODE_DEV = 1;
     const VERSION = '5.20.1';
