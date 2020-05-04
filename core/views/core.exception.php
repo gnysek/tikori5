@@ -70,6 +70,10 @@
                         <td class="d-k">Locale</td>
                         <td class="d-v">en</td>
                     </tr>
+                    <tr>
+                        <td class="d-k">PHP Version</td>
+                        <td class="d-v"><?= phpversion(); ?></td>
+                    </tr>
                 </table>
 
                 <h1>Tikori Request</h1>

@@ -27,7 +27,7 @@
         padding: 5px 15px;
     }
 
-    .dbg-tab-link:hover {
+    .dbg-tab-link:hover, a.dbg-tab-link:hover:not([href]):not([tabindex]):hover {
         color: black;
     }
 
@@ -229,6 +229,18 @@
         border-radius: 0;
         padding: 2px 5px;
     }
+
+    .dbg-status {
+        text-align: right;
+    }
+
+    .dbg-status > div:hover {
+        /*position: absolute;*/
+        /*right: 0;*/
+        /*bottom: -6px;*/
+        /*padding: 5px 10px;*/
+        /*background: black;*/
+    }
 </style>
 
 <?php
@@ -243,86 +255,92 @@ $values['niceTimeline'] = array('<div id="niceTimelineDbgTab">' . $timeline . '<
 <div id="tikori-dbg-toolbar">
 
     <div id="tikori-dbg-inner">
-        <?php if (count($counters)): ?>
-            <div class="tikori-dbg-counters">
-                &times;<?php echo array_sum($counters); ?>
-                <div class="tikori-dbg-counters-container">
-                    <table>
-                        <?php foreach ($counters as $name => $cnt): ?>
-                            <tr>
-                                <td><?= $name ?></td>
-                                <td><span><?= $cnt ?>&times;</span></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </table>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <?php if (count($timers)): ?>
-            <div class="tikori-dbg-counters">
-                <?php echo round(array_sum($timers), 2); ?>s
-                <div class="tikori-dbg-counters-container">
-                    <table>
-                        <?php foreach ($timers as $name => $cnt): ?>
-                            <?php
-                            $roundedTime = round($cnt, 3);
-                            ?>
-                            <tr>
-                                <td><?= $name ?></td>
-                                <td><span><?= ($roundedTime == 0 ? '&lt;' : '') . round($cnt, 3) . 's' ?></span></td>
-                                <td><span><?php if ($cnt < 1): ?>
-                                            <?php echo $cnt * 1000;
-                                            echo ' ms'; ?>
-                                        <?php else: ?>
-                                            <?= '&ndash;'; ?>
-                                        <?php endif; ?></span></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </table>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <div class="tikori-dbg-counters">
-            <div>A&times; <span id="tikori-dbg-ajax-calls">0</span></div>
-            <div class="tikori-dbg-counters-container">
-
-                <table id="tikori-dbg-ajax-calls-table">
-                    <thead>
-                    <tr>
-                        <th>Method</th>
-                        <th>Status</th>
-                        <th>Url</th>
-                        <th>Time</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td colspan="4" class="text-center">&nbsp;</td>
-                    </tr>
-                    </tbody>
-                </table>
-
-            </div>
-        </div>
-
-        <?php foreach ($tabs as $tab): ?>
-            <a onclick="activateTab('<?php echo $tab; ?>', this);" class="dbg-tab-link" id="tab-btn-<?php echo $tab; ?>">
-                <?php echo ucfirst($tab); ?>
-                <?php if (array_key_exists($tab, $nf)): ?>
-                    <span class="dbg-notfications-count"><?php echo $nf[$tab]; ?></span>
+        <div style="float: left; margin-right: 10px;">
+            <div style="z-index: 100; position: relative;">
+                <?php if (count($counters)): ?>
+                    <div class="tikori-dbg-counters">
+                        &times;<?php echo array_sum($counters); ?>
+                        <div class="tikori-dbg-counters-container">
+                            <table>
+                                <?php foreach ($counters as $name => $cnt): ?>
+                                    <tr>
+                                        <td><?= $name ?></td>
+                                        <td><span><?= $cnt ?>&times;</span></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </table>
+                        </div>
+                    </div>
                 <?php endif; ?>
-                <span class="dbg-tab-close">&times;</span>
-            </a>
-        <?php endforeach; ?>
 
-        <div style="display: inline-block;">
-            &nbsp;<a class="dbg-tab-link" onclick="highlightTemplates();" style="padding: 5px 10px;" title="Template Hints">T</a>
+                <?php if (count($timers)): ?>
+                    <div class="tikori-dbg-counters">
+                        <?php echo round(array_sum($timers), 2); ?>s
+                        <div class="tikori-dbg-counters-container">
+                            <table>
+                                <?php foreach ($timers as $name => $cnt): ?>
+                                    <?php
+                                    $roundedTime = round($cnt, 3);
+                                    ?>
+                                    <tr>
+                                        <td><?= $name ?></td>
+                                        <td><span><?= ($roundedTime == 0 ? '&lt;' : '') . round($cnt, 3) . 's' ?></span></td>
+                                        <td><span><?php if ($cnt < 1): ?>
+                                                    <?php echo $cnt * 1000;
+                                                    echo ' ms'; ?>
+                                                <?php else: ?>
+                                                    <?= '&ndash;'; ?>
+                                                <?php endif; ?></span></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </table>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <div class="tikori-dbg-counters">
+                    <div>A&times; <span id="tikori-dbg-ajax-calls">0</span></div>
+                    <div class="tikori-dbg-counters-container">
+
+                        <table id="tikori-dbg-ajax-calls-table">
+                            <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Url</th>
+                                <th>Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td colspan="4" class="text-center">&nbsp;</td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+                <?php foreach ($tabs as $tab): ?>
+                    <a onclick="activateTab('<?php echo $tab; ?>', this);" class="dbg-tab-link" id="tab-btn-<?php echo $tab; ?>">
+                        <?php echo ucfirst($tab); ?>
+                        <?php if (array_key_exists($tab, $nf)): ?>
+                            <span class="dbg-notfications-count"><?php echo $nf[$tab]; ?></span>
+                        <?php endif; ?>
+                        <span class="dbg-tab-close">&times;</span>
+                    </a>
+                <?php endforeach; ?>
+
+                <div style="display: inline-block;">
+                    &nbsp;<a class="dbg-tab-link" onclick="highlightTemplates();" style="padding: 5px 10px;" title="Template Hints">T</a>
+                </div>
+            </div>
         </div>
 
-        <div style="display: inline; line-height: 27px;">
-            <?php echo $status; ?>
+        <div style="width: 100%; min-height: 28px; line-height: 27px; position: relative;">
+            <div class="dbg-status">
+                <div><?php echo $status; ?></div>
+            </div>
         </div>
     </div>
     <script type="text/javascript">

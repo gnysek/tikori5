@@ -70,8 +70,11 @@ class TProfiler
         return implode(PHP_EOL, $logs);
     }
 
+    public static $getLogsGetAtLeastOnce = false;
+
     public static function getLogs($forceNotToolbar = false)
     {
+        self::$getLogsGetAtLeastOnce = true;
         $logs = array();
 
         $logs[] = 'Profiler:<br/>';
@@ -132,7 +135,7 @@ class TProfiler
             $requestHeaders = ['Request headers' => apache_request_headers(), 'Reponse headers' => array_merge(apache_response_headers(), Core::app()->response->header())];
         } else {
             $rh = [];
-            foreach($_SERVER as $k => $v) {
+            foreach ($_SERVER as $k => $v) {
                 if (stripos($k, 'HTTP_') !== false) {
                     $rh[str_replace('HTTP_', '', $k)] = $v;
                 }
@@ -172,7 +175,7 @@ class TProfiler
             Core::app()->toolbar->putValueToTab('loadedClasses', implode('<br>', $classes));
             Core::app()->toolbar->setNotificationsNumberOnTab('loadedClasses', count($classes));
 
-            Core::app()->toolbar->addStatus(sprintf('Zużycie pamięci: <kbd>%s MB</kbd> (~<kbd>%s MB</kbd>)',
+            Core::app()->toolbar->addStatus(sprintf('Zużycie pamięci: <kbd>%s MB</kbd> (<kbd>~%s MB</kbd>)',
                     round(memory_get_peak_usage(false) / 1024 / 1024, 4),
                     round(memory_get_peak_usage(true) / 1024 / 1024, 4))
             );

@@ -26,6 +26,10 @@ class ToolbarModule extends TModule
         if (Core::app()->mode != Core::MODE_PROD) {
             $view = new TView();
 
+            if (!TProfiler::$getLogsGetAtLeastOnce) {
+                Profiler::getLogs(); // to get status
+            }
+
             $output = $view->renderPartialInContext('toolbar', $this, array(
                 'tabs'     => $this->_tabs,
                 'nf'       => $this->_notificationNum,
