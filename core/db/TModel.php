@@ -1848,13 +1848,13 @@ class TModel implements IteratorAggregate, ArrayAccess
                 if (empty($customValues)) {
 
                     $_k = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2];
-                    $_v = $this->_values[$_k];
+                    $_v = $this->_values[$_k] ?? null;
 
-                    if ($_k == $this->getFirstPK() or $_v == null) {
+                    if ($_v == null) {
                         return null;
                     }
 
-                    $customValues = $this->_values[$this->__getCommon(self::COMMON_RELATIONS)[$relationName][2]];
+                    $customValues = $_v;
                 }
                 $result = $rel->findWhere(array($rel->getFirstPK(), 'IN', $customValues));
                 if ($populate) {
