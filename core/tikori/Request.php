@@ -106,7 +106,7 @@ class Request extends DefaultObject
         );
     }
 
-    private function getProxyIpAddress() {
+    protected function getProxyIpAddress() {
         static $forwarded = array(
             'HTTP_CLIENT_IP',
             'HTTP_X_FORWARDED_FOR',
@@ -154,6 +154,7 @@ class Request extends DefaultObject
      * Is this a Flash request?
      *
      * @return bool
+     * @deprecated
      */
     public static function isFlashRequest()
     {
@@ -244,11 +245,11 @@ class Request extends DefaultObject
 
         $env = array();
         //The HTTP request method
-        $env[self::REQUEST_METHOD] = $_SERVER['REQUEST_METHOD'];
+        $env[self::REQUEST_METHOD] = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
         //The IP
 //		$env['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
-        $env[self::REMOTE_ADDR] = $_SERVER['REMOTE_ADDR'];
+        $env[self::REMOTE_ADDR] = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
         $env['proxy-ip'] = $this->getProxyIpAddress();
 
         /**
@@ -332,6 +333,7 @@ class Request extends DefaultObject
         $env['raw-length'] = getenv('CONTENT_LENGTH') ?: 0;
         $env['is-secure'] = getenv('HTTPS') && getenv('HTTPS') != 'off';
         $env['tikori.base-dir'] = str_replace(array('\\',' '), array('/','%20'), dirname($_SERVER['SCRIPT_NAME']));
+        $env['host'] = $env['host'] ?? '';
 
         preg_match('#(.*)/(.*?)\.php#i', $env['script-name'], $match);
         $env['tikori.root_path'] = (count($match) == 3) ? $env['host'] . $match[1] : $env['host'];

@@ -1325,6 +1325,8 @@ class TModel implements IteratorAggregate, ArrayAccess
             ->where($this->_getWhereByPK())
             ->execute();
 
+        //$this->$fieldName = $newValue;
+
         return true;
     }
 
@@ -1779,8 +1781,15 @@ class TModel implements IteratorAggregate, ArrayAccess
             case self::HAS_MANY:
                 $rel = self::model($this->__getCommon(self::COMMON_RELATIONS)[$relationName][1]);
                 $conditions = array();
+                $whereFirstField = $this->getFirstPK();
+                $whereSecondField = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2];
                 if (array_key_exists(3, $this->__getCommon(self::COMMON_RELATIONS)[$relationName])) {
                     $conditions = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][3];
+
+                    if (array_key_exists(self::RELATION_FIELDS, $conditions)) {
+                        $whereFirstField = $conditions[self::RELATION_FIELDS][0];
+                        $whereSecondField = $conditions[self::RELATION_FIELDS][1];
+                    }
                 }
                 if (empty($customValues)) {
 
@@ -1788,7 +1797,7 @@ class TModel implements IteratorAggregate, ArrayAccess
                         return new Collection(); // return empty collection for non-saved data
                     }
 
-                    $customValues = [$this->_values[$this->getFirstPK()]];
+                    $customValues = [$this->_values[$whereFirstField]];
                 }
 
                 $with = array();
@@ -1797,7 +1806,7 @@ class TModel implements IteratorAggregate, ArrayAccess
                     unset($conditions['with']);
                 }
 
-                $_byField = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2];
+                $_byField = $whereSecondField;
 
                 // VIA RELATION, eg 'field' => array(self::HAS_MANY, 'Model', ['Model_field', 'via' => ['ModelVia', 'self_id_field', 'model_id_fields']]),
                 if (is_array($_byField)) {
@@ -1845,18 +1854,27 @@ class TModel implements IteratorAggregate, ArrayAccess
                 break;
             case self::BELONGS_TO:
                 $rel = self::model($this->__getCommon(self::COMMON_RELATIONS)[$relationName][1]);
+                $whereFirstField = $rel->getFirstPK();
+                $whereSecondField = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2];
+
+                if (array_key_exists(3, $this->__getCommon(self::COMMON_RELATIONS)[$relationName])) {
+                    $conditions = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][3];
+
+                    if (array_key_exists(self::RELATION_FIELDS, $conditions)) {
+                        $whereFirstField = $conditions[self::RELATION_FIELDS][0];
+                        $whereSecondField = $conditions[self::RELATION_FIELDS][1];
+                    }
+                }
+
                 if (empty($customValues)) {
-
-                    $_k = $this->__getCommon(self::COMMON_RELATIONS)[$relationName][2];
-                    $_v = $this->_values[$_k] ?? null;
-
+                    $_v = $this->_values[$whereSecondField] ?? null;
                     if ($_v == null) {
                         return null;
                     }
-
                     $customValues = $_v;
                 }
-                $result = $rel->findWhere(array($rel->getFirstPK(), 'IN', $customValues));
+
+                $result = $rel->findWhere(array($whereFirstField, 'IN', $customValues));
                 if ($populate) {
                     $result = $result->getFirst();
                 }

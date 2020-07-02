@@ -508,6 +508,7 @@ class DbQuery
             if (!empty($this->_customWhere)) {
                 if (!in_array('WHERE', $sql)) {
                     $sql[] = 'WHERE';
+                    $this->_customWhere = preg_replace('/^(\s*(?:AND|OR)\s+)/', '', $this->_customWhere);
                 }
 
                 $sql[] = $this->_customWhere;

@@ -7,6 +7,12 @@ class TikoriConsole extends Application
     protected $_cmdArg = null;
     protected $_lockModeEnabled = false;
     protected $_lockTime = 0;
+    protected $_cleaner = false;
+
+    /**
+     * @var ConsoleRequest
+     */
+    public $request = null;
 
     const CRON_CACHE_FILE = '.__CRONLOCK__';
 
@@ -28,6 +34,8 @@ class TikoriConsole extends Application
         set_exception_handler(array(TikoriConsole::class, 'exch'));
         ini_set('error_display', 1);
         error_reporting(E_ALL | E_STRICT);
+
+        $this->request = new ConsoleRequest();
 
         $cmdArgsFound = [];
 
@@ -129,10 +137,19 @@ class TikoriConsole extends Application
             }
         }
 
-        $this->ascii();
         ini_set('memory_limit', '512M');
-        echo '---> got ' . ini_get('memory_limit') . PHP_EOL;
-        echo '---> Starting ' . date('d.m.Y H:i:s') . PHP_EOL;
+
+        foreach ($cmdArgsFound as $caf) {
+            if (in_array($caf, ['clean', '-c'])) {
+                $this->_cleaner = true;
+            }
+        }
+
+        if (!$this->_cleaner) {
+            $this->ascii();
+            echo '---> got ' . ini_get('memory_limit') . PHP_EOL;
+            echo '---> Starting ' . date('d.m.Y H:i:s') . PHP_EOL;
+        }
 
         $cronTasks = Core::app()->cfg('cron');
         if (is_array($cronTasks)) {

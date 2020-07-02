@@ -63,4 +63,18 @@ abstract class TikoriCron
 
         return $default;
     }
+
+    /**
+     * @param string|array $text
+     */
+    public function write($text)
+    {
+        if (!is_array($text)) {
+            $text = [$text];
+        }
+
+        foreach ($text as $t) {
+            echo $t . PHP_EOL;
+        }
+    }
 }
