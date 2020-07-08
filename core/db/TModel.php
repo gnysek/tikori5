@@ -1176,7 +1176,8 @@ class TModel implements IteratorAggregate, ArrayAccess
         return true;
     }
 
-    public function resetOriginals() {
+    public function resetOriginals()
+    {
         foreach ($this->_values as $k => $v) {
             $this->_original[$k] = $v;
         }
@@ -1928,6 +1929,25 @@ class TModel implements IteratorAggregate, ArrayAccess
     {
         $head = '';
         $row = '';
+
+        if (Core::isConsoleApplication()) {
+            $head = $row = '|';
+            $separator = '+';
+            foreach ($this->_values as $k => $v) {
+
+                $_len = max(strlen($k), strlen($v));
+
+                $_spacesHeader = $_len - mb_strlen($k);
+                $_spacesRow = $_len - mb_strlen($v);
+
+                $head .= sprintf(' %s |', str_repeat(' ', floor($_spacesHeader / 2)) . $k . str_repeat(' ', ceil($_spacesHeader / 2)));
+                $row .= sprintf(' %s |', str_repeat(' ', floor($_spacesRow / 2)) . $v . str_repeat(' ', ceil($_spacesRow / 2)));
+                $separator .= str_repeat('-', $_len + 2) . '+';
+            }
+
+            return $separator . PHP_EOL . $head . PHP_EOL . $separator . PHP_EOL . $row . PHP_EOL . $separator . PHP_EOL;
+        }
+
         foreach ($this->_values as $k => $v) {
             $head .= ($k == $this->getFirstPK()) ? '<th><u>' . $k . '</u></th>' : '<th>' . $k . '</th>';
 
