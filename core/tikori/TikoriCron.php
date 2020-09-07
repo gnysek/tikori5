@@ -67,14 +67,21 @@ abstract class TikoriCron
     /**
      * @param string|array $text
      */
-    public function write($text)
+    public function write($text, $color = null)
     {
         if (!is_array($text)) {
             $text = [$text];
         }
 
         foreach ($text as $t) {
-            echo $t . PHP_EOL;
+            if ($t !== null) {
+                if ($color !== null) {
+                    echo TikoriConsole::colorForCli($t, $color);
+                } else {
+                    echo $t;
+                }
+                echo PHP_EOL;
+            }
         }
     }
 }

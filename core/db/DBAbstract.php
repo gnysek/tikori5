@@ -87,6 +87,11 @@ abstract class DbAbstract
         return $this->_queryList;
     }
 
+    public function sqlQueryLast()
+    {
+        return $this->_queryList[count($this->_queryList) - 1];
+    }
+
     public function close()
     {
         $this->_conn = NULL;

@@ -16,12 +16,12 @@
         <div id="left">
             <?php foreach ($errors as $eid => $errorData): ?>
                 <?php if (count($errors) > 0): ?>
-                <div id="error_<?php echo $eid; ?>" class="box" style="background-color: white;">
-                    <h1>
-                        <strong><?php echo ($eid + 1) . '/' . count($errors); ?>: <?php echo $errorData['message']; ?></strong>
-                    </h1>
-                    <code class="box-wrap"><?php echo $errorData['file']; ?>:<?php echo $errorData['line']; ?></code>
-                </div>
+                    <div id="error_<?php echo $eid; ?>" class="box" style="background-color: white;">
+                        <h1>
+                            <strong><?php echo ($eid + 1) . '/' . count($errors); ?>: <?php echo $errorData['message']; ?></strong>
+                        </h1>
+                        <code class="box-wrap"><?php echo $errorData['file']; ?>:<?php echo $errorData['line']; ?></code>
+                    </div>
                 <?php endif; ?>
                 <?php foreach ($errorData['files'] as $fid => $fileData): ?>
                     <div id="link_<?php echo $eid . '-' . $fid; ?>" class="box box-clickable">
@@ -125,10 +125,22 @@
                     </tr>
                 </table>
 
+                <?php if ($db = Core::app()->db): ?>
+                    <h1>Sql Requests</h1>
+
+                    <div style="border-bottom: 1px solid white;" class="error-preview">
+                        <code class="prettyprint lang-sql highlight" style="overflow: auto;">
+                            <?php foreach ($db->sqlQueries() as $query): ?>
+                                <?= $query; ?><br><br>
+                            <?php endforeach; ?>
+                        </code>
+                    </div>
+                <?php endif; ?>
+
                 <h1>Server/Request data</h1>
 
                 <table>
-                    <?php foreach($_SERVER as $k => $v): ?>
+                    <?php foreach ($_SERVER as $k => $v): ?>
                         <?php if (in_array($k, array('HTTP_COOKIE', 'PATH'))) {
                             $v = str_replace(';', '<br/>', $v);
                         } ?>

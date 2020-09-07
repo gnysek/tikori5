@@ -333,7 +333,7 @@ class Request extends DefaultObject
         $env['raw-length'] = getenv('CONTENT_LENGTH') ?: 0;
         $env['is-secure'] = getenv('HTTPS') && getenv('HTTPS') != 'off';
         $env['tikori.base-dir'] = str_replace(array('\\',' '), array('/','%20'), dirname($_SERVER['SCRIPT_NAME']));
-        $env['host'] = $env['host'] ?? '';
+        $env['host'] = trim($env['host'], './,') ?? '';
 
         preg_match('#(.*)/(.*?)\.php#i', $env['script-name'], $match);
         $env['tikori.root_path'] = (count($match) == 3) ? $env['host'] . $match[1] : $env['host'];
@@ -347,6 +347,7 @@ class Request extends DefaultObject
         $parsedUrl = parse_url($env['tikori.base_url']);
 
         $host = explode('.', $parsedUrl['host']);
+        $host = array_filter($host);
 
         $env['tikori.domain'] = (count($host) >= 2) ? $host[count($host)-2] . '.' . $host[count($host)-1] : $host[0];
         $env['tikori.subdomains'] = array_slice($host, 0, count($host) - 2);
@@ -485,10 +486,14 @@ class Request extends DefaultObject
     public function getHostInfo()
     {
         if ($this->_hostInfo === NULL) {
-            if (isset($_SERVER['HTTP_HOST'])) {
-                $this->_hostInfo = $this->get('tikori.url_scheme') . '://' . $_SERVER['HTTP_HOST'];
+            if (!$this->get('tikori.base_url')) {
+                if (isset($_SERVER['HTTP_HOST'])) {
+                    $this->_hostInfo = $this->get('tikori.url_scheme') . '://' . $_SERVER['HTTP_HOST'];
+                } else {
+                    $this->_hostInfo = $this->get('tikori.url_scheme') . '://' . $_SERVER['SERVER_NAME'];
+                }
             } else {
-                $this->_hostInfo = $this->get('tikori.url_scheme') . '://' . $_SERVER['SERVER_NAME'];
+                $this->_hostInfo = rtrim( $this->get('tikori.base_url') , '/');
             }
         }
 

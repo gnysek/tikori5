@@ -81,6 +81,10 @@ class DbMySqli extends DBAbstract
      */
     public function query($sql, $skip = '', $assoc = TRUE)
     {
+        if (empty($sql)) {
+            return false;
+        }
+
         Profiler::addLog('SQL QUERY: <kbd title="' . $sql . '">' . $sql . '</kbd>', Profiler::LEVEL_SQL);
         $benchmark = Profiler::benchStart(\TProfiler::BENCH_CAT_SQL, 'SQL QUERY: <kbd title="' . $sql . '">' . $sql . '</kbd>');
 

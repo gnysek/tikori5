@@ -167,7 +167,7 @@ class TikoriConsole extends Application
             }
 
             if ($this->_lockModeEnabled) {
-                echo '---> [ LOCK MODE ENABLED! ]' . PHP_EOL;
+                echo self::colorForCli('---> [ LOCK MODE ENABLED! ]', self::CLI_COLOR_YELLOW) . PHP_EOL;
                 if (Core::app()->cache->isFresh(self::CRON_CACHE_FILE, $this->_lockTime)) {
                     echo 'Cron task are locked to be not executed more often than ' . $this->_lockTime . ' seconds, if any already runs/crashed. Skipping current run.' . PHP_EOL;
                     echo 'Next run in ' . ($this->_lockTime - (time() - Core::app()->cache->lastMtime(self::CRON_CACHE_FILE))) . ' seconds.' . PHP_EOL;
@@ -212,23 +212,23 @@ class TikoriConsole extends Application
                     $_t = Core::genTimeNow();
                     /** @var TikoriCron $task */
                     $task = new $cronTask;
-                    echo '---> Running [' . $cronTask . ']' . PHP_EOL;
+                    echo self::colorForCli('---> Running [' . $cronTask . ']', self::CLI_COLOR_BLUE) . PHP_EOL;
 
                     $params = $this->_prepareTaskParams($task);
 
                     Core::app()->observer->fireEvent(self::EVENT_PASS_TO_JOB, ['taskId' => $cronTaskId, 'task' => $task]);
                     $task->run($params);
-                    echo PHP_EOL . '---> Task [' . $cronTask . '] done in ' . round(Core::genTimeNow() - $_t, 5) . 's !' . PHP_EOL;
+                    echo PHP_EOL . self::colorForCli('---> Task [' . $cronTask . '] done in ' . round(Core::genTimeNow() - $_t, 5) . 's !', self::CLI_COLOR_BLUE) . PHP_EOL;
 
                     Core::app()->observer->fireEvent(self::EVENT_END_JOB, ['taskId' => $cronTaskId, 'startTime' => $_t]);
                 } catch (Exception $e) {
-                    echo 'Cron task [' . $cronTask . '] encountered an error: ' . $e->getMessage() . PHP_EOL;
+                    echo self::colorForCli('Cron task [' . $cronTask . '] encountered an error: ' . $e->getMessage(), self::CLI_COLOR_RED) . PHP_EOL;
 
                     Core::app()->observer->fireEvent(self::EVENT_ERROR_JOB,
                         ['taskId' => $cronTaskId, 'status' => 'Exception', 'message' => 'Error: ' . $e->getMessage()]
                     );
                 } catch (Throwable $e) {
-                    echo 'Cron task [' . $cronTask . '] encountered a [FATAL] error: ' . $e->getMessage() . PHP_EOL;
+                    echo self::colorForCli('Cron task [' . $cronTask . '] encountered a [FATAL] error: ', self::CLI_COLOR_RED) . $e->getMessage() . PHP_EOL;
                     echo str_replace('#', '   #', $e->getTraceAsString()) . PHP_EOL;
 
                     Core::app()->observer->fireEvent(self::EVENT_ERROR_JOB,
@@ -237,10 +237,10 @@ class TikoriConsole extends Application
                 }
             }
         } else {
-            echo ':( No cron tasks defined' . PHP_EOL;
+            echo self::colorForCli(':( No cron tasks defined', self::CLI_COLOR_RED) . PHP_EOL;
         }
-        echo PHP_EOL . '--> Finished in ' . Core::genTimeNow(4) . ' s.';
-        echo PHP_EOL . '--> Memory usage ' . number_format(memory_get_peak_usage() / 1024 / 1024, 2) . ' MB';
+        echo PHP_EOL . self::colorForCli('--> Finished in ' . Core::genTimeNow(4) . ' s.', self::CLI_COLOR_BLUE);
+        echo PHP_EOL . self::colorForCli('--> Memory usage ' . number_format(memory_get_peak_usage() / 1024 / 1024, 2) . ' MB', self::CLI_COLOR_PURPLE);
         echo PHP_EOL;
 
         Core::app()->cache->deleteCache(self::CRON_CACHE_FILE);
@@ -420,5 +420,27 @@ ASCII;
     public static function exch($e)
     {
         echo $e->getCode() . ':' . $e->getMessage() . PHP_EOL . $e->getFile() . ':' . $e->getLine() . PHP_EOL . PHP_EOL;
+    }
+
+    const CLI_COLOR_WHITE = '30';
+    const CLI_COLOR_RED = '31';
+    const CLI_COLOR_GREEN = '32';
+    const CLI_COLOR_YELLOW = '33';
+    const CLI_COLOR_BLUE = '34';
+    const CLI_COLOR_PURPLE = '35';
+    const CLI_COLOR_CYAN = '36';
+    const CLI_COLOR_GRAY = '37';
+    const CLI_COLOR_GRAY_DK = '90';
+    const CLI_COLOR_PINK = '91';
+    const CLI_COLOR_GREEN_LT = '92';
+    const CLI_COLOR_YELLOW_LT = '93';
+    const CLI_COLOR_BLUE_LT = '94';
+    const CLI_COLOR_PURPLE_LT = '95';
+    const CLI_COLOR_CYAN_LT = '96';
+    const CLI_COLOR_BLACK = '97';
+
+    public static function colorForCli($text, $color = '39')
+    {
+        return "\033[" . $color . "m" . $text . "\033[0m";
     }
 }
