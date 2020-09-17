@@ -329,7 +329,7 @@ HTML;
             $html[] = '<p class="pink">' . $dispName . ':' . $line . '</p>' . PHP_EOL;
             $html[] = '<p><code class="prettyprint lang-php highlight linenums:' . $line . '">'; #onclick="$(\'#' . $index . '\').toggle();"
             #$html[] = '<span class="num nocode">' . sprintf('%04d', $line) . '.</span>';
-            $html[] = ltrim(self::shortify($file[min(count($file), $line) - 1])) . '<br/>';
+            $html[] = ltrim(self::shortify($file[max(0, min(count($file), $line) - 1)])) . '<br/>';
             #$html[] = '<span class="num nocode">   &raquo;</span>';
             if (!empty($trace['class'])) {
                 $html[] = $trace['class'];

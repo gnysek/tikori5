@@ -333,7 +333,7 @@ class Request extends DefaultObject
         $env['raw-length'] = getenv('CONTENT_LENGTH') ?: 0;
         $env['is-secure'] = getenv('HTTPS') && getenv('HTTPS') != 'off';
         $env['tikori.base-dir'] = str_replace(array('\\',' '), array('/','%20'), dirname($_SERVER['SCRIPT_NAME']));
-        $env['host'] = trim($env['host'], './,') ?? '';
+        $env['host'] = isset($env['host']) ? trim($env['host'], './,') : '';
 
         preg_match('#(.*)/(.*?)\.php#i', $env['script-name'], $match);
         $env['tikori.root_path'] = (count($match) == 3) ? $env['host'] . $match[1] : $env['host'];
@@ -348,6 +348,9 @@ class Request extends DefaultObject
 
         $host = explode('.', $parsedUrl['host']);
         $host = array_filter($host);
+        if (!is_array($host) or count($host) == 0) {
+            $host = [''];
+        }
 
         $env['tikori.domain'] = (count($host) >= 2) ? $host[count($host)-2] . '.' . $host[count($host)-1] : $host[0];
         $env['tikori.subdomains'] = array_slice($host, 0, count($host) - 2);
