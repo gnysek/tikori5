@@ -66,6 +66,10 @@
         padding: 10px 5px;
     }
 
+    .dbg-toolbar code {
+        color: darkred;
+    }
+
     #tikori-dbg-toolbar {
         box-sizing: border-box;
         position: fixed;

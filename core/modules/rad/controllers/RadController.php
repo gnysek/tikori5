@@ -52,16 +52,20 @@ class RadController extends Controller
 
         $rules = array();
         foreach ($result as $v) {
+            if ($v['Field'] == $primaryKey) {
+                continue;
+            }
+
             if (preg_match('/char/', $v['Type'])) {
-                $rules['maxlen'][preg_replace('/.*\(([0-9]*)\)/', '$1', $v['Type'])][] = '\'' . $v['Field'] . '\'';
+                $rules['maxlen'][preg_replace('/.*\(([0-9]*)\)/', '$1', $v['Type'])][] = 'self::FIELD_' . strtoupper($v['Field']);
             }
 
             if (preg_match('/int/', $v['Type'])) {
-                $rules['int']['true'][] = '\'' . $v['Field'] . '\'';
+                $rules['int']['true'][] = 'self::FIELD_' . strtoupper($v['Field']);
             }
 
             if ($v['Null'] == 'NO' && $v['Extra'] != 'auto_increment') {
-                $rules['required']['true'][] = '\'' . $v['Field'] . '\'';
+                $rules['required']['true'][] = 'self::FIELD_' . strtoupper($v['Field']);
             }
         }
 
@@ -69,7 +73,12 @@ class RadController extends Controller
 
         foreach ($rules as $ruleName => $rule) {
             foreach ($rule as $ruleValue => $ruleFields) {
-                $rulesHtml[] = 'array(array(' . implode(', ', $ruleFields) . '), \'' . $ruleName . '\', \'' . $ruleValue . '\')';
+                if ($ruleValue !== 'true') {
+                    $ruleValue = '\'' . $ruleValue . '\'';
+                }
+                #$constFields = $ruleFields;
+                #array_walk($constFields, function(&$row, &$key) { $row = 'self::FIELD_' . trim(strtoupper($row), '\'');});
+                $rulesHtml[] = '[[' . implode(', ', $ruleFields) . '], \'' . $ruleName . '\', ' . $ruleValue . ']';
             }
         }
 

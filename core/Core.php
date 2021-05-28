@@ -10,6 +10,7 @@
 defined('TIKORI_STARTED') or define('TIKORI_STARTED', microtime());
 defined('TIKORI_DEBUG') or define('TIKORI_DEBUG', false);
 defined('TIKORI_FPATH') or define('TIKORI_FPATH', str_replace('\\', '/', dirname(__FILE__)));
+// @see TIKORI_ROOT for ./app location
 
 /**
  * @author  Piotr Gnys <gnysek@gnysek.pl>

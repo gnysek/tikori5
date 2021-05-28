@@ -7,10 +7,14 @@
 
 <?php endforeach; ?>
  */
+
 class <?php echo $modelName; ?> extends TModel
 {
+<?php foreach ($result as $v): ?>
+    const FIELD_<?= strtoupper($v['Field']); ?> = '<?= $v['Field']; ?>';
+<?php endforeach; ?>
 
-	protected $_primaryKey = '<?php echo $primaryKey; ?>';
+	protected $_primaryKey = <?= 'self::FIELD_' . strtoupper($primaryKey); ?>;
 
 	/**
 	 * @param null|string $model
@@ -21,22 +25,27 @@ class <?php echo $modelName; ?> extends TModel
 		return parent::model($model);
 	}
 
-	/* rules */
+	/**
+     * @return array[]
+     */
 	public function rules()
 	{
-		return array(
+		return [
 			<?php echo implode(','.PHP_EOL."\t\t\t", $rulesHtml); ?>
 
-		);
+		];
 	}
 
 <?php if (!empty($relationsHtml)): ?>
+    /**
+     * @return array[]
+     */
 	public function relations()
 	{
-		return array(
+		return [
 			<?php echo implode(','.PHP_EOL."\t\t\t", $relationsHtml); ?>
 
-		);
+		];
 	}
 <?php endif; ?>
 }
